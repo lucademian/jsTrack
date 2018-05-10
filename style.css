@@ -3,13 +3,39 @@ body, html {
     padding: 0;
     background: #f00;
     height: 100vh;
-    width: 100vw;
+    width: calc(100vw - 300px);
 }
-canvas {
+#container {
+    background: #000;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+}
+#main {
     margin: 0;
     padding: 0;
     display: block;
     position: fixed;
     top: 0;
     left: 0;
+}
+#sidebar {
+    background: green;
+    height: 100vh;
+    width: 500px;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+#graph {
+    background: blue;
+    display: block;
+    width: 100%;
+    height: 300px;
+}
+video, img {
+    display: block;
+    z-index: -333;
 }

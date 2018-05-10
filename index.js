@@ -27,11 +27,13 @@ class Timeline
 
 class Frame
 {
-	constructor(timeline, time, image)
+	constructor(timeline, time, video)
 	{
 		this.time = time;
-		this.image = image;
+		this.video = video;
 		this.timeline = timeline;
+
+		//this.timeline.
 	}
 }
 
@@ -141,19 +143,35 @@ class Point
 	remove()
 	{
 		this.track.stage.removeChild(this.sprite);
+		this.track.stage.update();
 	}
 }
 
 
 
 
-canvas = document.getElementById("canvas");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas = document.getElementById("main");
 
-var stage = new createjs.Stage("canvas");
-var background = new createjs.Shape(new createjs.Graphics().beginFill("#FFFFFF").drawRect(0, 0, canvas.width, canvas.height));
+var stage = new createjs.Stage("main");
+var background = new createjs.Bitmap(document.getElementById("my-video"));
 stage.addChild(background);
+
+video = document.getElementById("my-video");
+var frameTime = Math.floor(video.duration / 100);
+console.log(frameTime);
+
+video.pause();
+video.addEventListener("loadeddata", function(){
+	background.image = this;
+	background.scaleY = (window.innerHeight - 100) / video.videoHeight;
+	background.scaleX = (window.innerWidth - 500) / video.videoWidth;
+	canvas.height = (window.innerHeight - 100);
+	canvas.width = (window.innerWidth - 500);
+	stage.update();
+	frameTime = (video.duration / 100);
+	console.log(frameTime);
+});
+
 stage.update();
 
 var defaultShape = new createjs.SpriteSheet({
@@ -185,4 +203,7 @@ stage.on("stagemousemove", function(e){
 background.on("click", function(e){
 	console.log("asdf");
 	myTrack.addPoint(new Frame(currentTimeline, Math.round(Math.random()*42353), "image"), e.stageX, e.stageY);
+	video.currentTime += frameTime;
+	background.image = video;
+	stage.update();
 });

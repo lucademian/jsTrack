@@ -5,10 +5,21 @@
     <meta charset="UTF-8">
     <title>A Pen by  Luca Demian</title>
     <link rel="stylesheet" href="style.css">
+    <script src="capture-video-frame.js"></script>
   </head>
 
   <body>
-    <canvas id="canvas"></canvas>
+    <div id="container">
+      <canvas id="main"></canvas>
+      <canvas id="seek"></canvas>
+      <div id="sidebar">
+        <canvas id="graph"></canvas>
+      </div>
+    </div>
+    <video id="my-video" autoplay>
+      <source src="videos/bouncing_cart.mov.mp4" type="video/mp4">
+    </video>
+
     <script src='createjs.min.js'></script>
     <script  src="index.js"></script>
   </body>

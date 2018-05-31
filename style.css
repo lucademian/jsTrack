@@ -18,6 +18,13 @@ body, html {
     position: fixed;
     top: 0;
     left: 0;
+    background: skyblue;
+}
+#scrubber {
+    position: fixed;
+    background: #FFF;
+    bottom: 0;
+    left: 0;
 }
 #sidebar {
     background: green;

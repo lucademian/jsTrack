@@ -18,16 +18,11 @@ var frameMarkers = {
 frameMarkers.master.shape.graphics.beginFill("#8f8f8f");
 scrubber.addChild(frameMarkers.master.shape);
 
-var thumber = new createjs.SpriteSheet({
-	images: ["thumber.png"],
-	frames: {width:8, height:78},
-	animations: {
-		"default": 0,
-		"grabbed": 1
-	}
-});
-
-scrubberLine.thumb = new createjs.Sprite(thumber, "default");
+scrubberLine.thumb = new createjs.Shape;
+scrubberLine.thumb.graphics.beginFill("#000");
+scrubberLine.thumb.regX = 0;
+scrubberLine.thumb.regY = 0;
+scrubberLine.thumb.rect = scrubberLine.thumb.graphics.drawRoundRect(-2, -5, 4, scrubberLine.rect.h, 3, 3, 3, 3).command;
 scrubber.addChild(scrubberLine.thumb);
 
 

@@ -1,29 +1,54 @@
 <!DOCTYPE html>
 <html lang="en" >
 
-  <head>
-    <meta charset="UTF-8">
-    <title>A Pen by  Luca Demian</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="capture-video-frame.js"></script>
-  </head>
+    <head>
+        <meta charset="UTF-8">
+        <title>A Pen by  Luca Demian</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
 
-  <body>
-    <div id="container">
-      <canvas id="main"></canvas>
-      <canvas id="scrubber"></canvas>
-      <div id="sidebar">
-        <canvas id="graph"></canvas>
-      </div>
-    </div>
-    <video id="my-video" autoplay>
-      <source src="videos/Pendulum.mov.mp4" type="video/mp4">
-    </video>
+    <body>
+        <div id="container">
+            <div id="video-container">
+                <div id="main-container">
+                    <canvas id="main"></canvas>
+                </div>
+            </div>
+            <canvas id="scrubber"></canvas>
+            <div id="sidebar" class="hidden">
+                <div id="graphs" class="sidebar-item">
+                    <div class="handle-bar">
+                    <div class="handle"></div>
+                    <div class="minimize"></div>
+                    </div>
+                    <div id="table"></div> 
+                </div>
+                
+                <div id="toolbox" class="sidebar-item">
+                    <div class="handle-bar">
+                    <div class="handle"></div>
+                    <div class="minimize"></div>
+                    </div>
+                    <div class="option button"></div>
+                </div>
+            </div>
+        </div>
+        <video id="my-video" autoplay>
+            <source src="videos/scrub3.mp4" type="video/mp4">
+        </video>
 
-    <script src='createjs.min.js'></script>
-    <script src="window.js"></script>
-    <script src="scrubber.js"></script>
-    <script src="index.js"></script>
-  </body>
+        <script src='createjs.min.js'></script>
+        <script src='math.min.js'></script>
+        <script src="functions.js"></script>
+        <script src="classes/project.js"></script>
+        <script src="classes/timeline.js"></script>
+        <script src="classes/track.js"></script>
+        <script src="classes/frame.js"></script>
+        <script src="classes/point.js"></script>
+        <script src="classes/axes.js"></script>
+        <script src="classes/scale.js"></script>
+        <script src="scrubber.js"></script>
+        <script src="index.js"></script>
+    </body>
 
 </html>

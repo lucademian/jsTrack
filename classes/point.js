@@ -16,7 +16,7 @@ class Point
         this.shape.rotation = 45;
         this.shape.hitArea = new createjs.Shape(new createjs.Graphics().beginFill("#000000").drawRect(-1, -1, 12, 12));
 
-        this.strokeWidth = this.shape.graphics.setStrokeStyle(1).command;
+        this.strokeWidth = this.shape.graphics.setStrokeStyle(2).command;
         this.strokeColor = this.shape.graphics.beginStroke(this.track.color).command;
         this.pointRect = this.shape.graphics.drawRect(0,0,this.pointSize,this.pointSize).command;
         
@@ -43,8 +43,9 @@ class Point
 			}
 		});
 		this.shape.on("pressmove", function(e){
+            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			//if(tempSprite.track.state.mode == "default")
-            tempShape.move(e.stageX, e.stageY);
+            tempShape.move(coords.x, coords.y);
             tempShape.select();
 		});
 		this.shape.on("dblclick", function(e){
@@ -55,9 +56,22 @@ class Point
         //	if(tempSprite.track.timeline.mode == "default")
             tempShape.track.unselectAll();
             tempShape.select();
-		});
-		// this.sprite.on("key")
+        });
     }
+    export(axes=this.track.project.axes, scale=this.track.project.scale)
+	{
+        let point = this;
+        
+        let location = axes.convert(point.x, point.y);
+
+        let data = {
+            t: (point.frame.time - (point.track.timeline.startFrame * point.track.timeline.frameTime)).roundTo(3),
+            x: scale.convert(location.x, point.track.unit).number,
+            y: scale.convert(location.y, point.track.unit).number
+        };
+
+        return data;
+	}
     emphasize(multiple=false)
     {
         if(!multiple)
@@ -85,17 +99,18 @@ class Point
         this.shape.regY = (this.pointSize + 2) / 2;
 
 		this.track.stage.update();
-		this.track.selectedPoint = this.frame.time;
+		this.track.selectedPoint = this;
 		return this;
 	}
 	unselect()
 	{
 		this.shape.rotation = 45;
-        this.strokeWidth.width = 1;
+        this.strokeWidth.width = 2;
         this.pointRect.w = this.pointSize;
         this.pointRect.h = this.pointSize;
 		this.shape.regX = this.pointSize / 2;
         this.shape.regY = this.pointSize / 2;
+        this.track.selectedPoint = null;
 		return this;
 	}
 
@@ -112,6 +127,7 @@ class Point
 		this.track.stage.removeChild(this.shape);
 		this.track.stage.update();
 		this.deleted = true;
+        this.track.selectedPoint = null;
 		delete this.track.points[this.frame.time];
 	}
 }

@@ -31,9 +31,10 @@ class Axes
 		let moving = false;
 		let rotating = false;
 		this.shape.addEventListener("mousedown", function(e){
+            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			moving = false;
 			rotating = false;
-			let mouseCoords = parent.convert(e.stageX, e.stageY);
+			let mouseCoords = parent.convert(coords.x, coords.y);
 			if(mouseCoords.x < 20 && mouseCoords.x > -20 && mouseCoords.y < 20 && mouseCoords.y > -20)
 			{
 				moving = true;
@@ -48,8 +49,8 @@ class Axes
 			}
 		});
 		this.shape.addEventListener("tick", function(e){
-			let mouseCoords = parent.convert(stage.mouseX, stage.mouseY);
-			//console.log(mouseCoords);
+            let coords = e.target.stage.globalToLocal(stage.mouseX, stage.mouseY);
+			let mouseCoords = parent.convert(coords.x, coords.y);
 			if(mouseCoords.x < 20 && mouseCoords.x > -20 && mouseCoords.y < 20 && mouseCoords.y > -20)
 			{
 				if(moving)
@@ -73,12 +74,13 @@ class Axes
 			}
 		});
 		this.shape.addEventListener("pressmove", function(e){
+            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			if(moving)
 			{
 				parent.shape.cursor = "grabbing";
-				parent.x = e.stageX;
+				parent.x = coords.x;
 				parent.shape.x = parent.x - 1;
-				parent.y = e.stageY;
+				parent.y = coords.y;
 				parent.shape.y = parent.y - 1;
 				parent.stage.update();
 			}
@@ -87,29 +89,29 @@ class Axes
 				let sign = 1;
 				let reference = Math.PI;
 
-				if(e.stageY > parent.y && e.stageX > parent.x)
+				if(coords.y > parent.y && coords.x > parent.x)
 				{
 					sign = 1;
 					reference = Math.PI * 2;
 				}
-				else if(e.stageY > parent.y && e.stageX < parent.x)
+				else if(coords.y > parent.y && coords.x < parent.x)
 				{
 					sign = 1;
 					reference = Math.PI;
 				}
-				else if(e.stageY < parent.y && e.stageX < parent.x)
+				else if(coords.y < parent.y && coords.x < parent.x)
 				{
 					sign = 1;
 					reference = Math.PI;
 				}
-				else if(e.stageY < parent.y && e.stageX > parent.x)
+				else if(coords.y < parent.y && coords.x > parent.x)
 				{
 					sign = 1;
 					reference = 0;
 				}
 
-				parent.theta = sign * (-sign * Math.atan((parent.y - e.stageY)/(parent.x - e.stageX)) + reference);
-				if(parent.theta == Math.PI && e.stageX > parent.x)
+				parent.theta = sign * (-sign * Math.atan((parent.y - coords.y)/(parent.x - coords.x)) + reference);
+				if(parent.theta == Math.PI && coords.x > parent.x)
 				{
 					parent.theta = 0;
 				}

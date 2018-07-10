@@ -2,6 +2,87 @@ var sidebar = document.getElementById("sidebar");
 var videoContainer = document.getElementById("video-container");
 var canvas = document.getElementById("main");
 var stage = new createjs.Stage("main");
+var distanceUnits = {
+    "fullUnits": ["meter (m)", "inch (in)", "foot (ft)", "yard (yd)", "mile (mi)", "link (li)", "rod (rd)", "chain (ch)", "angstrom", "mil"],
+    "abbreviations": ["m", "in", "ft", "yd", "mi", "li", "rd", "ch", "angstrom", "mil"],
+    "unitNames": ["meter", "inch", "foot", "yard", "mile", "link", "rod", "chain", "angstrom", "mil"],
+    "wordPrefixBig": ["deca", "hecto", "kilo", "mega", "giga", "tera", "peta", "exa", "zetta", "yotta"],
+    "abbrPrefixBig": ["da", "h", "k", "M", "G", "T", "P", "E", "Z", "Y"],
+    "wordPrefixSmall": ["deci", "centi", "milli", "micro", "nano", "pico", "femto", "atto", "zepto", "yocto"],
+    "abbrPrefixSmall": ["d", "c", "m", "u", "n", "p", "f", "a", "z", "y"]
+};
+
+
+
+var newTrack = new modal({
+    name: "New Track",
+    id: "new-track",
+    fields: {
+        "name": {
+            "label": "Name",
+            "type": "text",
+            "required": true
+        },
+        "color": {
+            "label": "Color",
+            "type": "color",
+            "required": true
+        },
+        "unit": {
+            "label": "Unit",
+            "type": "text",
+            "required": true
+        }
+    },
+    buttons: {
+        "cancel": {
+            "label": "Cancel"
+        },
+        "submit": {
+            "label": "Submit"
+        }
+    }
+}, true);
+
+
+var unitAutocomplete;
+newTrack.on("create", function(){
+    console.log("created");
+    unitAutocomplete = new autoComplete({
+        'selector': "#" + newTrack.fields.unit.id,
+        'minChars': 1,
+        'menuClass': 'autoComplete',
+        'source': function(term, response, units=distanceUnits){
+            var matches = [];
+            term = term.toLowerCase();
+            // if it is a unit or abbreviation
+            for(var i=0; i < units.fullUnits.length; i++)
+            {
+                if(~units.fullUnits[i].toLowerCase().indexOf(term))
+                {
+                    matches.push(units.unitNames[i]);
+                }
+            }
+            let wordPre = units.wordPrefixBig.concat(units.wordPrefixSmall);
+            let abbrPre = units.abbrPrefixBig.concat(units.abbrPrefixSmall);
+            for(var i=0; i < wordPre.length; i++)
+            {
+                if(~wordPre[i].toLowerCase().indexOf(term))
+                {
+                    matches.push(wordPre[i] + "meters");
+                }
+            }
+            response(matches);
+        }
+    });
+})
+.on("cancel", function(){
+    this.hide().clear();
+})
+.on("submit", function(data){
+    this.hide().clear();
+    master.newTrack(data.name, data.color, stage, data.unit, true);
+});
 
 stage.enableMouseOver();
 
@@ -16,11 +97,12 @@ stage.addChild(background);
 video = document.getElementById("my-video");
 video.pause();
 
-var master = new Project("My Project", new Timeline(video.duration, canvas.width, canvas.height, video, new createjs.Shape()));
+var tableContainer = document.getElementById('table');
+var master = new Project("My Project", new Timeline(video.duration, canvas.width, canvas.height, video, new createjs.Shape()), new Handsontable(tableContainer));
 master.newTrack("track1", "#f00", stage, "m", true);
 master.newAxes(stage, 300, 200, "#ff69b4", true);
-master.newScale(stage, "scale1", "3 m", 20, 20, 100, 100);
-
+master.newScale(stage, "scale1", "3 m", 20, 20, 100, 100, "#FF3300");
+master.newScale(stage, "scale1", "3 m", 200, 200, 300, 300, "#39ff14");
 
 var posText = new createjs.Text("Frame: 0, X: 0, Y: 0", "13px Arial", "#FFF");
 posText.x = 10;
@@ -31,12 +113,18 @@ stage.addChild(posText);
 stage.update();
 
 
+var initialSize = {};
 
-
-function drawGraphics()
+function drawGraphics(initialDraw=false)
 {
-    let width = window.innerWidth - 500;
+    let width = window.innerWidth - sidebar.offsetWidth;
     let height = window.innerHeight - 50;
+    
+    if(initialDraw)
+    {
+        initialSize.width = video.videoWidth;
+        initialSize.height = video.videoHeight;
+    }
 
     if(window.innerWidth < 1000)
     {
@@ -53,24 +141,34 @@ function drawGraphics()
     videoContainer.style.width = width + "px";
     videoContainer.style.height = height + "px";
 
-    background.scaleY = width / video.videoWidth;
-    background.scaleX = width / video.videoWidth;
+    let scale = Math.min((width / initialSize.width), (height / initialSize.height));
+    stage.scale = scale;
     
-    if(background.scaleY > height / video.videoHeight)
+    canvas.height = stage.scale * initialSize.height;
+    canvas.width = stage.scale * initialSize.width;
+
+    if(initialDraw)
     {
-        background.scaleY = height / video.videoHeight;
-        background.scaleX = height / video.videoHeight;
+        background.scale = stage.scale;
+        stage.scale = 1;
+        initialSize.width = canvas.width;
+        initialSize.height = canvas.height;
+        initialSize.backgroundScale = background.scaleX;
     }
-    
-    canvas.height = background.scaleY * video.videoHeight;
-    canvas.width = background.scaleX * video.videoWidth;
+    else
+    {
+        background.scale = width / (stage.scale * video.videoWidth);
+    }
+
 
     document.getElementById("main-container").style.left = ((width - canvas.width) / 2) + "px";
     document.getElementById("main-container").style.top = ((height - canvas.height) / 2) + "px";
 
-    scrubberCanv.width = width;
+    //scrubber.scaleX = stage.scaleX;
+    
+    scrubberCanv.width = canvas.width;
     scrubberCanv.height = 50;
-    scrubberLine.rect.w = scrubberCanv.width - 100;
+    scrubberLine.rect.w = scrubberCanv.width / stage.scaleX - 100;
     scrubberLine.rect.h = 10;
     scrubberLine.rect.y = (scrubberCanv.height - 10) / 2;
     scrubberLine.rect.x = 15;
@@ -86,18 +184,67 @@ function drawGraphics()
     frameArrows.back.sprite.y = (scrubberCanv.height - 20) / 2;
     
     posText.x = 10;
-    posText.y = canvas.height - 25;
+    posText.regY = 25;
+    posText.y = stage.globalToLocal(0, canvas.height).y;
 
     scrubberLine.startMarker.x = (master.timeline.startFrame / master.timeline.frameCount * scrubberLine.rect.w) + scrubberLine.rect.x;
     scrubberLine.endMarker.x = (master.timeline.endFrame / master.timeline.frameCount * scrubberLine.rect.w) + scrubberLine.rect.x;
     scrubberLine.startMarker.y = scrubberLine.rect.y + scrubberLine.rect.h + 6;
     scrubberLine.endMarker.y = scrubberLine.rect.y + scrubberLine.rect.h + 6;
 
+    master.handsOnTable.render();
+
     stage.update();
     scrubber.update();
     frameArrows.update();
     console.log("drawn");
 }
+
+interact("#sidebar").resizable({
+    edges: { left: true },
+    restrictEdges: {
+        outer: 'parent',
+        endOnly: true,
+    },
+
+    // minimum size
+    restrictSize: {
+        min: { width: 400},
+        max: {width: window.innerWidth - 300}
+    },
+
+    inertia: true,
+})
+.on('resizemove', function (event) {
+    var target = event.target;
+
+    // update the element's style
+    target.style.width  = event.rect.width + 'px';
+    drawGraphics();
+});
+
+dragula([document.getElementById("sidebar")], {
+    direction: "vertical",
+    moves: function(el, source, handle, sibling){
+        if(!handle.classList.contains("handle-bar"))
+        {
+            return false;
+        }
+        else
+        {
+            handle.style.cursor = "grabbing";
+            return true;
+        }
+    }
+})
+.on("drag", function(el){
+    el.querySelector(".handle-bar").style.cursor = "grabbing";
+})
+.on("dragend", function(el){
+    el.querySelector(".handle-bar").style.cursor = "grab";
+});;
+
+
 video.addEventListener("loadeddata", function(){
     // let lastTime = 0;
     // let frame = null;
@@ -128,13 +275,14 @@ video.addEventListener("loadeddata", function(){
     master.timeline.updateDuration(video.duration);
     master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
     master.timeline.video.currentTime = master.timeline.currentTime;
-    drawGraphics();
+    drawGraphics(true);
 });
 
 window.addEventListener("resize", drawGraphics);
 
 stage.on("stagemousemove", function(e){
-	posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: " + Math.round(e.stageX) + ", Y: " + Math.round(e.stageY);
+    var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+	posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: " + Math.round(coords.x) + ", Y: " + Math.round(coords.y);
     stage.update();
 });
 
@@ -149,7 +297,7 @@ stage.on("click", function(e){
             scrubber.update();
         }
 
-        master.track.addPoint(frame, e.stageX, e.stageY);
+        master.track.addPoint(frame, stage.mouseX/stage.scaleX, stage.mouseY/stage.scaleY);
         stage.update();
 
 
@@ -165,7 +313,6 @@ stage.on("click", function(e){
         {
             let closestFrame = master.timeline.getClosestFrame();
             
-            console.log(closestFrame);
             master.timeline.currentTime = ((closestFrame + 1) * master.timeline.frameTime).roundTo(3);
             master.timeline.video.currentTime = master.timeline.currentTime;
             master.track.unselectAll();
@@ -259,9 +406,11 @@ frameArrows.back.sprite.on("click", function(e){
 });
 
 scrubberLine.thumb.on("pressmove", function(e){
-    if(e.stageX >= scrubberLine.rect.x && e.stageX <= scrubberLine.rect.w + scrubberLine.rect.x)
+    var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+
+    if(coords.x >= scrubberLine.rect.x && coords.x <= scrubberLine.rect.w + scrubberLine.rect.x)
     {
-        let closestFrame = Math.round((((e.stageX - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration) / (master.timeline.frameTime / 4)) / 4;
+        let closestFrame = Math.round((((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration) / (master.timeline.frameTime / 4)) / 4;
         if(closestFrame <= master.timeline.endFrame && closestFrame >= master.timeline.startFrame)
         {
             
@@ -284,11 +433,11 @@ scrubberLine.thumb.on("pressmove", function(e){
         }
 
     }
-    else if(e.stageX < (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.startFrame + scrubberLine.rect.x)
+    else if(coords.x < (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.startFrame + scrubberLine.rect.x)
     {
         master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
     }
-    else if(e.stageX > (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.endFrame + scrubberLine.rect.x)
+    else if(coords.x > (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.endFrame + scrubberLine.rect.x)
     {
         master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
     }
@@ -313,48 +462,49 @@ scrubberLine.thumb.on("pressmove", function(e){
     frameArrows.update();
 });
 scrubberLine.startMarker.on("pressmove", function(e){
-    //console.log(e.stageX);
-    let closestFrame = Math.round((((e.stageX - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration) / (master.timeline.frameTime))
+    var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+    let closestFrame = master.timeline.getClosestFrame(((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration);
+    console.log(closestFrame);
     if(closestFrame <= master.timeline.frameCount && closestFrame < master.timeline.endFrame && closestFrame >= 0)
     {
         scrubberLine.startMarker.x = closestFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
         master.timeline.startFrame = closestFrame;
-        if(master.timeline.currentTime < master.timeline.startFrame * master.timeline.frameTime)
+        if(master.timeline.currentTime < master.timeline.getFrameStart(master.timeline.startFrame))
         {
-            master.timeline.currentTime = master.timeline.startFrame * master.timeline.frameTime;
+            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
         }
     }
     else if(closestFrame < 0)
     {
         scrubberLine.startMarker.x = scrubberLine.rect.x;
         master.timeline.startFrame = 0;
-        if(master.timeline.currentTime < master.timeline.startFrame * master.timeline.frameTime)
+        if(master.timeline.currentTime < master.timeline.getFrameStart(master.timeline.startFrame))
         {
-            master.timeline.currentTime = master.timeline.startFrame * master.timeline.frameTime;
+            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
         }
     }
     frameArrows.update();
 });
 
 scrubberLine.endMarker.on("pressmove", function(e){
-    //console.log(e.stageX);
-    let closestFrame = Math.round((((e.stageX - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration) / (master.timeline.frameTime))
+    var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+    let closestFrame = master.timeline.getClosestFrame(((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration);
     if(closestFrame <= master.timeline.frameCount && closestFrame > master.timeline.startFrame)
     {
         scrubberLine.endMarker.x = closestFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
         master.timeline.endFrame = closestFrame;
-        if(master.timeline.currentTime > master.timeline.endFrame * master.timeline.frameTime)
+        if(master.timeline.currentTime > master.timeline.getFrameStart(master.timeline.endFrame))
         {
-            master.timeline.currentTime = master.timeline.endFrame * master.timeline.frameTime;
+            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
         }
     }
     else if(closestFrame > master.timeline.frameCount)
     {
         scrubberLine.endMarker.x = master.timeline.frameCount * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
         master.timeline.endFrame = master.timeline.frameCount;
-        if(master.timeline.currentTime > master.timeline.endFrame * master.timeline.frameTime)
+        if(master.timeline.currentTime > master.timeline.getFrameStart(master.timeline.endFrame))
         {
-            master.timeline.currentTime = master.timeline.endFrame * master.timeline.frameTime;
+            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
         }
     }
     frameArrows.update();
@@ -363,7 +513,7 @@ document.onkeydown = function(e){
     switch(e.keyCode)
     {
         case 16:
-            stage.cursor = "copy";
+            stage.cursor = "crosshair";
             master.track.state.mode = "add";
             parent.stage._testMouseOver(true);
             break;

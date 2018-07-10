@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 body, html {
     margin: 0;
     padding: 0;
@@ -39,7 +40,7 @@ body, html {
     left: 0;
 }
 #sidebar {
-    background: green;
+    background: #f1f1f1;
     padding: 5px;
     height: 100vh;
     width: 500px;
@@ -62,6 +63,9 @@ body, html {
     display: block;
     width: 100%;
     height: 300px;
+}
+#table {
+    font-family: "Source Sans Pro", sans-serif;
 }
 video, img {
     display: block;
@@ -86,19 +90,162 @@ input.scale-text {
     background: #FFF;
     color: #000 !important;
 }
-#toolbox {
-    height: 800px;
-    background: pink;
-}
 .sidebar-item {
-    margin-bottom: 5px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    background: #FFF;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 6px -3px rgba(0,0,0,0.3);
+    position: relative;
+    padding: 6px;
+    padding-top: 26px
 }
 .handle-bar {
-    background: grey;
+    background: #e8e8e8;
     display: block;
     width: 100%;
     height: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    border: 1px #FFF solid;
+    border-bottom: none;
+    border-radius: 4px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    cursor: grab;
 }
 .handle-bar .handle {
     background: black;
+}
+#toolbox {
+    padding-bottom: 5px;
+}
+#toolbox .button {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    background: grey;
+    margin: 0px;
+    margin-top: 8px;
+    margin-left: 8px;
+    cursor: pointer;
+    border: 4px #6c6c6c solid;
+    box-sizing: border-box;
+}
+#toolbox .button:active {
+    border: 0px #6c6c6c solid;
+}
+
+#tracks #track-list ul {
+    margin: 0;
+    padding: 0;
+}
+#tracks #track-list ul li {
+    /* border-bottom: 1px grey solid; */
+    font: 15px "Source Sans Pro", sans-serif;
+    padding: 10px;
+    list-style: none;
+    cursor: pointer;
+}
+#tracks #track-list ul li:last-of-type {
+    border: none;
+}
+#tracks #track-list ul li:not(.selected):hover {
+    background: #f6f6f6;
+}
+#tracks #track-list ul li.selected {
+    background: #e6e6e6;
+}
+#tracks #track-list ul li .name {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+#tracks #track-list ul li .swath {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: red;
+    vertical-align: middle;
+}
+#modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.295);
+    overflow-y: scroll;
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+#modal-container.active {
+    display: flex;
+}
+.modal {
+    position: absolute;
+    background: #FFF;
+    border-radius: 10px;
+    padding: 30px;
+    display: none;
+}
+.modal.active {
+    display: block;
+}
+.modal .modal-title {
+    font: 25px "Source Sans Pro", sans-serif;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.modal .form-item {
+    font: 16px "Source Sans Pro", sans-serif;
+}
+.modal .form-item + .form-item {
+    margin-top: 20px;
+}
+.modal .form-item input[type="text"] {
+    padding: 8px 10px;
+    border: 1px lightgrey solid;
+    border-radius: 3px;
+}
+.modal .form-item input[type="color"] {
+    padding: 2px;
+    border: 1px lightgrey solid;
+    background: #FFF;
+    border-radius: 3px;
+    width: 30px;
+    height: 30px;
+    vertical-align: middle;
+}
+.modal .form-item label {
+    margin-right: 20px;
+    vertical-align: middle;
+}
+.modal .form-buttons {
+    text-align: center;
+    margin-top: 25px;
+}
+.modal .form-buttons button {
+    font: 16px "Source Sans Pro", sans-serif;
+    display: inline-block;
+    background: #00b38c;
+    border: none;
+    color: #FFF;
+    border-radius: 30px;
+    padding: 10px 30px;
+    margin-right: 10px;
+    transition: all 0.2s;
+}
+.modal .form-buttons button:hover {
+    opacity: 0.9;
+}
+.modal .form-buttons button:last-of-type{
+    margin-right: 0px;
+}
+.autoComplete {
+    font-family: sans-serif;
 }

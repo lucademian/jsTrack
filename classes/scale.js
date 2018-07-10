@@ -1,9 +1,9 @@
 class Scale
 {
-	constructor (stage, name, size, x1, y1, x2, y2)
+	constructor (stage, name, size, x1, y1, x2, y2, color)
 	{
 		this.stage = stage;
-		this.color = "#39ff14";
+		this.color = color;
 		this.nodeSize = 8;
 		this.textValue = math.unit(size).toString();
         this.size = math.unit(size);
@@ -113,14 +113,16 @@ class Scale
 		});
 		
 		this.nodes[0].addEventListener("pressmove", function(e){
-			_scale.nodes[0].x = e.stageX;
-			_scale.nodes[0].y = e.stageY;
+            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+			_scale.nodes[0].x = coords.x;
+			_scale.nodes[0].y = coords.y;
 			_scale.update();
             _scale.stage.update();
 		});
 		this.nodes[1].addEventListener("pressmove", function(e){
-			_scale.nodes[1].x = e.stageX;
-			_scale.nodes[1].y = e.stageY;
+            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+			_scale.nodes[1].x = coords.x;
+			_scale.nodes[1].y = coords.y;
 			_scale.update();
 			_scale.stage.update();
 		});

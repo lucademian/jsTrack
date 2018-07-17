@@ -1,6 +1,6 @@
 class modal
 {
-    constructor(schema, create=false)
+    constructor(schema, create=true)
     {
         this.name = schema.name;
         this.id = schema.id;
@@ -56,21 +56,36 @@ class modal
             let formItem = document.createElement("div");
             formItem.classList.add("form-item");
             formItem.setAttribute("data-key", field);
-            let formItemLabel = document.createElement("label");
-            formItemLabel.innerText = this.fields[field].label + ":";
-            formItemLabel.for = this.id + "_input-" + field;
+            let formInputId = this.id + "_input-" + field;
             let formItemInput = document.createElement("input");
             formItemInput.type = this.fields[field].type;
-            formItemInput.name = formItemLabel.for;
-            formItemInput.id = formItemLabel.for;
+            formItemInput.name = formInputId;
+            formItemInput.id = formInputId;
             formItemInput.setAttribute("data-key", field);
-            this.fields[field].id = formItemLabel.for;
+            this.fields[field].id = formInputId;
             this.fields[field].element = formItem;
             
             if(this.fields[field].initVal === undefined)
-                this.fields[field].initVal = "";
+            {
+                if(this.fields[field].type == "color")
+                {
+                    this.fields[field].initVal = "#FF0000";
+                }
+                else
+                {
+                    this.fields[field].initVal = "";
+                }
+            }
+            formItemInput.value = this.fields[field].initVal;
             
-            formItem.appendChild(formItemLabel);
+            if(this.fields[field].type !== "hidden")
+            {
+                let formItemLabel = document.createElement("label");
+                formItemLabel.innerText = this.fields[field].label + ":";
+                formItemLabel.for = formInputId;
+                formItem.appendChild(formItemLabel);
+            }
+
             formItem.appendChild(formItemInput);
             this.element.appendChild(formItem);
         }
@@ -137,6 +152,17 @@ class modal
                 this.fields[field].initVal = "";
             
             document.getElementById(this.fields[field].id).value = this.fields[field].initVal;
+        }
+        return this;
+    }
+    push(value)
+    {
+        for(var field in value)
+        {
+            if(this.fields[field] !== undefined)
+            {
+                document.getElementById(this.fields[field].id).value = value[field];
+            }
         }
         return this;
     }

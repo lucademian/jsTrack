@@ -5,8 +5,16 @@ class Scale
 		this.stage = stage;
 		this.color = color;
 		this.nodeSize = 8;
-		this.textValue = math.unit(size).toString();
-        this.size = math.unit(size);
+        if(size === null || size == undefined)
+        {
+            this.textValue = math.unit("1m").toString();
+            this.size = math.unit("1m");
+        }
+        else
+        {
+            this.textValue = math.unit(size).toString();
+            this.size = math.unit(size);
+        }
 
 		this.hitArea = new createjs.Shape();
 		this.hitArea.graphics.beginFill(this.color).drawRect(-1, -1,this.nodeSize+2, this.nodeSize+2);
@@ -78,12 +86,16 @@ class Scale
 			{
 				_scale.textElement.blur();
 			}
-		});
-		this.textElement.addEventListener("dblclick", function(){
-			_scale.textElement.classList.add("editing");
-			_scale.textElement.classList.remove("not-editing");
-			_scale.textElement.readOnly = false;
-		});
+        });
+        
+        ["startEditing", "dblclick"].forEach(function(value){
+            _scale.textElement.addEventListener(value, function(e){
+                _scale.textElement.classList.add("editing");
+                _scale.textElement.classList.remove("not-editing");
+                _scale.textElement.readOnly = false;
+            });
+        });
+
 		["change", "keypress", "keyup"].forEach(function(value){
 			_scale.textElement.addEventListener(value, function(e){
 				if((value != "keypress" && value != "keyup") || e.key == "13")

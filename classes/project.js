@@ -24,6 +24,34 @@ class Project
             type: "numeric",
             stretchH: "last"
         });
+
+        this.state = {
+			_mode: "default",
+			modeCallbacks: [],
+			selectionCallbacks: [],
+			set mode(val){
+				this._mode = val;
+				for(var i = 0; i < this.modeCallbacks.length; i++)
+				{
+					this.modeCallbacks[i](this._mode);
+				}
+			},
+			get mode(){
+				return this._mode;
+			},
+			modeChange: function(val){
+				this.modeCallbacks.push(val);
+            },
+            default: function(){
+                this._mode = "default";
+				for(var i = 0; i < this.modeCallbacks.length; i++)
+				{
+					this.modeCallbacks[i](this._mode);
+				}
+            }
+        };
+
+
         this.timeline.project = this;
     }
 	newTrack(name, color, stage, unit="m", makeDefault=true)
@@ -36,6 +64,7 @@ class Project
             this.track.select();
         }
         track.table.makeActive();
+        return track;
 	}
 	newAxes(stage, x, y, color, makeDefault=true)
 	{
@@ -49,7 +78,9 @@ class Project
 		let scale = new Scale(stage, name, size, x1, y1, x2, y2, color);
 		this.scaleList.push(scale);
 		if(makeDefault)
-			this.scale = scale;
+            this.scale = scale;
+            
+        return scale;
     }
     switchTrack(uid)
     {

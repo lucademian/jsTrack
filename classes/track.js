@@ -6,6 +6,7 @@ class Track
 		this.color = color;
         this.unit = math.unit(unit);
         this.project = project;
+        this.scale = this.project.scale;
 		this.timeline = timeline;
 		this.stage = stage;
 		this.points = {};
@@ -15,15 +16,20 @@ class Track
         this.uid = (Math.round(Math.random() * 100000000) + 1).toString();
         this.listElement = {"container": document.createElement("li")};
         this.listElement.container.setAttribute("data-uid", this.uid);
+        this.listElement.container.title = "Double Click to Edit";
         this.listElement.swath = document.createElement("div");
         this.listElement.swath.classList.add("swath");
+        this.listElement.swath.style.background = this.color;
         this.listElement.name = document.createElement("div");
         this.listElement.name.classList.add("name");
-        this.listElement.name.innerText = this.name;
+        this.listElement.name.innerText = this.name + " (" + this.unit.toString() + ")";
+        this.listElement.scale = document.createElement("div");
+        this.listElement.scale.classList.add("scale-display");
 
         document.getElementById("track-list").querySelector("ul").appendChild(this.listElement.container);
         this.listElement.container.appendChild(this.listElement.swath);
         this.listElement.container.appendChild(this.listElement.name);
+        this.listElement.container.appendChild(this.listElement.scale);
 
 		this.state = {
 			_mode: "default",
@@ -79,12 +85,60 @@ class Track
             let uid = this.getAttribute("data-uid");
             tempTrack.project.switchTrack(uid);
         });
-	}
+        this.listElement.container.addEventListener("dblclick", function(){
+            let uid = this.getAttribute("data-uid");
+            if(master.trackList[uid] !== undefined)
+            {
+                editTrack.push({
+                    "name": tempTrack.project.trackList[uid].name,
+                    "color": tempTrack.project.trackList[uid].color,
+                    "unit": tempTrack.project.trackList[uid].unit.toString(),
+                    "uid": uid
+                }).show();
+            }
+        });
+    }
+    update(data)
+    {
+        for(var key in data)
+        {
+            switch(key)
+            {
+                case "name":
+                    this.name = data[key];
+                    this.listElement.name.innerText = this.name + " (" + this.unit.toString() + ")";
+                    break;
+                case "color":
+                    this.color = data[key];
+                    this.listElement.swath.style.background = this.color;
+                    for(var pointKey in this.points)
+                    {
+                        this.points[pointKey].color(this.color);
+                    }
+                    break;
+                case "unit":
+                    this.unit = math.unit(data[key]);
+                    this.listElement.name.innerText = this.name + " (" + this.unit.toString() + ")";
+                    break;
+            }
+        }
+    }
 
-	export(axes=this.project.axes, scale=this.project.scale)
+	export(axes=this.project.axes, scale=this.scale)
 	{
 		var track = this;
-		let data = {};
+        let data = {};
+
+        if(scale == null || scale == undefined)
+        {
+            scale = this.project.scale;
+        }
+        
+        if(scale == null || scale == undefined)
+        {
+            scale = false;
+        }
+
 		data.name = this.name;
 		data.points = {
             scaled: [],
@@ -92,7 +146,6 @@ class Track
         };
 		for(var key in track.points)
 		{
-			console.log(axes);
 			if(track.points.hasOwnProperty(key))
 			{
 				let point = track.points[key];
@@ -107,11 +160,18 @@ class Track
 
 				data.points.pixels.push(pushData);
                 
-				data.points.scaled.push({
-					t: pushData.t,
-					x: scale.convert(pushData.x, track.unit).number,
-					y: scale.convert(pushData.y, track.unit).number
-				});
+                if(scale === false)
+                {
+                    data.points.scaled.push(pushData);
+                }
+                else
+                {
+                    data.points.scaled.push({
+                        t: pushData.t,
+                        x: scale.convert(pushData.x, track.unit).number,
+                        y: scale.convert(pushData.y, track.unit).number
+                    });
+                }
 			}
 		}
 		return data;

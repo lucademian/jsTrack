@@ -6,7 +6,7 @@ class Timeline
 		this.video = video;
 		this.width = width;
         this.height = height;
-        this.fps = 60.21;
+        this.fps = 29.21;
         this.frameSkip = 1;
 		this.frameTime = (1/this.fps).roundTo(3);
 		this.frameCount =  Math.round(this.duration / this.frameTime);

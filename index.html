@@ -25,17 +25,46 @@
                         <div class="minimize"></div>
                     </div>
                     <div class="option button" id="new-track-button"></div>
+                    <div class="option button" id="new-scale-button"></div>
                     <div class="option button"></div>
                     <div class="option button"></div>
                     <div class="option button"></div>
                 </div>
-                <div id="tracks" class="sidebar-item invisible">
+                <div id="tracks" class="sidebar-item">
                     <div class="handle-bar">
                         <div class="handle"></div>
                         <div class="minimize"></div>
                     </div>
-                    <div id="track-list">
-                        <ul></ul>
+                    <div id="track-list" class="sidebar-list">
+                        <ul>
+                            <li data-uid="28846608" title="Double Click to Edit" class="selected">
+                                <div class="swath" style="background: rgb(255, 0, 0) none repeat scroll 0% 0%;"></div>
+                                <div class="name">test (m)</div>
+                                <div class="scale-display"></div>
+                            </li>
+                        </ul>
+                    </div> 
+                </div>
+                <div id="scales" class="sidebar-item">
+                    <div class="handle-bar">
+                        <div class="handle"></div>
+                        <div class="minimize"></div>
+                    </div>
+                    <div id="scale-list" class="sidebar-list">
+                        <ul>
+                            <li class="scale-draggable">
+                                <div class="dragpart">
+                                    <div class="swath" style="background: rgb(255, 0, 0) none repeat scroll 0% 0%;"></div>
+                                    <div class="name">test</div>
+                                </div>
+                            </li>
+                            <li class="scale-draggable">
+                                <div class="dragpart">
+                                    <div class="swath" style="background: rgb(255, 0, 0) none repeat scroll 0% 0%;"></div>
+                                    <div class="name">test 3</div>
+                                </div>
+                            </li>
+                        </ul>
                     </div> 
                 </div>
                 <div id="graphs" class="sidebar-item">
@@ -46,27 +75,7 @@
                     <div id="table"></div> 
                 </div>
             </div>
-            <div id="modal-container">
-                <!-- <div class="modal" id="new-track">
-                    <div class="modal-title">New Track</div>
-                    <div class="form-item">
-                        <label for="track-name">Name:</label>
-                        <input type="text" name="track-name" id="track-name">
-                    </div>
-                    <div class="form-item">
-                        <label for="track-color">Color:</label>
-                        <input type="color" name="track-color" id="track-color">
-                    </div>
-                    <div class="form-item">
-                        <label for="track-unit">Unit:</label>
-                        <input type="text" name="track-unit" id="track-unit">
-                    </div>
-                    <div class="form-buttons">
-                        <button>Cancel</button>
-                        <button>Create</button>
-                    </div>
-                </div> -->
-            </div>
+            <div id="modal-container"></div>
         </div>
         <video id="my-video" autoplay>
             <source src="videos/scrub3.mp4" type="video/mp4">

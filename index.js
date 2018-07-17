@@ -14,6 +14,84 @@ var distanceUnits = {
 
 
 
+
+var background = new createjs.Bitmap(document.getElementById("my-video"));
+stage.addChild(background);
+
+var video = document.getElementById("my-video");
+video.pause();
+
+var tableContainer = document.getElementById('table');
+var master = new Project("My Project", new Timeline(video.duration, canvas.width, canvas.height, video, new createjs.Shape()), new Handsontable(tableContainer));
+master.newAxes(stage, 300, 200, "#ff69b4", true);
+
+var posText = new createjs.Text("Frame: 0, X: 0, Y: 0", "13px Arial", "#FFF");
+posText.x = 10;
+posText.y = canvas.height - 20;
+stage.addChild(posText);
+stage.update();
+
+var newScale = new modal({
+    name: "New Scale",
+    id: "new-scale",
+    fields: {
+        "name": {
+            "label": "Name",
+            "type": "text",
+            "required": true
+        },
+        "color": {
+            "label": "Color",
+            "type": "color",
+            "required": true
+        }
+    },
+    buttons: {
+        "cancel": {
+            "label": "Cancel"
+        },
+        "submit": {
+            "label": "Create"
+        }
+    }
+});
+
+var counter = 3;
+newScale.on("submit", function(data){
+    master.state.mode = "newScale";
+    counter = 1;
+    var locations = {
+        "point1": {},
+        "point2": {}
+    };
+    stage.cursor = "copy";
+    posText.text = "Click for 1st end of scale";
+    stage.on("click", function(e){
+        let mouseCoords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+        if(counter === 1)
+        {
+            locations.point1 = {"x": mouseCoords.x, "y": mouseCoords.y};
+            posText.text = "Click for 2nd end of scale";
+            counter++;
+        }
+        else if(counter === 2)
+        {
+            locations.point2 = {"x": mouseCoords.x, "y": mouseCoords.y};
+            let scale = master.newScale(stage, data.name, null, locations.point1.x, locations.point1.y, locations.point2.x, locations.point2.y, data.color);
+            scale.textElement.dispatchEvent(new Event("startEditing"));
+            scale.textElement.value = "";
+            scale.textElement.focus();
+            stage.cursor = "default";
+            master.state.default();
+            counter++;
+        }
+    });
+    this.hide().clear();
+})
+.on("cancel", function(){
+    this.hide().clear();
+});
+
 var newTrack = new modal({
     name: "New Track",
     id: "new-track",
@@ -39,11 +117,60 @@ var newTrack = new modal({
             "label": "Cancel"
         },
         "submit": {
-            "label": "Submit"
+            "label": "Create"
         }
     }
-}, true);
+});
 
+
+
+var editTrack = new modal({
+    name: "Edit Track",
+    id: "edit-track",
+    fields: {
+        "name": {
+            "label": "Name",
+            "type": "text",
+            "required": true
+        },
+        "color": {
+            "label": "Color",
+            "type": "color",
+            "required": true
+        },
+        "unit": {
+            "label": "Unit",
+            "type": "text",
+            "required": true
+        },
+        "uid": {
+            "type": "hidden"
+        }
+    },
+    buttons: {
+        "cancel": {
+            "label": "Cancel"
+        },
+        "submit": {
+            "label": "Save"
+        }
+    }
+});
+
+editTrack.on("cancel", function(){
+    this.hide().clear();
+})
+.on("submit", function(data){
+    if(master.trackList[data.uid] !== undefined)
+    {
+        master.trackList[data.uid].update({
+            "name": data.name,
+            "color": data.color,
+            "unit": math.unit(data.unit)
+        });
+    }
+    this.hide();
+});
 
 var unitAutocomplete;
 newTrack.on("create", function(){
@@ -60,16 +187,16 @@ newTrack.on("create", function(){
             {
                 if(~units.fullUnits[i].toLowerCase().indexOf(term))
                 {
-                    matches.push(units.unitNames[i]);
+                    matches.push(units.abbreviations[i]);
                 }
             }
             let wordPre = units.wordPrefixBig.concat(units.wordPrefixSmall);
             let abbrPre = units.abbrPrefixBig.concat(units.abbrPrefixSmall);
             for(var i=0; i < wordPre.length; i++)
             {
-                if(~wordPre[i].toLowerCase().indexOf(term))
+                if(~wordPre[i].toLowerCase().indexOf(term) || ~(wordPre[i] + "meter").toLowerCase().indexOf(term))
                 {
-                    matches.push(wordPre[i] + "meters");
+                    matches.push(abbrPre[i] + "m");
                 }
             }
             response(matches);
@@ -81,6 +208,7 @@ newTrack.on("create", function(){
 })
 .on("submit", function(data){
     this.hide().clear();
+    document.getElementById("tracks").classList.remove("hidden");
     master.newTrack(data.name, data.color, stage, data.unit, true);
 });
 
@@ -91,26 +219,7 @@ stage.addEventListener("tick", function(){
     master.timeline.update();
     updateScrubber(master.timeline.currentTime, master.timeline.duration);
 });
-var background = new createjs.Bitmap(document.getElementById("my-video"));
-stage.addChild(background);
 
-video = document.getElementById("my-video");
-video.pause();
-
-var tableContainer = document.getElementById('table');
-var master = new Project("My Project", new Timeline(video.duration, canvas.width, canvas.height, video, new createjs.Shape()), new Handsontable(tableContainer));
-master.newTrack("track1", "#f00", stage, "m", true);
-master.newAxes(stage, 300, 200, "#ff69b4", true);
-master.newScale(stage, "scale1", "3 m", 20, 20, 100, 100, "#FF3300");
-master.newScale(stage, "scale1", "3 m", 200, 200, 300, 300, "#39ff14");
-
-var posText = new createjs.Text("Frame: 0, X: 0, Y: 0", "13px Arial", "#FFF");
-posText.x = 10;
-posText.y = canvas.height - 20;
-stage.addChild(posText);
-
-
-stage.update();
 
 
 var initialSize = {};
@@ -223,7 +332,7 @@ interact("#sidebar").resizable({
     drawGraphics();
 });
 
-dragula([document.getElementById("sidebar")], {
+var panelMove = dragula([document.getElementById("sidebar")], {
     direction: "vertical",
     moves: function(el, source, handle, sibling){
         if(!handle.classList.contains("handle-bar"))
@@ -236,14 +345,45 @@ dragula([document.getElementById("sidebar")], {
             return true;
         }
     }
-})
-.on("drag", function(el){
+});
+
+var scroll = 0;
+var interval = false;
+panelMove.on("drag", function(el){
     el.querySelector(".handle-bar").style.cursor = "grabbing";
+    interval = window.setInterval(function(){
+        let position = document.querySelector(".gu-mirror").getBoundingClientRect();
+
+        if(panelMove.dragging)
+        {
+            if(position.top < 100)
+            {
+                scroll = -1;
+            }
+            else if(position.top > window.innerHeight - 100)
+            {
+                scroll = 1;
+            }
+            else
+            {
+                scroll = 0;
+            }
+        }
+        else
+        {
+            scroll = 0;
+        }
+        document.getElementById("sidebar").scrollTop += scroll * 20;
+    }, 100);
 })
 .on("dragend", function(el){
     el.querySelector(".handle-bar").style.cursor = "grab";
-});;
-
+    if(interval !== false)
+    {
+        clearInterval(interval);
+        interval = false;
+    }
+});
 
 video.addEventListener("loadeddata", function(){
     // let lastTime = 0;
@@ -270,54 +410,69 @@ video.addEventListener("loadeddata", function(){
     //         lastFrame = frame;
     //     }
     // }
-
     background.image = this;
     master.timeline.updateDuration(video.duration);
     master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
     master.timeline.video.currentTime = master.timeline.currentTime;
     drawGraphics(true);
+    window.setTimeout(function(){
+        drawGraphics();
+    }, 1000);
 });
 
 window.addEventListener("resize", drawGraphics);
 
 stage.on("stagemousemove", function(e){
     var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
-	posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: " + Math.round(coords.x) + ", Y: " + Math.round(coords.y);
+    
+    if(master.state.mode == "newScale")
+    {
+
+    }
+    else
+    {
+        posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: " + Math.round(coords.x) + ", Y: " + Math.round(coords.y);
+    }
+    
+    
     stage.update();
 });
 
 stage.on("click", function(e){
-    if(master.track.state.mode == "add")
+    if(master.track !== null && master.track !== undefined)
     {
-        let frame = master.timeline.current();
-        if(frame === false)
+        if(master.track.state.mode == "add")
         {
-            frame = master.timeline.addFrame(master.timeline.currentTime);
-            frameMarkers.master.markers[frame.uid] = frameMarkers.master.shape.graphics.drawRect(((master.timeline.currentTime / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
-            scrubber.update();
-        }
+            let frame = master.timeline.current();
+            if(frame === false)
+            {
+                frame = master.timeline.addFrame(master.timeline.currentTime);
+                frameMarkers.master.markers[frame.uid] = frameMarkers.master.shape.graphics.drawRect(((master.timeline.currentTime / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
+                scrubber.update();
+            }
 
-        master.track.addPoint(frame, stage.mouseX/stage.scaleX, stage.mouseY/stage.scaleY);
-        stage.update();
-
-
-        let nextFrame = master.timeline.next();
-
-        if(nextFrame !== false && nextFrame.distance <= master.timeline.frameTime)
-        {
-            master.timeline.setFrame(nextFrame.frame.time);
-            master.track.points[nextFrame.frame.time].emphasize();
+            master.track.addPoint(frame, stage.mouseX/stage.scaleX, stage.mouseY/stage.scaleY);
             stage.update();
-        }
-        else
-        {
-            let closestFrame = master.timeline.getClosestFrame();
-            
-            master.timeline.currentTime = ((closestFrame + 1) * master.timeline.frameTime).roundTo(3);
-            master.timeline.video.currentTime = master.timeline.currentTime;
-            master.track.unselectAll();
-            master.track.unemphasizeAll();
-            stage.update();
+
+
+            let nextFrame = master.timeline.next();
+
+            if(nextFrame !== false && nextFrame.distance <= master.timeline.frameTime)
+            {
+                master.timeline.setFrame(nextFrame.frame.time);
+                master.track.points[nextFrame.frame.time].emphasize();
+                stage.update();
+            }
+            else
+            {
+                let closestFrame = master.timeline.getClosestFrame();
+                
+                master.timeline.currentTime = ((closestFrame + 1) * master.timeline.frameTime).roundTo(3);
+                master.timeline.video.currentTime = master.timeline.currentTime;
+                master.track.unselectAll();
+                master.track.unemphasizeAll();
+                stage.update();
+            }
         }
     }
     frameArrows.update();

@@ -58,16 +58,33 @@ class Point
             tempShape.select();
         });
     }
+    color(color)
+    {
+        this.strokeColor.style = color;
+    }
     export(axes=this.track.project.axes, scale=this.track.project.scale)
 	{
         let point = this;
         
         let location = axes.convert(point.x, point.y);
 
+        let x = 0, y = 0;
+
+        if(this.scale === (null || undefined))
+        {
+            x = location.x;
+            y = location.y;
+        }
+        else
+        {
+            x = scale.convert(location.x, point.track.unit).number;
+            y = scale.convert(location.y, point.track.unit).number;
+        }
+
         let data = {
             t: (point.frame.time - (point.track.timeline.startFrame * point.track.timeline.frameTime)).roundTo(3),
-            x: scale.convert(location.x, point.track.unit).number,
-            y: scale.convert(location.y, point.track.unit).number
+            x: x,
+            y: y
         };
 
         return data;

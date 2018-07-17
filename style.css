@@ -43,7 +43,7 @@ body, html {
     background: #f1f1f1;
     padding: 5px;
     height: 100vh;
-    width: 500px;
+    width: 400px;
     position: fixed;
     overflow-y: scroll;
     box-sizing: border-box;
@@ -100,6 +100,9 @@ input.scale-text {
     padding: 6px;
     padding-top: 26px
 }
+.sidebar-item.hidden {
+    display: none;
+}
 .handle-bar {
     background: #e8e8e8;
     display: block;
@@ -138,37 +141,69 @@ input.scale-text {
     border: 0px #6c6c6c solid;
 }
 
-#tracks #track-list ul {
+.sidebar-list ul {
     margin: 0;
     padding: 0;
 }
-#tracks #track-list ul li {
+.sidebar-list ul li, .scale-draggable {
     /* border-bottom: 1px grey solid; */
     font: 15px "Source Sans Pro", sans-serif;
     padding: 10px;
     list-style: none;
     cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
 }
-#tracks #track-list ul li:last-of-type {
+.sidebar-list ul li:last-of-type, .scale-draggable {
     border: none;
 }
-#tracks #track-list ul li:not(.selected):hover {
+.sidebar-list ul li:not(.selected):hover {
     background: #f6f6f6;
 }
-#tracks #track-list ul li.selected {
+.sidebar-list ul li.selected {
     background: #e6e6e6;
 }
-#tracks #track-list ul li .name {
+.sidebar-list ul li .name, .scale-draggable .name {
     display: inline-block;
     vertical-align: middle;
     margin-left: 10px;
+    user-select: none;
+    -moz-user-select: none;
 }
-#tracks #track-list ul li .swath {
+.dragpart {
+    cursor: grab;
+    display: inline-block;
+}
+.sidebar-list ul li .swath, .scale-draggable .swath {
     display: inline-block;
     width: 20px;
     height: 20px;
     background: red;
     vertical-align: middle;
+}
+.sidebar-list ul li .scale-display {
+    height: 25px;
+    width: 80px;
+    border: 2px #000 dashed;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    float: right;
+    overflow: hidden;
+}
+
+.scale-display .scale-draggable {
+    padding: 0px;
+    padding-left: 10px;
+}
+.scale-display .scale-draggable .swath {
+    width: 10px;
+    height: 10px;
+}
+
+body > .scale-draggable {
+    display: inline-block;
+    background: #FFF;
+    width: auto !important;
 }
 #modal-container {
     position: fixed;

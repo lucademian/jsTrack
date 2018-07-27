@@ -4,9 +4,10 @@
     <head>
         <meta charset="UTF-8">
         <title>A Pen by  Luca Demian</title>
-        <link rel="stylesheet" href="handsontable.full.css">
-        <link rel="stylesheet" href="autocomplete/auto-complete.css">
-        <link rel="stylesheet" href="dragula.min.css">
+        <link rel="stylesheet" href="src/handsontable.full.css">
+        <link rel="stylesheet" href="src/autocomplete/auto-complete.css">
+        <link rel="stylesheet" href="src/dragula.min.css">
+        <link rel="stylesheet" href="src/colorpicker/color-picker.min.css">
         <link rel="stylesheet" href="style.css">
     </head>
 
@@ -24,11 +25,12 @@
                         <div class="handle"></div>
                         <div class="minimize"></div>
                     </div>
-                    <div class="option button" id="new-track-button"></div>
-                    <div class="option button" id="new-scale-button"></div>
-                    <div class="option button"></div>
-                    <div class="option button"></div>
-                    <div class="option button"></div>
+                    <div class="option button" title="Create New Track" id="new-track-button"></div>
+                    <div class="option button" title="Modify Scale" id="scale-button"></div>
+                    <div class="option button" title="Edit Project" id="edit-project-button"></div>
+                    <div class="option button" title="Export Data" id="export-button"></div>
+                    <div class="option button" title="Save to File" id="save-button"></div>
+                    <div class="option button" title="Save to Browser" id="save-project-storage-button"></div>
                 </div>
                 <div id="tracks" class="sidebar-item">
                     <div class="handle-bar">
@@ -36,35 +38,7 @@
                         <div class="minimize"></div>
                     </div>
                     <div id="track-list" class="sidebar-list">
-                        <ul>
-                            <li data-uid="28846608" title="Double Click to Edit" class="selected">
-                                <div class="swath" style="background: rgb(255, 0, 0) none repeat scroll 0% 0%;"></div>
-                                <div class="name">test (m)</div>
-                                <div class="scale-display"></div>
-                            </li>
-                        </ul>
-                    </div> 
-                </div>
-                <div id="scales" class="sidebar-item">
-                    <div class="handle-bar">
-                        <div class="handle"></div>
-                        <div class="minimize"></div>
-                    </div>
-                    <div id="scale-list" class="sidebar-list">
-                        <ul>
-                            <li class="scale-draggable">
-                                <div class="dragpart">
-                                    <div class="swath" style="background: rgb(255, 0, 0) none repeat scroll 0% 0%;"></div>
-                                    <div class="name">test</div>
-                                </div>
-                            </li>
-                            <li class="scale-draggable">
-                                <div class="dragpart">
-                                    <div class="swath" style="background: rgb(255, 0, 0) none repeat scroll 0% 0%;"></div>
-                                    <div class="name">test 3</div>
-                                </div>
-                            </li>
-                        </ul>
+                        <ul></ul>
                     </div> 
                 </div>
                 <div id="graphs" class="sidebar-item">
@@ -75,31 +49,53 @@
                     <div id="table"></div> 
                 </div>
             </div>
-            <div id="modal-container"></div>
+            <div id="modal-container" class="active launch">
+                <div id="launch" class="modal active">
+                    <div id="file-input-container">
+                        <div class="area" id="file-drop-area">
+                            <div class="text">Drag a video or .jstrack file here to begin, or</div>
+                            <label for="file-input" class="button">Click Here To Select Files</label>
+                        </div>
+                        <input type="file" id="file-input">
+                    </div>
+                </div>
+            </div>
         </div>
-        <video id="my-video" autoplay>
-            <source src="videos/scrub3.mp4" type="video/mp4">
-        </video>
+        <video id="my-video" autoplay></video>
 
-        <script src='createjs.min.js'></script>
-        <script src='autocomplete/auto-complete.min.js'></script>
-        <script src='math.min.js'></script>
-        <script src='handsontable.min.js'></script>
-        <script src='interact.min.js'></script>
-        <script src='dragula.min.js'></script>
-        <script src="functions.js"></script>
-        <script src="classes/project.js"></script>
-        <script src="classes/timeline.js"></script>
-        <script src="classes/track.js"></script>
-        <script src="classes/frame.js"></script>
-        <script src="classes/point.js"></script>
-        <script src="classes/axes.js"></script>
-        <script src="classes/scale.js"></script>
-        <script src="classes/table.js"></script>
-        <script src="classes/modal.js"></script>
-        <script src="scrubber.js"></script>
-        <script src="index.js"></script>
-        <script src="dom.js"></script>
+        <div id="fullscreen-loader"></div>
+        <script type="text/javascript" src='src/createjs.min.js'></script>
+        <script type="text/javascript" src='src/autocomplete/auto-complete.min.js'></script>
+        <script type="text/javascript" src='src/math.min.js'></script>
+        <script type="text/javascript" src='src/handsontable.min.js'></script>
+        <script type="text/javascript" src="src/jszip.js"></script>
+        <script type="text/javascript" src="src/jszip.min.js"></script>
+        <script type="text/javascript" src="src/jszip-utils.min.js"></script>
+        <!--
+        Mandatory in IE 6, 7, 8 and 9.
+        -->
+        <!--[if IE]>
+        <script type="text/javascript" src="src/jszip-utils-ie.min.js"></script>
+        <![endif]-->
+        <script type="text/javascript" src="src/FileSaver.js"></script>
+        <script type="text/javascript" src="src/xlsx.min.js"></script>
+        <script type="text/javascript" src='src/interact.min.js'></script>
+        <script type="text/javascript" src='src/dragula.min.js'></script>
+        <script type="text/javascript" src='src/cycle.js'></script>
+        <script type="text/javascript" src='src/colorpicker/color-picker.min.js'></script>
+        <script type="text/javascript" src="js/functions.js"></script>
+        <script type="text/javascript" src="js/classes/project.js"></script>
+        <script type="text/javascript" src="js/classes/timeline.js"></script>
+        <script type="text/javascript" src="js/classes/track.js"></script>
+        <script type="text/javascript" src="js/classes/frame.js"></script>
+        <script type="text/javascript" src="js/classes/point.js"></script>
+        <script type="text/javascript" src="js/classes/axes.js"></script>
+        <script type="text/javascript" src="js/classes/scale.js"></script>
+        <script type="text/javascript" src="js/classes/table.js"></script>
+        <script type="text/javascript" src="js/classes/modal.js"></script>
+        <script type="text/javascript" src="js/scrubber.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/dom.js"></script>
     </body>
 
 </html>

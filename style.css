@@ -5,6 +5,7 @@ body, html {
     background: #f00;
     height: 100vh;
     width: calc(100vw - 300px);
+    overflow: hidden;
 }
 #container {
     background: #000;
@@ -17,7 +18,7 @@ body, html {
     display: block;
     width: calc(100vw - 500px);
     height: calc(100vh - 50px);
-    background-color: #919191;
+    background-color: #f2f2f2;
     background-size: auto auto;
     background-position: center;
 }
@@ -40,7 +41,7 @@ body, html {
     left: 0;
 }
 #sidebar {
-    background: #f1f1f1;
+    background: #fff;
     padding: 5px;
     height: 100vh;
     width: 400px;
@@ -65,6 +66,8 @@ body, html {
     height: 300px;
 }
 #table {
+    height: 400px;
+    overflow: hidden;
     font-family: "Source Sans Pro", sans-serif;
 }
 video, img {
@@ -95,10 +98,10 @@ input.scale-text {
     border-radius: 4px;
     background: #FFF;
     box-sizing: border-box;
-    box-shadow: 0px 0px 6px -3px rgba(0,0,0,0.3);
     position: relative;
     padding: 6px;
-    padding-top: 26px
+    padding-top: 26px;
+    border: 1px #d8d8d8 solid;
 }
 .sidebar-item.hidden {
     display: none;
@@ -129,17 +132,49 @@ input.scale-text {
     width: 30px;
     height: 30px;
     display: inline-block;
-    background: grey;
+    background: #FFF;
+    background-size: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
     margin: 0px;
     margin-top: 8px;
     margin-left: 8px;
     cursor: pointer;
-    border: 4px #6c6c6c solid;
+    border: 1px #d8d8d8 solid;
+    border-radius: 2px;
     box-sizing: border-box;
 }
-#toolbox .button:active {
-    border: 0px #6c6c6c solid;
+#toolbox .button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
+#toolbox .button:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+
+
+#toolbox #new-track-button {
+    background-image: url("icons/track.svg");
+}
+#toolbox #scale-button {
+    background-image: url("icons/scale.svg");
+}
+#toolbox #edit-project-button {
+    background-image: url("icons/settings.svg");
+}
+#toolbox #export-button {
+    background-image: url("icons/export.svg");
+}
+#toolbox #save-button {
+    background-image: url("icons/save_file.svg");
+}
+#toolbox #save-project-storage-button {
+    background-image: url("icons/save_browser.svg");
+}
+
+
+
+
 
 .sidebar-list ul {
     margin: 0;
@@ -153,6 +188,7 @@ input.scale-text {
     cursor: pointer;
     user-select: none;
     -moz-user-select: none;
+    border-radius: 3px;
 }
 .sidebar-list ul li:last-of-type, .scale-draggable {
     border: none;
@@ -178,9 +214,28 @@ input.scale-text {
     display: inline-block;
     width: 20px;
     height: 20px;
+    border-radius: 10px;
     background: red;
     vertical-align: middle;
 }
+.sidebar-list ul li .visibility {
+    display: block;
+    float: right;
+    width: 20px;
+    height: 20px;
+    background: url("visible.svg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+}
+.sidebar-list ul li .visibility.hidden {
+    background: url("hidden.svg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 .sidebar-list ul li .scale-display {
     height: 25px;
     width: 80px;
@@ -221,6 +276,9 @@ body > .scale-draggable {
 #modal-container.active {
     display: flex;
 }
+#modal-container.launch {
+    background: #FFF;
+}
 .modal {
     position: absolute;
     background: #FFF;
@@ -242,19 +300,21 @@ body > .scale-draggable {
 .modal .form-item + .form-item {
     margin-top: 20px;
 }
-.modal .form-item input[type="text"] {
+.modal .form-item input:not(.colorpicker) {
     padding: 8px 10px;
     border: 1px lightgrey solid;
     border-radius: 3px;
 }
-.modal .form-item input[type="color"] {
-    padding: 2px;
-    border: 1px lightgrey solid;
+.modal .form-item input.colorpicker {
     background: #FFF;
-    border-radius: 3px;
-    width: 30px;
-    height: 30px;
+    border: none;
+    color: transparent;
+    overflow: hidden;
+    border-radius: 15px;
+    width: 25px;
+    height: 25px;
     vertical-align: middle;
+    cursor: pointer;
 }
 .modal .form-item label {
     margin-right: 20px;
@@ -281,6 +341,80 @@ body > .scale-draggable {
 .modal .form-buttons button:last-of-type{
     margin-right: 0px;
 }
+#launch #file-input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#launch input {
+    display: none;
+}
+@keyframes highlightPulse {
+    from {
+        box-shadow: 0px 0px 15px 3px rgba(0, 255, 149, 0.3);
+    }
+    to {
+        box-shadow: 0px 0px 25px 10px rgba(0, 255, 149, 0.4);
+    }
+}
+#launch .area {
+    width: 50vw;
+    height: 50vh;
+    border: 5px rgb(226, 226, 226) dashed;
+    border-radius: 20px;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation-direction: alternate;
+    animation-duration: 0.6s;
+    animation-fill-mode: backwards;
+    animation-iteration-count: infinite;
+    transition: all 0.4s;
+}
+#launch .area.highlight {
+    animation-name: highlightPulse;
+    border-color: rgb(0, 80, 17);
+    /* background-image: url("upload-icon.png");
+    background-position: center; */
+}
+#launch .area .text {
+    display: block;
+    font: 15px "Source Sans Pro", sans-serif;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+#launch label.button {
+    display: block;
+    font: 15px "Source Sans Pro", sans-serif;
+    color: rgb(0, 80, 17);
+    background: rgb(0, 255, 149);
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* #launch .area.highlight * {
+    display: none;
+} */
 .autoComplete {
     font-family: sans-serif;
+}
+#fullscreen-loader {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(255,255,255,0.9);
+    /* background-image: url("loader.svg");
+    background-size: 150px;
+    background-position: center center;
+    background-repeat: no-repeat; */
+    display: none;
+    cursor: wait;
+}
+#fullscreen-loader.active {
+    display: block;
 }

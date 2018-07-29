@@ -29,8 +29,8 @@
                     <div class="option button" title="Modify Scale" id="scale-button"></div>
                     <div class="option button" title="Edit Project" id="edit-project-button"></div>
                     <div class="option button" title="Export Data" id="export-button"></div>
-                    <div class="option button" title="Save to File" id="save-button"></div>
-                    <div class="option button" title="Save to Browser" id="save-project-storage-button"></div>
+                    <div class="option button" title="Save" id="save-button"></div>
+                    <div class="option button" title="Logout of Drive" id="logout-drive"></div>
                 </div>
                 <div id="tracks" class="sidebar-item">
                     <div class="handle-bar">
@@ -55,8 +55,9 @@
                         <div class="area" id="file-drop-area">
                             <div class="text">Drag a video or .jstrack file here to begin, or</div>
                             <label for="file-input" class="button">Click Here To Select Files</label>
+                            <button id="pick">Select From Drive</button>
                         </div>
-                        <input type="file" id="file-input">
+                        <input type="file" id="file-input" accept=".jstrack,.mp4,.m4v">
                     </div>
                 </div>
             </div>
@@ -81,7 +82,8 @@
         <script type="text/javascript" src="src/xlsx.min.js"></script>
         <script type="text/javascript" src='src/interact.min.js'></script>
         <script type="text/javascript" src='src/dragula.min.js'></script>
-        <script type="text/javascript" src='src/cycle.js'></script>
+        <script type="text/javascript" src='src/undomanager.js'></script>
+        <script type="text/javascript" src='src/keyboard.min.js'></script>
         <script type="text/javascript" src='src/colorpicker/color-picker.min.js'></script>
         <script type="text/javascript" src="js/functions.js"></script>
         <script type="text/javascript" src="js/classes/project.js"></script>
@@ -93,6 +95,9 @@
         <script type="text/javascript" src="js/classes/scale.js"></script>
         <script type="text/javascript" src="js/classes/table.js"></script>
         <script type="text/javascript" src="js/classes/modal.js"></script>
+        <script type="text/javascript" src="js/drive.js"></script>
+        <script src="https://www.google.com/jsapi?key=AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA"></script>
+        <script src="https://apis.google.com/js/client.js?onload=initPicker"></script>
         <script type="text/javascript" src="js/scrubber.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <script type="text/javascript" src="js/dom.js"></script>

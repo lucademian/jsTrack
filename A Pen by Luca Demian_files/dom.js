@@ -104,6 +104,37 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
         date = new Date(date).toLocaleString();
         if(confirm("You have a project backup from " + date + ". Would you like to recover this?"))
         {
+            if(backupInfo.data !== undefined || backupInfo.data !== null || backupInfo.data !== "")
+            {
+                var file = dataURLtoBlob(backupInfo.data);
+
+                let fileUrl = URL.createObjectURL(file);
+                JSZipUtils.getBinaryContent(fileUrl, function(err, data) {
+                    if(err) {
+                        throw err; // or handle err
+                    }
+                
+                    JSZip.loadAsync(data).then(function (data) {
+                        data.file("meta.json").async("text").then(function(projectJson){
+                            master.load(JSON.parse(projectJson));
+                            if(backupInfo.video === undefined || backupInfo.video === null || backupInfo.video === "")
+                            {
+
+                            }
+                            master.timeline.video.addEventListener("playing", function(){
+                                hideLoader();
+                                master.saved = true;
+                                master.updateVisiblePoints();
+                                for(var time in master.timeline.frames)
+                                {
+                                    if(frameMarkers.master.markers[time] === undefined)
+                                        frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
+                                }
+                            });
+                        });
+                    });
+                });
+            }
             
             if(backupInfo.video !== undefined || backupInfo.video !== null || backupInfo.video !== "")
             {
@@ -117,41 +148,21 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
                 
                     JSZip.loadAsync(data).then(function (data) {
                         data.file("video.mp4").async("blob").then(function(videoBlob){
-                            loadVideo(videoBlob, function(){
-                                if(backupInfo.data !== undefined || backupInfo.data !== null || backupInfo.data !== "")
-                                {
-                                    var file = dataURLtoBlob(backupInfo.data);
-
-                                    let fileUrl = URL.createObjectURL(file);
-                                    JSZipUtils.getBinaryContent(fileUrl, function(err, data) {
-                                        if(err) {
-                                            throw err; // or handle err
-                                        }
-                                    
-                                        JSZip.loadAsync(data).then(function (data) {
-                                            data.file("meta.json").async("text").then(function(projectJson){
-                                                master.load(JSON.parse(projectJson));
-                                                if(backupInfo.video === undefined || backupInfo.video === null || backupInfo.video === "")
-                                                {
-
-                                                }
-                                                
-                                                hideLoader();
-                                                master.saved = true;
-                                                master.updateVisiblePoints();
-                                                for(var time in master.timeline.frames)
-                                                {
-                                                    if(frameMarkers.master.markers[time] === undefined)
-                                                        frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
-                                                }
-                                            });
-                                        });
-                                    });
-                                }
-                            });
+                            loadVideo(videoBlob);
                         });
                     });
                 });
+            }
+            
+            console.log(file);
+            if(file.type == "application/zip")
+            {
+
+
+
+                showLoader();
+                loadProject(file);
+                hideLaunchModal();
             }
             else
             {

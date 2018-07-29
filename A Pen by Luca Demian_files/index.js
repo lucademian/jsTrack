@@ -36,14 +36,10 @@ stage.addChild(posTextBackground);
 stage.addChild(posText);
 
 
-function loadVideo(file, callback=null)
+function loadVideo(file)
 {
     master.videoFile = file;
     master.timeline.video.src = URL.createObjectURL(file);
-    if(callback !== null)
-    {
-        master.timeline.video.addEventListener("playing", callback);
-    }
 }
 
 function loadProject(file)
@@ -56,13 +52,19 @@ function loadProject(file)
     
         JSZip.loadAsync(data).then(function (data) {
             console.log(data);
-            if(data.files["video.mp4"] !== undefined){
-                data.file("video.mp4").async("blob").then(function(videoBlob){
-                    loadVideo(videoBlob, function(){
-                        if(data.files["meta.json"] !== undefined)
-                        {
-                            data.file("meta.json").async("text").then(function(projectJson){
-                                master.load(JSON.parse(projectJson));
+            for(var filename in data.files)
+            {
+                switch(filename.split(".").pop())
+                {
+                    case "mp4":
+                        data.file(filename).async("blob").then(function(videoBlob){
+                            loadVideo(videoBlob);
+                        });
+                        break;
+                    case "json":
+                        data.file(filename).async("text").then(function(projectJson){
+                            master.load(JSON.parse(projectJson));
+                            master.timeline.video.addEventListener("playing", function(){
                                 hideLoader();
                                 master.saved = true;
                                 master.updateVisiblePoints();
@@ -72,9 +74,10 @@ function loadProject(file)
                                         frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
                                 }
                             });
-                        }
-                    });
-                });
+                        });
+                        break;
+                }
+                // console.log(data.file(filename));
             }
         });
     });
@@ -526,6 +529,7 @@ function drawGraphics(initialDraw=false)
     stage.update();
     scrubber.update();
     frameArrows.update();
+    console.log("drawn");
 }
 
 interact("#sidebar").resizable({

@@ -166,7 +166,10 @@ input.scale-text {
     background-image: url("icons/export.svg");
 }
 #toolbox #save-button {
-    background-image: url("icons/save.svg");
+    background-image: url("icons/save_file.svg");
+}
+#toolbox #save-project-storage-button {
+    background-image: url("icons/save_browser.svg");
 }
 
 

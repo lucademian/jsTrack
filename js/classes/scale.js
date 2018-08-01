@@ -5,7 +5,11 @@ class Scale
         this.stage = stage;
         this.project = project;
 		this.color = color;
-		this.nodeSize = 8;
+        this.nodeSize = 8;
+        this.positions = [
+            {x: x1, y: y1},
+            {x: x2, y: y2}
+        ];
         if(size === null || size == undefined)
         {
             this.textValue = math.unit("1m").toString();
@@ -37,14 +41,16 @@ class Scale
 		this.nodes[0].graphics.drawEllipse(0,0,this.nodeSize,this.nodeSize);
 		this.nodes[1].graphics.drawEllipse(0,0,this.nodeSize,this.nodeSize);
 		this.nodes[0].cursor = "pointer";
-		this.nodes[1].cursor = "pointer";
-		this.nodes[0].x = x1;
-		this.nodes[1].x = x2;
+        this.nodes[1].cursor = "pointer";
+        let scaled1 = this.project.toUnscaled(x1, y1);
+        let scaled2 = this.project.toUnscaled(x2, y2);
+		this.nodes[0].x = scaled1.x;
+		this.nodes[1].x = scaled2.x;
 
-		this.nodes[0].y = y1;
-		this.nodes[1].y = y2;
+		this.nodes[0].y = scaled1.y;
+		this.nodes[1].y = scaled2.y;
 
-		this.length = Math.sqrt(Math.pow(this.nodes[0].y - this.nodes[1].y, 2) + Math.pow(this.nodes[0].x - this.nodes[1].x, 2));
+		this.length = Math.sqrt(Math.pow(this.positions[0].y - this.positions[1].y, 2) + Math.pow(this.positions[0].x - this.positions[1].x, 2));
 		this.line = new createjs.Shape();
 		this.line.graphics.setStrokeStyle("2");
 		this.styleCommands.colors.push(this.line.graphics.beginStroke(this.color).command);
@@ -134,14 +140,22 @@ class Scale
 		this.nodes[0].addEventListener("pressmove", function(e){
             let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			_scale.nodes[0].x = coords.x;
-			_scale.nodes[0].y = coords.y;
+            _scale.nodes[0].y = coords.y;
+            
+            let scaled = _scale.project.toScaled(coords);
+            _scale.positions[0] = scaled;
+
 			_scale.update();
             _scale.stage.update();
 		});
 		this.nodes[1].addEventListener("pressmove", function(e){
             let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			_scale.nodes[1].x = coords.x;
-			_scale.nodes[1].y = coords.y;
+            _scale.nodes[1].y = coords.y;
+            
+            let scaled = _scale.project.toScaled(coords);
+            _scale.positions[1] = scaled;
+            
 			_scale.update();
 			_scale.stage.update();
         });
@@ -216,7 +230,7 @@ class Scale
 		_scale.lineStart.y = _scale.nodes[1].y;
 		_scale.lineEnd.x = _scale.nodes[0].x;
 		_scale.lineEnd.y = _scale.nodes[0].y;
-		_scale.length = Math.sqrt(Math.pow(_scale.nodes[0].y - _scale.nodes[1].y, 2) + Math.pow(_scale.nodes[0].x - _scale.nodes[1].x, 2));
+		_scale.length = Math.sqrt(Math.pow(_scale.positions[0].y - _scale.positions[1].y, 2) + Math.pow(_scale.positions[0].x - _scale.positions[1].x, 2));
 
 		_scale.textElement.style.width = (_scale.letterWidth * _scale.textElement.value.length) + "px";
 

@@ -128,7 +128,7 @@ input.scale-text {
 #toolbox {
     padding-bottom: 5px;
 }
-#toolbox .button {
+#toolbox .option {
     width: 30px;
     height: 30px;
     display: inline-block;
@@ -139,10 +139,12 @@ input.scale-text {
     margin: 0px;
     margin-top: 8px;
     margin-left: 8px;
-    cursor: pointer;
     border: 1px #d8d8d8 solid;
     border-radius: 2px;
     box-sizing: border-box;
+}
+#toolbox .button {
+    cursor: pointer;
 }
 #toolbox .button:hover {
     background-color: rgba(0, 0, 0, 0.05);
@@ -167,6 +169,10 @@ input.scale-text {
 }
 #toolbox #save-button {
     background-image: url("icons/save.svg");
+}
+#toolbox #backup-status {
+    background-image: url("icons/backup.svg");
+    transition: all 0.3s;
 }
 
 

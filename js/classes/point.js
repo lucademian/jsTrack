@@ -12,8 +12,9 @@ class Point
         this.shape.cursor = "pointer";
 		this.shape.regX = this.pointSize / 2;
         this.shape.regY = this.pointSize / 2;
-        this.shape.x = x;
-		this.shape.y = y;
+        let unscaled = this.track.project.toUnscaled(x, y);
+        this.shape.x = unscaled.x;
+		this.shape.y = unscaled.y;
         this.shape.rotation = 45;
         this.shape.hitArea = new createjs.Shape(new createjs.Graphics().beginFill("#000000").drawRect(-1, -1, 12, 12));
 
@@ -53,13 +54,13 @@ class Point
 			}
 		});
 		this.shape.on("pressmove", function(e){
-            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+            let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
             
             tempShape.move(coords.x, coords.y, true);
             tempShape.select();
         });
         this.shape.on("pressup", function(e){
-            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+            let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
             
             var goTo = {x: tempShape.x, y: tempShape.y};
             tempShape.track.project.change({
@@ -205,10 +206,11 @@ class Point
 
 	move(x, y, internal=false)
 	{
-		this.shape.x = x;
-		this.shape.y = y;
-        this.circle.x = this.shape.x;
-        this.circle.y = this.shape.y;
+        let unscaled = this.track.project.toUnscaled(x, y);
+		this.shape.x = unscaled.x;
+        this.shape.y = unscaled.y;
+        this.circle.x = unscaled.x;
+        this.circle.y = unscaled.y;
         if(!internal)
         {
             this.x = x;

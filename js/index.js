@@ -19,7 +19,7 @@ var background = new createjs.Bitmap(document.getElementById("my-video"));
 stage.addChild(background);
 
 var tableContainer = document.getElementById('table');
-var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 29.21), new Handsontable(tableContainer), stage);
+var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 29.21), new Handsontable(tableContainer), stage, background);
 
 tableContainer.querySelectorAll("table").forEach(function(el){
     el.id = "data-table-master";
@@ -438,18 +438,13 @@ stage.addEventListener("tick", function(){
     updateScrubber(master.timeline.currentTime, master.timeline.duration);
 });
 
-var initialSize = {};
 
 function drawGraphics(initialDraw=false)
 {
     let width = window.innerWidth - sidebar.offsetWidth;
     let height = window.innerHeight - 50;
     
-    if(initialDraw)
-    {
-        initialSize.width = video.videoWidth;
-        initialSize.height = video.videoHeight;
-    }
+    
 
     if(window.innerWidth < 1000)
     {
@@ -466,30 +461,13 @@ function drawGraphics(initialDraw=false)
     videoContainer.style.width = width + "px";
     videoContainer.style.height = height + "px";
 
-    let scale = Math.min((width / initialSize.width), (height / initialSize.height));
-    stage.scale = scale;
+    let scale = Math.min((width / master.timeline.video.videoWidth), (height / master.timeline.video.videoHeight));
+    master.backgroundScale = scale;
     
-    canvas.height = stage.scale * initialSize.height;
-    canvas.width = stage.scale * initialSize.width;
-
-    if(initialDraw)
-    {
-        background.scale = stage.scale;
-        stage.scale = 1;
-        initialSize.width = canvas.width;
-        initialSize.height = canvas.height;
-        initialSize.backgroundScale = background.scale;
-    }
-    else
-    {
-        background.scale = Math.min(width / (stage.scale * video.videoWidth), height / (stage.scale * video.videoHeight));
-    }
-
-
-    document.getElementById("main-container").style.left = ((width - canvas.width) / 2) + "px";
-    document.getElementById("main-container").style.top = ((height - canvas.height) / 2) + "px";
-
-    //scrubber.scaleX = stage.scaleX;
+    canvas.height = height;
+    canvas.width = width;
+    background.scale = master.backgroundScale * master.positioning.zoom;
+    
     
     scrubberCanv.width = canvas.width;
     scrubberCanv.height = 50;
@@ -515,17 +493,24 @@ function drawGraphics(initialDraw=false)
     posTextBackground.regY = posTextBackgroundCommand.h;
     posTextBackground.y = stage.globalToLocal(0, canvas.height).y;
 
-
     scrubberLine.startMarker.x = (master.timeline.startFrame / master.timeline.frameCount * scrubberLine.rect.w) + scrubberLine.rect.x;
     scrubberLine.endMarker.x = (master.timeline.endFrame / master.timeline.frameCount * scrubberLine.rect.w) + scrubberLine.rect.x;
     scrubberLine.startMarker.y = scrubberLine.rect.y + scrubberLine.rect.h + 6;
     scrubberLine.endMarker.y = scrubberLine.rect.y + scrubberLine.rect.h + 6;
 
+    for(var time in frameMarkers.master.markers)
+    {
+        let marker = frameMarkers.master.markers[time];
+        marker.x = ((time / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x);
+    }
+
     master.handsOnTable.render();
 
     stage.update();
+    master.updateScale();
     scrubber.update();
     frameArrows.update();
+    console.log("drawn");
 }
 
 interact("#sidebar").resizable({
@@ -548,8 +533,8 @@ interact("#sidebar").resizable({
 
     // update the element's style
     target.style.width  = event.rect.width + 'px';
-    drawGraphics();
-});
+})
+.on('resizeend', drawGraphics);
 
 var panelMove = dragula([document.getElementById("sidebar")], {
     direction: "vertical",
@@ -641,8 +626,11 @@ video.onplaying = (function(){
     console.log("drawn");
 });
 
-
-window.addEventListener("resize", drawGraphics);
+var resizeTimer;
+window.addEventListener("resize", function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(drawGraphics, 250);
+});
 
 stage.on("stagemousemove", function(e){
     var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
@@ -672,11 +660,11 @@ stage.on("click", function(e){
                 if(frameMarkers.master.markers[frame.time] == undefined)
                     frameMarkers.master.markers[frame.time] = frameMarkers.master.shape.graphics.drawRect(((master.timeline.currentTime / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
             }
-            master.track.addPoint(frame, stage.mouseX/stage.scaleX, stage.mouseY/stage.scaleY);
+            let scaled = master.toScaled(stage.mouseX, stage.mouseY);
+            master.track.addPoint(frame, scaled.x, scaled.y);
 
             var nextFrame = master.timeline.next();
 
-            console.log(nextFrame);
             if(nextFrame !== false && nextFrame.distance <= master.timeline.frameTime)
             {
                 master.timeline.setFrame(nextFrame.frame.time);
@@ -898,13 +886,21 @@ scrubberLine.endMarker.on("pressmove", function(e){
 
 function updateBackup(success)
 {
-    if(success !== false)
+    var backupStatus = document.getElementById("backup-status");
+    switch(success)
     {
-        console.log("Backed up success: " + success);
-    }
-    else
-    {
-        console.error("Unable to backup!");
+        case 1:
+            backupStatus.style.backgroundColor = "yellow";
+            backupStatus.title = "Partially Backed Up " + master.backUpDate.toLocaleString();
+            break;
+        case 2:
+            backupStatus.style.backgroundColor = "#07ff07";
+            backupStatus.title = "Backed Up " + master.backUpDate.toLocaleString();
+            break;
+        default:
+            backupStatus.style.backgroundColor = "red";
+            backupStatus.title = "Changes Not Backed Up"; + master.backUpDate.toLocaleString();
+            break;
     }
 }
 

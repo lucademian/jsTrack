@@ -1,12 +1,14 @@
 class Project
 {
-	constructor(name, timeline, handsOnTable, stage)
+	constructor(name, timeline, handsOnTable, stage, background)
 	{
         this.name = name;
         this.created = false;
         this.uid = Math.random() * 100000000000000;
         this.timeline = timeline;
         this.stage = stage;
+        this.background = background;
+        this.backgroundScale = 0;
         this.saved = true;
         this.backedUp = true;
         this.backUpDate = null;
@@ -41,6 +43,59 @@ class Project
         });
 
         var project = this;
+        
+        this.positioning = {
+            _zoom: 1,
+            _x: 0,
+            _y: 0,
+            _callbacks: {},
+            get zoom(){
+                return this._zoom;
+            },
+            set zoom(value){
+                this._zoom = value;
+                this.trigger("zoom");
+            },
+            get x(){
+                return this._x;
+            },
+            set x(value){
+                this._x = value;
+                this.trigger("translation");
+            },
+            get y(){
+                return this._y;
+            },
+            set y(value){
+                this._y = value;
+                this.trigger("translation");
+            },
+            trigger(event){
+                if(this._callbacks[event] !== undefined)
+                {
+                    let callbacks = this._callbacks[event];
+                    for(var i = 0; i < callbacks.length; i++)
+                    {
+                        callbacks[i].call(project, {zoom: this._zoom, x: this._x, y: this._y});
+                    }
+                }
+            },
+            on(event, callback)
+            {
+                let events = event.split(",");
+                for(var i = 0; i < events.length; i++)
+                {
+                    let tempEvent = events[i].trim();
+
+                    if(this._callbacks[tempEvent] === undefined)
+                    {
+                        this._callbacks[tempEvent] = [];
+                    }
+
+                    this._callbacks[tempEvent].push(callback);
+                }
+            }
+        }
         this.state = {
             _mode: "default",
             _lastMode: "",
@@ -97,7 +152,91 @@ class Project
                     break;
             }
         });
+        
+        this.positioning.on("translation, zoom", function(position){
+            console.log(position);
+            this.background.scale = this.backgroundScale * position.zoom;
+            this.background.x = position.x;
+            this.background.y = position.y;
+            this.updateScale();
+        });
+
         this.timeline.project = this;
+    }
+    toUnscaled(x, y=null)
+    {
+        if(typeof x == "object" && y == null)
+        {
+            y = x.y;
+            x = x.x;
+        }
+
+        let changing = {
+            width: this.timeline.video.videoWidth * (this.backgroundScale * this.positioning.zoom),
+            height: this.timeline.video.videoHeight * (this.backgroundScale * this.positioning.zoom)
+        };
+        let unchanging = {
+            width: this.timeline.video.videoWidth,
+            height: this.timeline.video.videoHeight
+        };
+        let translation = {
+            x: this.positioning.x,
+            y: this.positioning.y
+        };
+
+        return {x: ((x / unchanging.width) * changing.width) + translation.x, y: ((y / unchanging.height) * changing.height) + translation.y};
+    }
+    toScaled(x, y)
+    {
+        if(typeof x == "object" && y == null)
+        {
+            y = x.y;
+            x = x.x;
+        }
+        
+        let changing = {
+            width: this.timeline.video.videoWidth * (this.backgroundScale * this.positioning.zoom),
+            height: this.timeline.video.videoHeight * (this.backgroundScale * this.positioning.zoom)
+        };
+        let unchanging = {
+            width: this.timeline.video.videoWidth,
+            height: this.timeline.video.videoHeight
+        };
+        let translation = {
+            x: this.positioning.x,
+            y: this.positioning.y
+        };
+
+        return {x: (((x + translation.x) / changing.width) * unchanging.width), y: (((y + translation.y) / changing.height) * unchanging.height)};
+    }
+    updateScale()
+    {
+        if(this.axes !== undefined && this.axes !== null)
+        {
+            let moveTo = this.toUnscaled(this.axes.x, this.axes.y);
+            this.axes.shape.x = moveTo.x;
+            this.axes.shape.y = moveTo.y;
+        }
+        for(var time in this.timeline.frames)
+        {
+            let frame = this.timeline.frames[time];
+            for(var i = 0; i < frame.points.length; i++)
+            {
+                let point = frame.points[i];
+                let scaled = this.toUnscaled(point.x, point.y);
+                point.shape.x = point.circle.x = scaled.x;
+                point.shape.y = point.circle.y = scaled.y;
+            }
+        }
+        if(this.scale !== undefined && this.scale !== null)
+        {
+            let moveTo = [this.toUnscaled(this.scale.positions[0]), this.toUnscaled(this.scale.positions[1])];
+            this.scale.nodes[0].x = moveTo[0].x;
+            this.scale.nodes[0].y = moveTo[0].y;
+            this.scale.nodes[1].x = moveTo[1].x;
+            this.scale.nodes[1].y = moveTo[1].y;
+            this.scale.update();
+        }
     }
     undo()
     {
@@ -248,8 +387,8 @@ class Project
                 size: this.scale.size.toString(),
                 color: this.scale.color,
                 nodes: [
-                    {x: this.scale.nodes[0].x, y: this.scale.nodes[0].y},
-                    {x: this.scale.nodes[1].x, y: this.scale.nodes[1].y}
+                    {x: this.scale.positions[0].x, y: this.scale.positions[0].y},
+                    {x: this.scale.positions[1].x, y: this.scale.positions[1].y}
                 ]
             }
         }
@@ -336,6 +475,7 @@ class Project
                     master.newScale(value.size, value.nodes[0].x, value.nodes[0].y, value.nodes[1].x, value.nodes[1].y, value.color, true);
                     break;
                 case "axes":
+                    console.log(value);
                     let axes = master.newAxes(value.position.x, value.position.y, value.color, true);
                     if(version > 0)
                     {

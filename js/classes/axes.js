@@ -14,9 +14,10 @@ class Axes
 		this.size = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2))*2;
 		this.shape = new createjs.Shape();
 		// this.shape.regX = 2000;
-		// this.shape.regY = 2000;
-		this.shape.x = x;
-		this.shape.y = y;
+        // this.shape.regY = 2000;
+        let unscaled = this.project.toUnscaled(this.x, this.y);
+		this.shape.x = unscaled.x;
+		this.shape.y = unscaled.y;
 		this.shape.rotation = this.theta;
 		this.shape.cursor = "pointer";
 		this.stage.addChild(this.shape);
@@ -34,12 +35,12 @@ class Axes
 
 		let parent = this;
 		let moving = false;
-		let rotating = false;
+        let rotating = false;
 		this.shape.addEventListener("mousedown", function(e){
             let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			moving = false;
 			rotating = false;
-			let mouseCoords = parent.convert(coords.x, coords.y);
+            let mouseCoords = parent.project.toUnscaled(parent.convert(parent.project.toScaled(coords.x, coords.y)));
 			if(mouseCoords.x < 20 && mouseCoords.x > -20 && mouseCoords.y < 20 && mouseCoords.y > -20)
 			{
 				moving = true;
@@ -55,7 +56,7 @@ class Axes
 		});
 		this.shape.addEventListener("tick", function(e){
             let coords = e.target.stage.globalToLocal(stage.mouseX, stage.mouseY);
-			let mouseCoords = parent.convert(coords.x, coords.y);
+			let mouseCoords = parent.convert(parent.project.toScaled(coords.x, coords.y));
 			if(mouseCoords.x < 20 && mouseCoords.x > -20 && mouseCoords.y < 20 && mouseCoords.y > -20)
 			{
 				if(moving)
@@ -79,15 +80,16 @@ class Axes
 			}
 		});
 		this.shape.addEventListener("pressmove", function(e){
-            let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+            let coords = parent.project.toScaled(e.stageX, e.stageY);
+            let coordsUnscaled = parent.project.toUnscaled(coords);
+
 			if(moving)
 			{
 				parent.shape.cursor = "grabbing";
 				parent.x = coords.x;
-				parent.shape.x = parent.x - 1;
+				parent.shape.x = coordsUnscaled.x - 1;
 				parent.y = coords.y;
-				parent.shape.y = parent.y - 1;
-                parent.stage.update();
+				parent.shape.y = coordsUnscaled.y - 1;
                 parent.project.changed();
 			}
 			else if(rotating)
@@ -185,11 +187,29 @@ class Axes
 		{
 			parent.shape.cursor = "ne-resize";
 		}
-	}
-	convert(x, y)
+    }
+
+    /**
+     * Takes coordinates (x, y), or {x: x, y: y} relative to canvas top left with up to the right increasing and converts to (x, y) relative to axes
+     * @param {number|Object} x
+     * @param {number} y
+     * @returns {Object}
+     */
+
+    convert(x, y=null)
 	{
+        if(typeof x == "object" && y == null)
+        {
+            y = x.y;
+            x = x.x;
+        }
+        else if(typeof x != "number" && typeof y != "number")
+        {
+            return false;
+        }
+
 		let axes = this;
-		let coords = {x: x, y: -y};
+        let coords = {x: x, y: -y};
 		let origin = {x: axes.x, y: -axes.y};
 
 		let tan = Math.tan(axes.theta);

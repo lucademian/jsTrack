@@ -131,12 +131,9 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
                                         JSZip.loadAsync(data).then(function (data) {
                                             data.file("meta.json").async("text").then(function(projectJson){
                                                 master.load(JSON.parse(projectJson));
-                                                if(backupInfo.video === undefined || backupInfo.video === null || backupInfo.video === "")
-                                                {
-
-                                                }
                                                 
                                                 hideLoader();
+                                                hideLaunchModal();
                                                 master.saved = true;
                                                 master.updateVisiblePoints();
                                                 for(var time in master.timeline.frames)

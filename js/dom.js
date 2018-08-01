@@ -107,6 +107,7 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
             
             if(backupInfo.video !== undefined || backupInfo.video !== null || backupInfo.video !== "")
             {
+                showLoader();
                 var file = dataURLtoBlob(backupInfo.video);
 
                 let fileUrl = URL.createObjectURL(file);

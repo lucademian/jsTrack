@@ -884,22 +884,30 @@ scrubberLine.endMarker.on("pressmove", function(e){
     frameArrows.update();
 });
 
-function updateBackup(success)
+function updateBackup(state)
 {
     var backupStatus = document.getElementById("backup-status");
-    switch(success)
+    switch(state)
     {
         case 1:
+            backupStatus.style.opacity = 1;
             backupStatus.style.backgroundColor = "yellow";
-            backupStatus.title = "Partially Backed Up " + master.backUpDate.toLocaleString();
+            backupStatus.title = "Partially backed up on " + master.backUpDate.toLocaleDateString() + " at " + master.backUpDate.toLocaleTimeString();
             break;
         case 2:
+            backupStatus.style.opacity = 1;
             backupStatus.style.backgroundColor = "#07ff07";
-            backupStatus.title = "Backed Up " + master.backUpDate.toLocaleString();
+            backupStatus.title = "Backed up on " + master.backUpDate.toLocaleDateString() + " at " + master.backUpDate.toLocaleTimeString();
+            break;
+        case "loading":
+            backupStatus.style.opacity = 0.5;
+            backupStatus.style.backgroundColor = "grey";
+            backupStatus.title = "Backing up...";
             break;
         default:
+            backupStatus.style.opacity = 1;
             backupStatus.style.backgroundColor = "red";
-            backupStatus.title = "Changes Not Backed Up"; + master.backUpDate.toLocaleString();
+            backupStatus.title = "Unable to backup changes";
             break;
     }
 }
@@ -1034,6 +1042,7 @@ function projectBackup()
 master.on("change", function(){
     if(!this.saved && this.created && !this.backedUp)
     {
+        updateBackup("loading");
         projectBackup();
     }
     else if(this.saved)

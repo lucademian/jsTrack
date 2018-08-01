@@ -41,9 +41,12 @@ class Timeline
     }
     updateFps(fps)
     {
+        let changeEnd = this.endFrame == this.frameCount;
         this.fps = fps;
 		this.frameTime = (1/this.fps).roundTo(3);
-		this.frameCount =  Math.round(this.duration / this.frameTime);
+        this.frameCount =  Math.round(this.duration / this.frameTime);
+        if(changeEnd)
+            this.endFrame = this.frameCount;
     }
 	updateDuration(duration){
 		this.duration = duration.roundTo(3);

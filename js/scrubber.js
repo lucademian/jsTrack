@@ -32,17 +32,13 @@ var marker = new createjs.SpriteSheet({
         "default": 0
 	}
 });
+
 scrubberLine["startMarker"] = new createjs.Sprite(marker, "default");
 scrubberLine["endMarker"] = new createjs.Sprite(marker, "default");
 scrubberLine.startMarker.regX = 5;
 scrubberLine.endMarker.regX = 5;
 scrubber.addChild(scrubberLine.startMarker);
 scrubber.addChild(scrubberLine.endMarker);
-
-
-
-
-
 
 var buttons = new createjs.SpriteSheet({
 	images: ["buttons.png"],

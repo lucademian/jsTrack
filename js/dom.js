@@ -189,16 +189,18 @@ document.body.addEventListener('drop', function(e){
                     stage.addChild(background);
                     stage.addChild(posText);
 
-                    frameMarkers.master.shape.graphics.clear();
+                    let tracklist = document.getElementById("track-list").querySelector("ul");
+                    while (tracklist.firstChild) {
+                        tracklist.removeChild(tracklist.firstChild);
+                    }
+
                     frameMarkers.master.markers = {};
+                    frameMarkers.master.shape.graphics.clear();
+                    frameMarkers.master.shape.graphics.beginFill("#0000ff");
                     
-                    handleFile(file);
-                    drawGraphics();
-                    
-                    master.timeline.video.addEventListener("playing", function(){
+                    handleFile(file, function(){
                         master.saved = true;
                         hideLoader();
-                        master.trigger("created");
                     });
                 }
             }
@@ -213,6 +215,11 @@ document.body.addEventListener('drop', function(e){
                     master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 29.21), new Handsontable(tableContainer), stage);
                     stage.addChild(background);
                     stage.addChild(posText);
+
+                    let tracklist = document.getElementById("track-list").querySelector("ul");
+                    while (tracklist.firstChild) {
+                        tracklist.removeChild(tracklist.firstChild);
+                    }
 
                     frameMarkers.master.shape.graphics.clear();
                     frameMarkers.master.markers = {};
@@ -233,12 +240,12 @@ document.getElementById("file-input").addEventListener("change", function(e){
     showLoader();
 });
 
-function handleFile(file, testName=true)
+function handleFile(file, callback=null)
 {
     switch(file.type)
     {
         case "video/mp4":
-            loadVideo(file);
+            loadVideo(file, callback);
             hideLaunchModal();
             newProject.show();
             hideLoader();
@@ -247,7 +254,7 @@ function handleFile(file, testName=true)
         case "application/x-zip":
             if(file.name.split(".").pop() == CUSTOM_EXTENSION)
             {
-                loadProject(file);
+                loadProject(file, callback);
                 hideLaunchModal();
             }
             else

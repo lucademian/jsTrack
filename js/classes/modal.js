@@ -17,16 +17,21 @@ class modal
     }
     on(event, callback)
     {
-        if(this.callbacks[event] === undefined)
-            this.callbacks[event] = [];
-        
-        this.callbacks[event].push(callback);
+        let events = event.split(",");
 
-        if(event == "create" && this.created)
+        for(var i = 0; i < events.length; i++)
         {
-            callback();
-        }
+            let tempEvent = events[i].trim();
+            if(this.callbacks[tempEvent] === undefined)
+                this.callbacks[tempEvent] = [];
+            
+            this.callbacks[tempEvent].push(callback);
 
+            if(tempEvent == "create" && this.created)
+            {
+                callback.call(this, this.export());
+            }
+        }
         return this;
     }
     show()

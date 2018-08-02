@@ -46,7 +46,7 @@ function loadVideo(file, callback=null)
     }
 }
 
-function loadProject(file)
+function loadProject(file, callback=null)
 {
     let fileUrl = URL.createObjectURL(file);
     JSZipUtils.getBinaryContent(fileUrl, function(err, data) {
@@ -66,6 +66,8 @@ function loadProject(file)
                                 hideLoader();
                                 master.saved = true;
                                 master.trigger("created");
+                                if(callback !== null)
+                                    callback();
                             });
                         }
                     });
@@ -154,7 +156,7 @@ var saveProject = new modal({
     }
 });
 
-saveProject.on("submit", function(modalData){
+saveProject.on("saveFile, saveDrive", function(modalData){
     showLoader();
     var fileUrl = URL.createObjectURL(master.videoFile);
     JSZipUtils.getBinaryContent(fileUrl, function (err, data) {

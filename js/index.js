@@ -722,7 +722,7 @@ frameArrows.forward.sprite.on("click", function(e){
         }
         else
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.endFrame);
+            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
             master.track.unselectAll();
             master.track.unemphasizeAll();
             master.updateVisiblePoints();
@@ -740,7 +740,7 @@ frameArrows.back.sprite.on("click", function(e){
         let frame = master.timeline.prev();
         let closestFrame = master.timeline.getClosestFrame();
         if(closestFrame <= master.startFrame)
-            closestFrame = master.startFrame + 1;
+            closestFrame = master.startFrame + master.timeline.frameSkip;
         
         if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip)
         {
@@ -765,7 +765,7 @@ frameArrows.back.sprite.on("click", function(e){
         }
         else
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.startFrame);
+            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
             master.track.unselectAll();
             master.track.unemphasizeAll();
             master.updateVisiblePoints();

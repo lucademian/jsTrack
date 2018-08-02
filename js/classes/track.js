@@ -292,7 +292,8 @@ class Track
             });
 
             let pointData = newPoint.export();
-            this.table.addRow({t: pointData.t, x: pointData.scaled.x, y: pointData.scaled.y}, true);
+            if(pointData != undefined)
+                this.table.addRow({t: pointData.t, x: pointData.scaled.x, y: pointData.scaled.y}, true);
             return newPoint;
         }
         

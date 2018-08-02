@@ -27,7 +27,9 @@ document.getElementById("edit-project-button").addEventListener("click", functio
     editProject.push({
         "name": master.name,
         "framerate": master.timeline.fps,
-        "axesColor": master.axes.color
+        "axesColor": master.axes.color,
+        "pointsForward": master.viewPoints.forward,
+        "pointsBackward": master.viewPoints.backward
     }).show();
 });
 

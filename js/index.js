@@ -86,13 +86,25 @@ var newProject = new modal({
         },
         "framerate": {
             "label": "Framerate",
-            "type": "text",
+            "type": "number",
             "required": true
         },
         "axesColor": {
             "label": "Axes Color",
             "type": "color",
             "defaultValue": "#ff69b4",
+            "required": true
+        },
+        "pointsBackward": {
+            "label": "Points Before Current Time",
+            "type": "number",
+            "defaultValue": "7",
+            "required": true
+        },
+        "pointsForward": {
+            "label": "Points Ahead of Current Time",
+            "type": "number",
+            "defaultValue": "0",
             "required": true
         }
     },
@@ -109,6 +121,11 @@ newProject.on("submit", function(data){
     master.timeline.updateFps(data.framerate);
     master.newAxes(300, 200, data.axesColor, true);
     this.hide().clear();
+    master.viewPoints = {
+        forward: data.pointsForward,
+        backward: data.pointsBackward
+    };
+    master.updateVisiblePoints();
     master.created = true;
     master.trigger("created");
 });
@@ -191,6 +208,18 @@ var editProject = new modal({
             "defaultValue": "#ff69b4",
             "required": true
         },
+        "pointsBackward": {
+            "label": "Points Before Current Time",
+            "type": "number",
+            "defaultValue": "7",
+            "required": true
+        },
+        "pointsForward": {
+            "label": "Points Ahead of Current Time",
+            "type": "number",
+            "defaultValue": "0",
+            "required": true
+        }
     },
     buttons: {
         "cancel": {
@@ -207,6 +236,11 @@ editProject.on("submit", function(data){
     master.timeline.updateFps(data.framerate);
     master.axes.updateColor(data.axesColor);
     this.hide().clear();
+    master.viewPoints = {
+        forward: data.pointsForward,
+        backward: data.pointsBackward
+    };
+    master.updateVisiblePoints();
 })
 .on("cancel", function(){
     this.hide().clear();

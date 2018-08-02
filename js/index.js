@@ -834,7 +834,10 @@ scrubberLine.thumb.on("pressmove", function(e){
     posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: 0, Y: 0";
     frameArrows.update();
 });
+
+var startMarkerStuck = false;
 scrubberLine.startMarker.on("pressmove", function(e){
+    console.log("pressing");
     var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
     let closestFrame = master.timeline.getClosestFrame(((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration);
     console.log(closestFrame);
@@ -844,7 +847,7 @@ scrubberLine.startMarker.on("pressmove", function(e){
         master.timeline.startFrame = closestFrame;
         if(master.timeline.currentTime < master.timeline.getFrameStart(master.timeline.startFrame))
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
+            startMarkerStuck = true;
         }
     }
     else if(closestFrame < 0)
@@ -853,10 +856,19 @@ scrubberLine.startMarker.on("pressmove", function(e){
         master.timeline.startFrame = 0;
         if(master.timeline.currentTime < master.timeline.getFrameStart(master.timeline.startFrame))
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
+            startMarkerStuck = true;
         }
     }
+
+    if(startMarkerStuck)
+    {
+        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
+    }
+
     frameArrows.update();
+});
+scrubberLine.startMarker.on("pressup", function(){
+    startMarkerStuck = false;
 });
 
 scrubberLine.endMarker.on("pressmove", function(e){

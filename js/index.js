@@ -65,12 +65,7 @@ function loadProject(file)
                                 master.load(JSON.parse(projectJson));
                                 hideLoader();
                                 master.saved = true;
-                                master.updateVisiblePoints();
-                                for(var time in master.timeline.frames)
-                                {
-                                    if(frameMarkers.master.markers[time] === undefined)
-                                        frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
-                                }
+                                master.trigger("created");
                             });
                         }
                     });
@@ -115,6 +110,7 @@ newProject.on("submit", function(data){
     master.newAxes(300, 200, data.axesColor, true);
     this.hide().clear();
     master.created = true;
+    master.trigger("created");
 });
 
 
@@ -696,7 +692,7 @@ frameArrows.forward.sprite.on("click", function(e){
         if(closestFrame >= master.timeline.endFrame)
             closestFrame = master.timeline.endFrame - 1;
 
-        if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip)
+        if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip && frame.time <= master.timeline.getFrameStart(master.timeline.endFrame))
         {
             if(master.timeline.setFrame(frame.frame.time) !== false)
             {
@@ -714,11 +710,14 @@ frameArrows.forward.sprite.on("click", function(e){
         }
         else if(closestFrame <= master.timeline.endFrame - master.timeline.frameSkip && closestFrame >= master.timeline.startFrame)
         {
-
             master.timeline.currentTime = master.timeline.getFrameStart(closestFrame + master.timeline.frameSkip);
             master.track.unselectAll();
             master.track.unemphasizeAll();
             master.updateVisiblePoints();
+            if(master.track.points[master.timeline.currentTime] !== undefined)
+            {
+                master.track.points[master.timeline.currentTime].emphasize();
+            }
         }
         else
         {
@@ -726,6 +725,10 @@ frameArrows.forward.sprite.on("click", function(e){
             master.track.unselectAll();
             master.track.unemphasizeAll();
             master.updateVisiblePoints();
+            if(master.track.points[master.timeline.currentTime] !== undefined)
+            {
+                master.track.points[master.timeline.currentTime].emphasize();
+            }
         }
 
         posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
@@ -742,7 +745,7 @@ frameArrows.back.sprite.on("click", function(e){
         if(closestFrame <= master.startFrame)
             closestFrame = master.startFrame + master.timeline.frameSkip;
         
-        if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip)
+        if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip && frame.time >= master.timeline.getFrameStart(master.timeline.startFrame))
         {
             if(master.timeline.setFrame(frame.frame.time) !== false)
             {
@@ -762,6 +765,10 @@ frameArrows.back.sprite.on("click", function(e){
             master.track.unselectAll();
             master.track.unemphasizeAll();
             master.updateVisiblePoints();
+            if(master.track.points[master.timeline.currentTime] !== undefined)
+            {
+                master.track.points[master.timeline.currentTime].emphasize();
+            }
         }
         else
         {
@@ -769,6 +776,10 @@ frameArrows.back.sprite.on("click", function(e){
             master.track.unselectAll();
             master.track.unemphasizeAll();
             master.updateVisiblePoints();
+            if(master.track.points[master.timeline.currentTime] !== undefined)
+            {
+                master.track.points[master.timeline.currentTime].emphasize();
+            }
         }
         posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
         frameArrows.update();
@@ -836,11 +847,17 @@ scrubberLine.thumb.on("pressmove", function(e){
 });
 
 var startMarkerStuck = false;
+var startFrames = [];
+
+scrubberLine.startMarker.on("mousedown", function(e){
+    if(startFrames.length == 0)
+    {
+        startFrames.push(master.timeline.startFrame);
+    }
+});
 scrubberLine.startMarker.on("pressmove", function(e){
-    console.log("pressing");
     var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
     let closestFrame = master.timeline.getClosestFrame(((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration);
-    console.log(closestFrame);
     if(closestFrame <= master.timeline.frameCount && closestFrame < master.timeline.endFrame && closestFrame >= 0)
     {
         scrubberLine.startMarker.x = closestFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
@@ -849,6 +866,8 @@ scrubberLine.startMarker.on("pressmove", function(e){
         {
             startMarkerStuck = true;
         }
+        master.update();
+        master.updateVisiblePoints();
     }
     else if(closestFrame < 0)
     {
@@ -858,19 +877,81 @@ scrubberLine.startMarker.on("pressmove", function(e){
         {
             startMarkerStuck = true;
         }
+        master.update();
+        master.updateVisiblePoints();
     }
 
     if(startMarkerStuck)
     {
         master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
+        master.track.unemphasizeAll();
+        if(master.track.points[master.timeline.currentTime] !== undefined)
+        {
+            master.track.points[master.timeline.currentTime].emphasize();
+        }
     }
 
     frameArrows.update();
 });
 scrubberLine.startMarker.on("pressup", function(){
+    if(master.timeline.startFrame !== startFrames.last())
+    {
+        let last = startFrames.last();
+        let current = master.timeline.startFrame;
+        let stuck = startMarkerStuck;
+        let index = startFrames.length;
+        if(startFrames.length >= 1)
+        {
+            master.change({
+                undo: function(){
+                    startFrames.splice(index, 1);
+                    scrubberLine.startMarker.x = last * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
+                    master.timeline.startFrame = last;
+                    if(stuck)
+                    {
+                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
+                        master.track.unemphasizeAll();
+                        if(master.track.points[master.timeline.currentTime] !== undefined)
+                        {
+                            master.track.points[master.timeline.currentTime].emphasize();
+                        }
+                    }
+                    master.update();
+                    master.updateVisiblePoints();
+                },
+                redo: function(){
+                    startFrames.push(current);
+                    scrubberLine.startMarker.x = current * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
+                    master.timeline.startFrame = current;
+                    if(stuck)
+                    {
+                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
+                        master.track.unemphasizeAll();
+                        if(master.track.points[master.timeline.currentTime] !== undefined)
+                        {
+                            master.track.points[master.timeline.currentTime].emphasize();
+                        }
+                    }
+                    master.update();
+                    master.updateVisiblePoints();
+                }
+            });
+        }
+    }
+    
+    startFrames.push(master.timeline.startFrame);
     startMarkerStuck = false;
 });
 
+var endMarkerStuck = false;
+var endFrames = [];
+
+scrubberLine.endMarker.on("mousedown", function(e){
+    if(endFrames.length == 0)
+    {
+        endFrames.push(master.timeline.endFrame);
+    }
+});
 scrubberLine.endMarker.on("pressmove", function(e){
     var coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
     let closestFrame = master.timeline.getClosestFrame(((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration);
@@ -880,8 +961,10 @@ scrubberLine.endMarker.on("pressmove", function(e){
         master.timeline.endFrame = closestFrame;
         if(master.timeline.currentTime > master.timeline.getFrameStart(master.timeline.endFrame))
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
+            endMarkerStuck = true;
         }
+        master.update();
+        master.updateVisiblePoints();
     }
     else if(closestFrame > master.timeline.frameCount)
     {
@@ -889,10 +972,72 @@ scrubberLine.endMarker.on("pressmove", function(e){
         master.timeline.endFrame = master.timeline.frameCount;
         if(master.timeline.currentTime > master.timeline.getFrameStart(master.timeline.endFrame))
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
+            endMarkerStuck = true;
+        }
+        master.update();
+        master.updateVisiblePoints();
+    }
+
+    if(endMarkerStuck)
+    {
+        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
+        master.track.unemphasizeAll();
+        if(master.track.points[master.timeline.currentTime] !== undefined)
+        {
+            master.track.points[master.timeline.currentTime].emphasize();
         }
     }
     frameArrows.update();
+});
+
+scrubberLine.endMarker.on("pressup", function(){
+    if(master.timeline.endFrame !== endFrames.last())
+    {
+        let last = endFrames.last();
+        let current = master.timeline.endFrame;
+        let stuck = endMarkerStuck;
+        let index = endFrames.length;
+        if(endFrames.length >= 1)
+        {
+            master.change({
+                undo: function(){
+                    endFrames.splice(index, 1);
+                    scrubberLine.endMarker.x = last * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
+                    master.timeline.endFrame = last;
+                    if(stuck)
+                    {
+                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
+                        master.track.unemphasizeAll();
+                        if(master.track.points[master.timeline.currentTime] !== undefined)
+                        {
+                            master.track.points[master.timeline.currentTime].emphasize();
+                        }
+                    }
+                    master.update();
+                    master.updateVisiblePoints();
+                },
+                redo: function(){
+                    endFrames.push(current);
+                    scrubberLine.endMarker.x = current * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
+                    master.timeline.endFrame = current;
+                    if(stuck)
+                    {
+                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
+                        master.track.unemphasizeAll();
+                        if(master.track.points[master.timeline.currentTime] !== undefined)
+                        {
+                            master.track.points[master.timeline.currentTime].emphasize();
+                        }
+                    }
+                    master.update();
+                    master.updateVisiblePoints();
+                }
+            });
+        }
+    }
+    
+    endFrames.push(master.timeline.endFrame);
+    endMarkerStuck = false;
 });
 
 function updateBackup(state)
@@ -1060,6 +1205,19 @@ master.on("change", function(){
     {
         localStorage.removeItem("backup");
     }
+});
+
+master.on("created", function(){
+    scrubberLine.startMarker.x = this.timeline.startFrame * (scrubberLine.rect.w / this.timeline.frameCount) + scrubberLine.rect.x;
+    scrubberLine.endMarker.x = this.timeline.endFrame * (scrubberLine.rect.w / this.timeline.frameCount) + scrubberLine.rect.x;
+
+    for(var time in master.timeline.frames)
+    {
+        if(frameMarkers.master.markers[time] === undefined)
+            frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
+    }
+
+    master.updateVisiblePoints();
 });
 
 keyboardJS.pause();

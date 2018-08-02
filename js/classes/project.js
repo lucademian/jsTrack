@@ -320,7 +320,7 @@ class Project
             for(var time in this.timeline.frames)
             {
                 let frame = this.timeline.frames[time];
-                if(frame.time < this.timeline.currentTime - this.timeline.frameTime * this.viewPoints.backward || frame.time > this.timeline.currentTime + this.timeline.frameTime * this.viewPoints.forward)
+                if(frame.time < this.timeline.currentTime - this.timeline.frameTime * this.viewPoints.backward || frame.time > this.timeline.currentTime + this.timeline.frameTime * this.viewPoints.forward || frame.time < this.timeline.getFrameStart(this.timeline.startFrame) || frame.time > this.timeline.getFrameStart(this.timeline.endFrame))
                 {
                     for(var i = 0; i < frame.points.length; i++)
                     {
@@ -373,7 +373,9 @@ class Project
             fps: this.timeline.fps,
             currentTime: this.timeline.currentTime,
             uid: this.uid,
-            frames: []
+            frames: [],
+            startFrame: this.timeline.startFrame,
+            endFrame: this.timeline.endFrame
         };
 
         for(var time in this.timeline.frames)
@@ -464,6 +466,12 @@ class Project
                     break;
                 case "currentTime":
                     this.timeline.seek(value);
+                    break;
+                case "startFrame":
+                    this.timeline.startFrame = value;
+                    break;
+                case "endFrame":
+                    this.timeline.endFrame = value;
                     break;
                 case "frames":
                     for(var i=0; i < value.length; i++)
@@ -618,6 +626,12 @@ class Project
             this.track = this.trackList[uid];
             this.track.select();
             this.track.table.makeActive();
+
+            let tableData = this.track.export().points.scaled;
+            if(tableData.length == 0)
+                tableData = [""];
+            this.track.table.newData(tableData, true, true);
+
             if(this.track.points[master.timeline.currentTime] !== undefined)
             {
                 this.track.points[master.timeline.currentTime].emphasize();
@@ -645,8 +659,13 @@ class Project
                     track.table.newCols({"t": "s", "x": track.unit, "y": track.unit});
                 }
             }
-
-            track.table.newData(track.export().points.scaled, true, true);
+        }
+        if(this.track !== null && this.track !== undefined)
+        {
+            let tableData = this.track.export().points.scaled;
+            if(tableData.length == 0)
+                tableData = [""];
+            this.track.table.newData(tableData, true, true);
         }
         return this;
     }

@@ -25,13 +25,6 @@ scrubberLine.thumb.regY = 0;
 scrubberLine.thumb.rect = scrubberLine.thumb.graphics.drawRoundRect(-2, -5, 4, scrubberLine.rect.h, 3, 3, 3, 3).command;
 scrubber.addChild(scrubberLine.thumb);
 
-
-function updateScrubber(time, total)
-{
-    scrubberLine.thumb.x = (time / total) * scrubberLine.rect.w + scrubberLine.rect.x;
-    scrubber.update();
-}
-
 var marker = new createjs.SpriteSheet({
 	images: ["marker.png"],
 	frames: {width:10, height:9},
@@ -110,3 +103,12 @@ frameArrows.update = function(){
 
 
 scrubber.update();
+
+function updateScrubber(time, total)
+{
+    scrubberLine.thumb.x = (time / total) * scrubberLine.rect.w + scrubberLine.rect.x;
+    scrubberLine.startMarker.x = master.timeline.startFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
+    scrubberLine.endMarker.x = master.timeline.endFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
+
+    scrubber.update();
+}

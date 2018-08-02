@@ -137,29 +137,32 @@ class Point
 	{
         let point = this;
         
-        let location = axes.convert(point.x, point.y);
-
-        let data = {
-            t: (point.frame.time - (point.track.timeline.startFrame * point.track.timeline.frameTime)).roundTo(3),
-            pixels: {},
-            scaled: {}
-        };
-
-        data.pixels.x = location.x;
-        data.pixels.y = location.y;
-
-        if(scale == null || scale == undefined)
+        if(point.frame.time >= point.track.timeline.getFrameStart(point.track.timeline.startFrame) && point.frame.time <= point.track.timeline.getFrameStart(point.track.timeline.endFrame))
         {
-            data.scaled.x = location.x;
-            data.scaled.y = location.y;
-        }
-        else
-        {
-            data.scaled.x = scale.convert(location.x).number;
-            data.scaled.y = scale.convert(location.y).number;
-        }
+            let location = axes.convert(point.x, point.y);
 
-        return data;
+            let data = {
+                t: (point.frame.time - point.track.timeline.getFrameStart(point.track.timeline.startFrame)).roundTo(3),
+                pixels: {},
+                scaled: {}
+            };
+
+            data.pixels.x = location.x;
+            data.pixels.y = location.y;
+
+            if(scale == null || scale == undefined)
+            {
+                data.scaled.x = location.x;
+                data.scaled.y = location.y;
+            }
+            else
+            {
+                data.scaled.x = scale.convert(location.x).number;
+                data.scaled.y = scale.convert(location.y).number;
+            }
+
+            return data;
+        }
 	}
     emphasize(multiple=false)
     {

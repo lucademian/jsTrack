@@ -49,6 +49,11 @@ if(!Math.cot)
         return (1 / Math.tan(number));
     }
 }
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
 
 function hideLoader()
 {

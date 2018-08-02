@@ -17,7 +17,7 @@ class Timeline
 		this.endFrame = this.frameCount;
 		this.frames = {
 			0: new Frame(this, 0, this.video)
-		};
+        };
     }
     seek(time)
     {
@@ -41,19 +41,26 @@ class Timeline
     }
     updateFps(fps)
     {
-        let changeEnd = this.endFrame == this.frameCount;
+        let ratios = {
+            start: (this.startFrame / this.frameCount) || 0,
+            end: (this.endFrame / this.frameCount) || 1
+        };
         this.fps = fps;
 		this.frameTime = (1/this.fps).roundTo(3);
         this.frameCount =  Math.round(this.duration / this.frameTime);
-        if(changeEnd)
-            this.endFrame = this.frameCount;
+        this.startFrame = Math.floor(ratios.start * this.frameCount);
+        this.endFrame = Math.floor(ratios.end * this.frameCount);
     }
 	updateDuration(duration){
+        let ratios = {
+            start: (this.startFrame / this.frameCount) || 0,
+            end: (this.endFrame / this.frameCount) || 1
+        };
 		this.duration = duration.roundTo(3);
 		this.frameCount = Math.round(this.duration / this.frameTime);
 		this.duration = (this.frameCount * this.frameTime).roundTo(3);
-		//this.duration = this.video.duration;
-        this.endFrame = this.frameCount;
+        this.startFrame = Math.floor(ratios.start * this.frameCount);
+        this.endFrame = Math.floor(ratios.end * this.frameCount);
 		return this.duration;
 	}
 	current()

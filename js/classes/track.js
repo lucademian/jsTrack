@@ -125,7 +125,7 @@ class Track
                     tempTrack.project.switchTrack(tempTrack.uid);
                 }
             });
-            
+
             tempTrack.project.switchTrack(tempTrack.uid);
         });
         this.listElement.container.addEventListener("dblclick", function(){
@@ -226,24 +226,27 @@ class Track
 			{
 				let point = track.points[key];
                 let pointData = point.export();
-                let pushData = {
-                    pixels: {
-                        t: pointData.t,
-                        x: pointData.pixels.x,
-                        y: pointData.pixels.y
-                    },
-                    scaled: {
-                        t: pointData.t,
-                        x: pointData.scaled.x,
-                        y: pointData.scaled.y
-                    }
-                };
+                if(pointData !== undefined)
+                {
+                    let pushData = {
+                        pixels: {
+                            t: pointData.t,
+                            x: pointData.pixels.x,
+                            y: pointData.pixels.y
+                        },
+                        scaled: {
+                            t: pointData.t,
+                            x: pointData.scaled.x,
+                            y: pointData.scaled.y
+                        }
+                    };
 
-                data.points.pixels.push(pushData.pixels);
-                data.table.pixels.push([pushData.pixels.t, pushData.pixels.x, pushData.pixels.y]);
-                
-                data.points.scaled.push(pushData.scaled);
-                data.table.scaled.push([pushData.scaled.t, pushData.scaled.x, pushData.scaled.y]);
+                    data.points.pixels.push(pushData.pixels);
+                    data.table.pixels.push([pushData.pixels.t, pushData.pixels.x, pushData.pixels.y]);
+                    
+                    data.points.scaled.push(pushData.scaled);
+                    data.table.scaled.push([pushData.scaled.t, pushData.scaled.x, pushData.scaled.y]);
+                }
 			}
 		}
 		return data;

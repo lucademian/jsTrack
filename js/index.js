@@ -443,8 +443,6 @@ function drawGraphics(initialDraw=false)
 {
     let width = window.innerWidth - sidebar.offsetWidth;
     let height = window.innerHeight - 50;
-    
-    
 
     if(window.innerWidth < 1000)
     {
@@ -467,7 +465,8 @@ function drawGraphics(initialDraw=false)
     canvas.height = height;
     canvas.width = width;
     background.scale = master.backgroundScale * master.positioning.zoom;
-    
+    master.positioning.x = (canvas.width - (background.scale * master.timeline.video.videoWidth)) / 2;
+    master.positioning.y = (canvas.height - (background.scale * master.timeline.video.videoHeight)) / 2;
     
     scrubberCanv.width = canvas.width;
     scrubberCanv.height = 50;

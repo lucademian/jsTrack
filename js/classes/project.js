@@ -156,7 +156,7 @@ class Project
         this.positioning.on("translation, zoom", function(position){
             console.log(position);
             this.background.scale = this.backgroundScale * position.zoom;
-            this.background.x = position.x;
+            this.background.x = position.x ;
             this.background.y = position.y;
             this.updateScale();
         });
@@ -207,7 +207,7 @@ class Project
             y: this.positioning.y
         };
 
-        return {x: (((x + translation.x) / changing.width) * unchanging.width), y: (((y + translation.y) / changing.height) * unchanging.height)};
+        return {x: (((x - translation.x) / changing.width) * unchanging.width), y: (((y - translation.y) / changing.height) * unchanging.height)};
     }
     updateScale()
     {

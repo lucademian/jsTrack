@@ -19,6 +19,85 @@ class Timeline
 			0: new Frame(this, 0, this.video)
         };
     }
+    play(callback, options)
+    {
+        if(this.playInterval == undefined)
+        {
+            var loop = true;
+            var startingTime = this.currentTime;
+            var startingFrame = this.startFrame;
+            var endingFrame = this.endFrame;
+            var frameSkip = this.frameSkip;
+            var speed = 0.25;
+
+            for(var key in options)
+            {
+                let value = options[key];
+                switch(key)
+                {
+                    case "loop":
+                        loop = value;
+                        break;
+                    case "startTime":
+                    case "startingTime":
+                        if(value > 0 && value < this.duration)
+                            startingTime = value;
+                        break;
+                    case "startFrame":
+                    case "startingFrame":
+                        if(value >= 0 && value < this.frameCount)
+                            startingFrame = value;
+                        break;
+                    case "endFrame":
+                    case "endingFrame":
+                        if(value > 0 && value <= this.frameCount)
+                            endingFrame = value;
+                        break;
+                }
+            }
+
+            this.currentTime = startingTime;
+            var counter = startingFrame;
+            var timeline = this;
+
+            this.playInterval = setInterval(function(){
+                console.log(counter);
+                if(counter < endingFrame - frameSkip)
+                {
+                    let next = timeline.next();
+                    if(next !== false && next.distance < (frameSkip * timeline.frameTime).roundTo(3))
+                    {
+                        timeline.currentTime = (next.time).roundTo(3);
+                        counter = timeline.getClosestFrame(next.time);
+                    }
+                    else
+                    {
+                        timeline.currentTime = (counter * timeline.frameTime).roundTo(3);
+                        counter += frameSkip;
+                    }
+                }
+                else
+                {
+                    counter = startingFrame;
+                }
+                timeline.project.updateVisiblePoints();
+                if(timeline.project.track !== undefined && timeline.project.track !== null)
+                {
+                    if(timeline.project.track.points[timeline.currentTime] !== undefined)
+                    {
+                        timeline.project.track.unemphasizeAll();
+                        timeline.project.track.points[timeline.currentTime].emphasize();
+                    }
+                }
+                console.log(timeline.currentTime);
+            }, timeline.frameTime / speed);
+        }
+    }
+    pause()
+    {
+        clearInterval(this.playInterval);
+        this.playInterval = undefined;
+    }
     seek(time)
     {
         this.savedTime = time;

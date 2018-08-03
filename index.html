@@ -26,14 +26,16 @@
                         <div class="minimize"></div>
                     </div>
                     <div class="option button" title="Create New Track" id="new-track-button"></div>
-                    <div class="option button" title="Modify Scale" id="scale-button"></div>
+                    <div class="option button" title="Create Scale" id="scale-button"></div>
+                    <div class="option button" title="Undo" id="undo-button"></div>
+                    <div class="option button" title="Redo" id="redo-button"></div>
                     <div class="option button" title="Edit Project" id="edit-project-button"></div>
                     <div class="option button" title="Export Data" id="export-button"></div>
                     <div class="option button" title="Save" id="save-button"></div>
                     <div class="option button" title="Logout of Drive" id="logout-drive"></div>
                     <div class="option" title="No Changes to Backup" id="backup-status"></div>
                 </div>
-                <div id="tracks" class="sidebar-item">
+                <div id="tracks" class="sidebar-item hidden">
                     <div class="handle-bar">
                         <div class="handle"></div>
                         <div class="minimize"></div>
@@ -42,7 +44,7 @@
                         <ul></ul>
                     </div> 
                 </div>
-                <div id="graphs" class="sidebar-item">
+                <div id="graphs" class="sidebar-item hidden">
                     <div class="handle-bar">
                         <div class="handle"></div>
                         <div class="minimize"></div>
@@ -63,6 +65,7 @@
                 </div>
             </div>
         </div>
+        <button id="help-fab" class="help-button"></button>
         <video id="my-video" autoplay></video>
 
         <div id="fullscreen-loader"></div>

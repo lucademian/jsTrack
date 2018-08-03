@@ -9,7 +9,7 @@ class Timeline
         this.fps = fps;
         this.frameSkip = 1;
 		this.frameTime = (1/this.fps).roundTo(3);
-		this.frameCount =  Math.round(this.duration / this.frameTime);
+		this.frameCount =  Math.floor(this.duration / this.frameTime);
 		this.currentTime = 0;
         this.savedTime = 0;
         this.seekSaved = false;
@@ -47,7 +47,8 @@ class Timeline
         };
         this.fps = fps;
 		this.frameTime = (1/this.fps).roundTo(3);
-        this.frameCount =  Math.round(this.duration / this.frameTime);
+        this.frameCount =  Math.floor(this.duration / this.frameTime);
+		this.duration = (this.frameCount * this.frameTime).roundTo(3);
         this.startFrame = Math.floor(ratios.start * this.frameCount);
         this.endFrame = Math.floor(ratios.end * this.frameCount);
     }
@@ -57,7 +58,7 @@ class Timeline
             end: (this.endFrame / this.frameCount) || 1
         };
 		this.duration = duration.roundTo(3);
-		this.frameCount = Math.round(this.duration / this.frameTime);
+		this.frameCount = Math.floor(this.duration / this.frameTime);
 		this.duration = (this.frameCount * this.frameTime).roundTo(3);
         this.startFrame = Math.floor(ratios.start * this.frameCount);
         this.endFrame = Math.floor(ratios.end * this.frameCount);

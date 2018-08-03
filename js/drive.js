@@ -132,15 +132,13 @@ function importDrive(file)
             xhr.responseType = 'blob';
             showLoader();
             xhr.onload = function(e) {
-                console.log(this);
                 if (this.status == 200) {
                     var blob = this.response;
                     let type = "";
                     if(file.mimeType == "video/mp4")
                         type = "video/mp4";
                     var tempFile = new File([blob], file.title, {"type": type});
-                    console.log(blob, tempFile);
-                    handleFile(tempFile, false);
+                    handleFile(tempFile);
                 }
             };
             xhr.send();

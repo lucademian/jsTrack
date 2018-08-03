@@ -4,11 +4,22 @@ document.getElementById("new-track-button").addEventListener("click", function()
     });
     newTrack.show();
 });
+document.getElementById("undo-button").addEventListener("click", function(){
+    master.undo();
+});
+document.getElementById("redo-button").addEventListener("click", function(){
+    master.redo();
+});
 document.getElementById("export-button").addEventListener("click", function(){
     exportData.show();
 });
 document.getElementById("save-button").addEventListener("click", function(){
     saveProject.show();
+});
+document.querySelectorAll(".help-button").forEach(function(el){
+    el.addEventListener("click", function(){
+        helpText.show();
+    });
 });
 document.getElementById("scale-button").addEventListener("click", function(){
     if(master.scale !== undefined && master.scale !== null)

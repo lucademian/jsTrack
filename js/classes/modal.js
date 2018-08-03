@@ -6,6 +6,7 @@ class modal
         this.id = schema.id;
         this.fields = schema.fields;
         this.buttons = schema.buttons;
+        this.text = schema.text;
         this.callbacks = {};
         this.created = false;
         this.defaultColors = ["#FFFF00", "#FFFF33", "#F2EA02", "#E6FB04", "#FF0000", "#FD1C03", "#FF3300", "#FF6600", "#00FF00", "#00FF33", "#00FF66", "#33FF00", "#00FFFF", "#099FFF", "#0062FF", "#0033FF", "#FF00FF", "#FF00CC", "#FF0099", "#CC00FF", "#9D00FF", "#CC00FF", "#6E0DD0", "#9900FF"];
@@ -42,7 +43,8 @@ class modal
     }
     hide()
     {
-        document.getElementById("modal-container").classList.remove("active");
+        if([...document.querySelectorAll(".modal.active")].length <= 1)
+            document.getElementById("modal-container").classList.remove("active");
         document.getElementById(this.id).classList.remove("active");
         return this;
     }
@@ -110,6 +112,18 @@ class modal
 
             formItem.appendChild(formItemInput);
             this.element.appendChild(formItem);
+        }
+
+        if(this.text !== undefined)
+        {
+            this.textContainer = document.createElement("div");
+            for(var i = 0; i < this.text.length; i++)
+            {
+                let paragraph = document.createElement("p");
+                paragraph.innerHTML = this.text[i];
+                this.textContainer.appendChild(paragraph);
+            }
+            this.element.appendChild(this.textContainer);
         }
 
         var buttonContainer = document.createElement("div");

@@ -40,7 +40,7 @@ class Axes
             let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
 			moving = false;
 			rotating = false;
-            let mouseCoords = parent.project.toUnscaled(parent.convert(parent.project.toScaled(coords.x, coords.y)));
+            let mouseCoords = parent.convert(parent.project.toScaled(coords));
 			if(mouseCoords.x < 20 && mouseCoords.x > -20 && mouseCoords.y < 20 && mouseCoords.y > -20)
 			{
 				moving = true;
@@ -86,11 +86,8 @@ class Axes
 			if(moving)
 			{
 				parent.shape.cursor = "grabbing";
-				parent.x = coords.x;
 				parent.shape.x = coordsUnscaled.x - 1;
-				parent.y = coords.y;
 				parent.shape.y = coordsUnscaled.y - 1;
-                parent.project.changed();
 			}
 			else if(rotating)
 			{
@@ -118,20 +115,47 @@ class Axes
 					reference = 0;
 				}
 
-				parent.theta = sign * (-sign * Math.atan((parent.y - coords.y)/(parent.x - coords.x)) + reference);
-				if(parent.theta == Math.PI && coords.x > parent.x)
+				let theta = sign * (-sign * Math.atan((parent.y - coords.y)/(parent.x - coords.x)) + reference);
+				if(theta == Math.PI && coords.x > parent.x)
 				{
-					parent.theta = 0;
+					theta = 0;
 				}
 
-				parent.cursor();
+				parent.cursor(theta.toDegrees());
 
-                parent.shape.rotation = -parent.theta.toDegrees();
+                parent.shape.rotation = -theta.toDegrees();
 			}
 		});
 		this.shape.addEventListener("pressup", function(e){
+            if(moving)
+            {
+                let coords = parent.project.toScaled(parent.shape.x, parent.shape.y);
+                parent.x = coords.x;
+                parent.y = coords.y;
+
+                parent.project.change({
+                    undo: function(){
+
+                    },
+                    redo: function(){
+
+                    }
+                });
+            }
+            else if (rotating)
+            {
+                parent.theta = -parent.shape.rotation.toRadians();
+                parent.project.change({
+                    undo: function(){
+
+                    },
+                    redo: function(){
+
+                    }
+                });
+            }
+
             parent.project.update();
-            parent.project.changed();
 			moving = false;
 			rotating = false;
 		});
@@ -150,10 +174,9 @@ class Axes
         }
         this.project.changed();
     }
-	cursor()
+	cursor(cursorDegree=this.theta.toDegrees())
 	{
 		let parent = this;
-		let cursorDegree = parent.theta.toDegrees();
 
 		if((cursorDegree >= 0 && cursorDegree <= 20) || (cursorDegree > 340 && cursorDegree <= 360))
 		{

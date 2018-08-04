@@ -150,7 +150,7 @@ class Track
                     tempTrack.project.deleteTrack(tempTrack.uid);
                 }
             });
-            
+
             tempTrack.project.deleteTrack(tempTrack.uid);
         });
         this.listElement.visibility.addEventListener("click", function(e){
@@ -278,10 +278,12 @@ class Track
             this.project.change({
                 undo: function(){
                     point.move(toGo.x, toGo.y);
+                    track.project.timeline.currentTime = newPoint.frame.time;
                     track.project.update();
                 },
                 redo: function(){
                     point.move(x, y);
+                    track.project.timeline.currentTime = newPoint.frame.time;
                     track.project.update();
                 }
             });
@@ -300,10 +302,12 @@ class Track
             this.project.change({
                 undo: function(){
                     newPoint.remove();
+                    track.project.timeline.currentTime = newPoint.frame.time;
                     track.project.update();
                 },
                 redo: function(){
                     newPoint.unRemove();
+                    track.project.timeline.currentTime = newPoint.frame.time;
                     track.project.update();
                 }
             });

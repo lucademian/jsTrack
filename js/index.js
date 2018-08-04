@@ -15,11 +15,22 @@ const EXPORT_FORMATS = ["xlsx", "xlsm", "xlsb", "xls", "ods", "fods", "csv", "tx
 const CUSTOM_EXTENSION = "jstrack";
 
 
-var background = new createjs.Bitmap(document.getElementById("my-video"));
+var background = new createjs.Bitmap(document.getElementById("video"));
+var background2 = new createjs.Bitmap(document.getElementById("video-clone"));
+stage.addChild(background2);
 stage.addChild(background);
 
 var tableContainer = document.getElementById('table');
-var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 29.21), new Handsontable(tableContainer), stage, background);
+var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("video"), 29.21), new Handsontable(tableContainer), stage, background);
+
+
+master.timeline.video.addEventListener("loadstart", function(){
+    document.getElementById("video-clone").src = this.src;
+    document.getElementById("video-clone").style.display = "none";
+});
+master.timeline.video.addEventListener("timeupdate", function(){
+    document.getElementById("video-clone").currentTime = master.timeline.currentTime;
+});
 
 tableContainer.querySelectorAll("table").forEach(function(el){
     el.id = "data-table-master";
@@ -592,6 +603,10 @@ function drawGraphics(initialDraw=false)
     background.scale = master.backgroundScale * master.positioning.zoom;
     master.positioning.x = (canvas.width - (background.scale * master.timeline.video.videoWidth)) / 2;
     master.positioning.y = (canvas.height - (background.scale * master.timeline.video.videoHeight)) / 2;
+
+    background2.scale = background.scale;
+    background2.x = background.x;
+    background2.y = background.y;
     
     scrubberCanv.width = canvas.width;
     scrubberCanv.height = 50;
@@ -1346,7 +1361,7 @@ master.on("created", function(){
             frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
     }
 
-    master.updateVisiblePoints();
+    this.updateVisiblePoints();
 });
 
 keyboardJS.pause();

@@ -50,6 +50,10 @@
             var file = this._getFile(function(file, name, callback){
                 var metadata = {
                     'name': name
+                    // 'contentHints': {
+                    //     'thumbnail': ,
+                    //     'mimeType': 'image/png'
+                    // }
                 };
                 var request = gapi.client.request({
                     path: '/upload/drive/v3/files',

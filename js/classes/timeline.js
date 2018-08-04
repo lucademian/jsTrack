@@ -19,6 +19,17 @@ class Timeline
 			0: new Frame(this, 0, this.video)
         };
     }
+    currentImage()
+    {
+        var canvas = document.createElement('canvas');
+        canvas.height = this.video.videoHeight;
+        canvas.width = this.video.videoWidth;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(this.video, 0, 0, canvas.width, canvas.height);
+        var img = new Image();
+        img.src = canvas.toDataURL();
+        return img;
+    }
     play(callback, options)
     {
         if(this.playInterval == undefined)

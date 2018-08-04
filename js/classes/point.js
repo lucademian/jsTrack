@@ -54,26 +54,32 @@ class Point
 			}
 		});
 		this.shape.on("pressmove", function(e){
-            let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
-            
-            tempShape.move(coords.x, coords.y, true);
-            tempShape.select();
+            if(tempShape.track.project.state.mode !== "seek")
+            {
+                let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
+                
+                tempShape.move(coords.x, coords.y, true);
+                tempShape.select();
+            }
         });
         this.shape.on("pressup", function(e){
-            let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
-            
-            var goTo = {x: tempShape.x, y: tempShape.y};
-            tempShape.track.project.change({
-                undo: function(){
-                    tempShape.move(goTo.x, goTo.y);
-                },
-                redo: function(){
-                    tempShape.move(coords.x, coords.y);
-                }
-            });
-            
-            tempShape.move(coords.x, coords.y);
-            tempShape.track.project.update();
+            if(tempShape.track.project.state.mode !== "seek")
+            {
+                let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
+                
+                var goTo = {x: tempShape.x, y: tempShape.y};
+                tempShape.track.project.change({
+                    undo: function(){
+                        tempShape.move(goTo.x, goTo.y);
+                    },
+                    redo: function(){
+                        tempShape.move(coords.x, coords.y);
+                    }
+                });
+                
+                tempShape.move(coords.x, coords.y);
+                tempShape.track.project.update();
+            }
         });
 		this.shape.on("dblclick", function(e){
             tempShape.remove();

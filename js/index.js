@@ -747,7 +747,7 @@ video.onplaying = (function(){
     master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
     master.timeline.video.currentTime = master.timeline.currentTime;
     drawGraphics(true);
-    console.log("drawn");
+    video.style.display = "none";
 });
 
 var resizeTimer;

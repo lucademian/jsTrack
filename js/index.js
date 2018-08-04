@@ -28,9 +28,6 @@ master.timeline.video.addEventListener("loadstart", function(){
     document.getElementById("video-clone").src = this.src;
     document.getElementById("video-clone").style.display = "none";
 });
-master.timeline.video.addEventListener("timeupdate", function(){
-    document.getElementById("video-clone").currentTime = master.timeline.currentTime;
-});
 
 tableContainer.querySelectorAll("table").forEach(function(el){
     el.id = "data-table-master";
@@ -185,10 +182,12 @@ var saveProject = new modal({
             "label": "Cancel"
         },
         "saveFile": {
-            "label": "Save File"
+            "label": "Save as File",
+            "image": "icons/save_file_white.svg"
         },
         "saveDrive": {
-            "label": "Save to Drive"
+            "label": "Save to Drive",
+            "image": "icons/drive_white.svg"
         }
     }
 });
@@ -202,8 +201,8 @@ saveProject.on("saveFile", function(modalData){
             console.log(err);
         }
 
-        var filename = modalData.filename;
-
+        var filename = modalData.filename || "";
+        
         if(filename.length == 0)
         {
             filename = master.name.toLowerCase().replace(" ", "_") + "-" + new Date().getTime() + "." + CUSTOM_EXTENSION;
@@ -807,7 +806,7 @@ stage.on("click", function(e){
             if(nextFrame !== false && nextFrame.distance <= master.timeline.frameTime)
             {
                 master.timeline.setFrame(nextFrame.frame.time);
-                master.updateVisiblePoints();
+                // master.updateVisiblePoints();
 
                 if(master.track.points[nextFrame.frame.time] !== undefined)
                     master.track.points[nextFrame.frame.time].show().emphasize();
@@ -820,7 +819,7 @@ stage.on("click", function(e){
                 master.timeline.video.currentTime = master.timeline.currentTime;
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                master.updateVisiblePoints();
+                // master.updateVisiblePoints();
             }
         }
     }
@@ -840,12 +839,12 @@ frameArrows.forward.sprite.on("click", function(e){
         {
             if(master.timeline.setFrame(frame.frame.time) !== false)
             {
-                master.updateVisiblePoints();
+                // master.updateVisiblePoints();
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
                 if(master.track.points[frame.frame.time] !== undefined)
                 {
-                    master.track.points[frame.frame.time].emphasize();
+                    master.track.points[frame.frame.time].show().emphasize();
                 }
             }
             else
@@ -857,7 +856,7 @@ frameArrows.forward.sprite.on("click", function(e){
             master.timeline.currentTime = master.timeline.getFrameStart(closestFrame + master.timeline.frameSkip);
             master.track.unselectAll();
             master.track.unemphasizeAll();
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
             if(master.track.points[master.timeline.currentTime] !== undefined)
             {
                 master.track.points[master.timeline.currentTime].emphasize();
@@ -868,7 +867,7 @@ frameArrows.forward.sprite.on("click", function(e){
             master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
             master.track.unselectAll();
             master.track.unemphasizeAll();
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
             if(master.track.points[master.timeline.currentTime] !== undefined)
             {
                 master.track.points[master.timeline.currentTime].emphasize();
@@ -895,7 +894,7 @@ frameArrows.back.sprite.on("click", function(e){
             {
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                master.updateVisiblePoints();
+                // master.updateVisiblePoints();
                 if(master.track.points[frame.frame.time] !== undefined)
                 {
                     master.track.points[frame.frame.time].emphasize();
@@ -908,7 +907,7 @@ frameArrows.back.sprite.on("click", function(e){
             master.timeline.video.currentTime = master.timeline.currentTime;
             master.track.unselectAll();
             master.track.unemphasizeAll();
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
             if(master.track.points[master.timeline.currentTime] !== undefined)
             {
                 master.track.points[master.timeline.currentTime].emphasize();
@@ -919,7 +918,7 @@ frameArrows.back.sprite.on("click", function(e){
             master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
             master.track.unselectAll();
             master.track.unemphasizeAll();
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
             if(master.track.points[master.timeline.currentTime] !== undefined)
             {
                 master.track.points[master.timeline.currentTime].emphasize();
@@ -945,29 +944,29 @@ scrubberLine.thumb.on("pressmove", function(e){
             time = (closestFrame * master.timeline.frameTime).roundTo(3);
             master.timeline.video.currentTime = time;
             master.timeline.currentTime = time;
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
         }
         else if(closestFrame < master.timeline.startFrame)
         {
             master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
         }
         else if(closestFrame > master.timeline.endFrame)
         {
             master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-            master.updateVisiblePoints();
+            // master.updateVisiblePoints();
         }
 
     }
     else if(coords.x < (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.startFrame + scrubberLine.rect.x)
     {
         master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-        master.updateVisiblePoints();
+        // master.updateVisiblePoints();
     }
     else if(coords.x > (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.endFrame + scrubberLine.rect.x)
     {
         master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-        master.updateVisiblePoints();
+        // master.updateVisiblePoints();
     }
     
     let current = master.timeline.current();
@@ -1011,7 +1010,7 @@ scrubberLine.startMarker.on("pressmove", function(e){
             startMarkerStuck = true;
         }
         master.update();
-        master.updateVisiblePoints();
+        // master.updateVisiblePoints();
     }
     else if(closestFrame < 0)
     {
@@ -1022,7 +1021,7 @@ scrubberLine.startMarker.on("pressmove", function(e){
             startMarkerStuck = true;
         }
         master.update();
-        master.updateVisiblePoints();
+        // master.updateVisiblePoints();
     }
 
     if(startMarkerStuck)
@@ -1061,7 +1060,7 @@ scrubberLine.startMarker.on("pressup", function(){
                         }
                     }
                     master.update();
-                    master.updateVisiblePoints();
+                    // master.updateVisiblePoints();
                 },
                 redo: function(){
                     startFrames.push(current);
@@ -1077,7 +1076,7 @@ scrubberLine.startMarker.on("pressup", function(){
                         }
                     }
                     master.update();
-                    master.updateVisiblePoints();
+                    // master.updateVisiblePoints();
                 }
             });
         }
@@ -1108,7 +1107,7 @@ scrubberLine.endMarker.on("pressmove", function(e){
             endMarkerStuck = true;
         }
         master.update();
-        master.updateVisiblePoints();
+        // master.updateVisiblePoints();
     }
     else if(closestFrame > master.timeline.frameCount)
     {
@@ -1119,7 +1118,7 @@ scrubberLine.endMarker.on("pressmove", function(e){
             endMarkerStuck = true;
         }
         master.update();
-        master.updateVisiblePoints();
+        // master.updateVisiblePoints();
     }
 
     if(endMarkerStuck)
@@ -1158,7 +1157,7 @@ scrubberLine.endMarker.on("pressup", function(){
                         }
                     }
                     master.update();
-                    master.updateVisiblePoints();
+                    // master.updateVisiblePoints();
                 },
                 redo: function(){
                     endFrames.push(current);
@@ -1174,7 +1173,7 @@ scrubberLine.endMarker.on("pressup", function(){
                         }
                     }
                     master.update();
-                    master.updateVisiblePoints();
+                    // master.updateVisiblePoints();
                 }
             });
         }
@@ -1182,6 +1181,11 @@ scrubberLine.endMarker.on("pressup", function(){
     
     endFrames.push(master.timeline.endFrame);
     endMarkerStuck = false;
+});
+
+master.timeline.on("seek", function(){
+    this.project.updateVisiblePoints();
+    document.getElementById("video-clone").currentTime = master.timeline.currentTime;
 });
 
 function updateBackup(state)

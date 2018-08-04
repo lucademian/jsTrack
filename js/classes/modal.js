@@ -137,7 +137,15 @@ class modal
             let buttonItem = document.createElement("button");
             buttonItem.type = "button";
             buttonItem.id = this.id + "_button-" + button;
-            buttonItem.innerText = this.buttons[button].label;
+            if(this.buttons[button].image !== undefined)
+            {
+                buttonItem.title = this.buttons[button].label;
+                buttonItem.style.backgroundImage = "url('" + this.buttons[button].image + "')";
+                console.log(this.buttons[button].image);
+            }
+            else
+                buttonItem.innerText = this.buttons[button].label;
+
             let modal = this;
             let buttonTemp = button;
             buttonItem.addEventListener("click", function(){

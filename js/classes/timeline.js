@@ -14,10 +14,44 @@ class Timeline
         this.savedTime = 0;
         this.seekSaved = false;
 		this.startFrame = 0;
-		this.endFrame = this.frameCount;
+        this.endFrame = this.frameCount;
+        this.callbacks = {};
 		this.frames = {
 			0: new Frame(this, 0, this.video)
         };
+
+        var timeline = this;
+        this.video.addEventListener("timeupdate", function(){
+            timeline.trigger("seek");
+        });
+    }
+    trigger(events, argArray=[])
+    {
+        events = events.split(",");
+        for(var i = 0; i < events.length; i++)
+        {
+            let event = events[i].trim();
+            if(this.callbacks[event] !== undefined)
+            {
+                for(var j = 0; j < this.callbacks[event].length; j++)
+                {
+                    this.callbacks[event][j].call(this, argArray);
+                }
+            }
+        }
+    }
+    on(events, callback)
+    {
+        events = events.split(",");
+        for(var i = 0; i < events.length; i++)
+        {
+            let event = events[i].trim();
+            if(this.callbacks[event] === undefined)
+            {
+                this.callbacks[event] = [];
+            }
+            this.callbacks[event].push(callback);
+        }
     }
     currentImage()
     {

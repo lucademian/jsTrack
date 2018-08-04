@@ -388,6 +388,11 @@ body > .scale-draggable {
     padding: 10px 30px;
     margin-right: 10px;
     transition: all 0.2s;
+    vertical-align: middle;
+    min-height: 40.25px;
+    background-size: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .modal .form-buttons button:disabled,
 .modal .form-buttons button[disabled=""] {

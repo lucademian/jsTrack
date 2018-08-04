@@ -290,6 +290,7 @@ class Track
             
             point.move(x, y).select();
             this.project.update();
+            this.project.updateVisiblePoints();
             return this.points[frame.time];
 		}
 		else
@@ -315,6 +316,7 @@ class Track
             let pointData = newPoint.export();
             if(pointData != undefined)
                 this.table.addRow({t: pointData.t, x: pointData.scaled.x, y: pointData.scaled.y}, true);
+            
             return newPoint;
         }
         

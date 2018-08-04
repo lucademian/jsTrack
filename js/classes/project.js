@@ -357,6 +357,13 @@ class Project
                     }
                 }
             }
+            if(this.track !== undefined && this.track !== null)
+            {
+                if(this.track.emphasizedPoint !== null && this.track.emphasizedPoint !== undefined)
+                {
+                    this.track.emphasizedPoint.emphasize();
+                }
+            }
         }
         return this;
     }

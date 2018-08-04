@@ -84,6 +84,9 @@ class modal
             this.fields[field].id = formInputId;
             this.fields[field].element = formItem;
             
+            if(this.fields[field].defaultValue !== undefined && this.fields[field].initVal === undefined)
+                this.fields[field].initVal = this.fields[field].defaultValue;
+
             if(this.fields[field].initVal === undefined)
             {
                 if(this.fields[field].type == "color")

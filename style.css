@@ -143,13 +143,16 @@ input.scale-text {
     border-radius: 2px;
     box-sizing: border-box;
 }
-#toolbox .button {
+#toolbox .button:not(.disabled) {
     cursor: pointer;
 }
-#toolbox .button:hover {
+#toolbox .button.disabled {
+    opacity: 0.5;
+}
+#toolbox .button:not(.disabled):hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
-#toolbox .button:active {
+#toolbox .button:not(.disabled):active {
     background-color: rgba(0, 0, 0, 0.1);
 }
 #help-fab {
@@ -189,6 +192,9 @@ input.scale-text {
 }
 #toolbox #redo-button {
     background-image: url("icons/redo.svg");
+}
+#toolbox #help-button {
+    background-image: url("icons/help.svg");
 }
 #toolbox #backup-status {
     background-image: url("icons/backup.svg");
@@ -250,7 +256,17 @@ input.scale-text {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
+}
+.sidebar-list ul li .delete {
+    display: block;
+    float: right;
+    width: 20px;
+    height: 20px;
+    background: url("icons/delete.svg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-left: 10px;
 }
 .sidebar-list ul li .visibility.hidden {
     background: url("hidden.svg");
@@ -306,6 +322,7 @@ body > .scale-draggable {
     background: #FFF;
     border-radius: 10px;
     padding: 30px;
+    padding-bottom: 0px;
     display: none;
     max-width: calc(100vw - 200px);
     max-height: calc(100vh - 100px);
@@ -359,7 +376,7 @@ body > .scale-draggable {
 }
 .modal .form-buttons {
     text-align: center;
-    margin-top: 25px;
+    margin: 25px 0px;
 }
 .modal .form-buttons button {
     font: 16px "Source Sans Pro", sans-serif;
@@ -371,6 +388,10 @@ body > .scale-draggable {
     padding: 10px 30px;
     margin-right: 10px;
     transition: all 0.2s;
+}
+.modal .form-buttons button:disabled,
+.modal .form-buttons button[disabled=""] {
+    display: none;
 }
 .modal .form-buttons button:hover {
     opacity: 0.9;
@@ -416,20 +437,34 @@ body > .scale-draggable {
     /* background-image: url("upload-icon.png");
     background-position: center; */
 }
+#launch .area-content {
+    display: block;
+}
 #launch .area .text {
     display: block;
-    font: 15px "Source Sans Pro", sans-serif;
-    padding-right: 15px;
-    padding-left: 15px;
+    font: 20px "Source Sans Pro", sans-serif;
+    margin-bottom: 20px;
 }
-#launch label.button {
-    display: block;
+#launch label.button, #launch button{
+    display: inline-block;
+    border: none;
     font: 15px "Source Sans Pro", sans-serif;
     color: rgb(0, 80, 17);
     background: rgb(0, 255, 149);
     padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
+    margin-right: 10px;
+}
+#launch button:disabled, #launch button[disabled=""] {
+    display: none;
+}
+#launch .launch-buttons:last-child {
+    margin-right: 0;
+}
+#launch .launch-buttons {
+    display: block;
+    text-align: center;
 }
 
 /* #launch .area.highlight * {

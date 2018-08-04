@@ -110,7 +110,7 @@
 		_doAuth: function(immediate, callback) {	
 			gapi.auth.authorize({
 				client_id: this.clientId + '.apps.googleusercontent.com',
-				scope: 'https://www.googleapis.com/auth/drive.readonly',
+				scope: 'https://www.googleapis.com/auth/drive',
 				immediate: immediate
 			}, callback);
 		}
@@ -119,7 +119,6 @@
 
 function importDrive(file)
 {
-    console.log(file);
     var accessToken = gapi.auth.getToken().access_token;
     switch(file.mimeType)
     {

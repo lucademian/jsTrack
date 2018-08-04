@@ -1,27 +1,27 @@
-document.getElementById("new-track-button").addEventListener("click", function(){
+document.querySelector("#new-track-button:not(.disabled)").addEventListener("click", function(){
     newTrack.push({
         "color": newTrack.defaultColors[Math.floor(Math.random()*newTrack.defaultColors.length)]
     });
     newTrack.show();
 });
-document.getElementById("undo-button").addEventListener("click", function(){
+document.querySelector("#undo-button:not(.disabled)").addEventListener("click", function(){
     master.undo();
 });
-document.getElementById("redo-button").addEventListener("click", function(){
+document.querySelector("#redo-button:not(.disabled)").addEventListener("click", function(){
     master.redo();
 });
-document.getElementById("export-button").addEventListener("click", function(){
+document.querySelector("#export-button:not(.disabled)").addEventListener("click", function(){
     exportData.show();
 });
-document.getElementById("save-button").addEventListener("click", function(){
+document.querySelector("#save-button:not(.disabled)").addEventListener("click", function(){
     saveProject.show();
 });
-document.querySelectorAll(".help-button").forEach(function(el){
+document.querySelectorAll(".help-button:not(.disabled)").forEach(function(el){
     el.addEventListener("click", function(){
         helpText.show();
     });
 });
-document.getElementById("scale-button").addEventListener("click", function(){
+document.querySelector("#scale-button:not(.disabled)").addEventListener("click", function(){
     if(master.scale !== undefined && master.scale !== null)
     {
         editScale.push({
@@ -34,7 +34,7 @@ document.getElementById("scale-button").addEventListener("click", function(){
         newScale.show();
     }
 });
-document.getElementById("edit-project-button").addEventListener("click", function(){
+document.querySelector("#edit-project-button:not(.disabled)").addEventListener("click", function(){
     editProject.push({
         "name": master.name,
         "framerate": master.timeline.fps,
@@ -42,6 +42,19 @@ document.getElementById("edit-project-button").addEventListener("click", functio
         "pointsForward": master.viewPoints.forward,
         "pointsBackward": master.viewPoints.backward
     }).show();
+});
+
+master.on("undo, created, change", function(){
+    if(this.undoManager.hasUndo())
+        document.getElementById("undo-button").classList.remove("disabled");
+    else
+        document.getElementById("undo-button").classList.add("disabled");
+});
+master.on("redo, created, change", function(){
+    if(this.undoManager.hasRedo())
+        document.getElementById("redo-button").classList.remove("disabled");
+    else
+        document.getElementById("redo-button").classList.add("disabled");
 });
 
 document.getElementById("track-list").querySelector("ul").querySelectorAll("li").forEach(function(element){

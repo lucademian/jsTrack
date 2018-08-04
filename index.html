@@ -32,7 +32,7 @@
                     <div class="option button" title="Edit Project" id="edit-project-button"></div>
                     <div class="option button" title="Export Data" id="export-button"></div>
                     <div class="option button" title="Save" id="save-button"></div>
-                    <div class="option button" title="Logout of Drive" id="logout-drive"></div>
+                    <div class="option button help-button" title="Help" id="help-button"></div>
                     <div class="option" title="No Changes to Backup" id="backup-status"></div>
                 </div>
                 <div id="tracks" class="sidebar-item hidden">
@@ -56,9 +56,13 @@
                 <div id="launch" class="modal active">
                     <div id="file-input-container">
                         <div class="area" id="file-drop-area">
-                            <div class="text">Drag a video or .jstrack file here to begin, or</div>
-                            <label for="file-input" class="button">Click Here To Select Files</label>
-                            <button id="pick">Select From Drive</button>
+                            <div class="area-content">
+                                <div class="text">Drag a video or .jstrack file here to begin, or</div>
+                                <div class="launch-buttons">
+                                    <label for="file-input" class="button">Select Local File</label>
+                                    <button id="pick" disabled>Select From Drive</button>
+                                </div>
+                            </div>
                         </div>
                         <input type="file" id="file-input" accept=".jstrack,.mp4,.m4v">
                     </div>
@@ -102,6 +106,7 @@
         <script type="text/javascript" src="js/drive.js"></script>
         <script src="https://www.google.com/jsapi?key=AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA"></script>
         <script src="https://apis.google.com/js/client.js?onload=initPicker"></script>
+        <script type="text/javascript" src="js/saveDrive.js"></script>
         <script type="text/javascript" src="js/scrubber.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <script type="text/javascript" src="js/dom.js"></script>

@@ -38,11 +38,15 @@ class Track
         this.listElement.name.innerText = this.name;
         this.listElement.visibility = document.createElement("div");
         this.listElement.visibility.classList.add("visibility");
-        this.listElement.visibility.title = "Click to hide";
+        this.listElement.visibility.title = "Hide Track";
+        this.listElement.delete = document.createElement("div");
+        this.listElement.delete.classList.add("delete");
+        this.listElement.delete.title = "Delete Track";
 
         document.getElementById("track-list").querySelector("ul").appendChild(this.listElement.container);
         this.listElement.container.appendChild(this.listElement.swath);
         this.listElement.container.appendChild(this.listElement.name);
+        this.listElement.container.appendChild(this.listElement.delete);
         this.listElement.container.appendChild(this.listElement.visibility);
 
         var track = this;
@@ -136,6 +140,19 @@ class Track
             }).show();
         });
         
+        this.listElement.delete.addEventListener("click", function(e){
+            e.stopPropagation();
+            tempTrack.project.change({
+                undo: function(){
+                    tempTrack.project.undeleteTrack(tempTrack.uid);
+                },
+                redo: function(){
+                    tempTrack.project.deleteTrack(tempTrack.uid);
+                }
+            });
+            
+            tempTrack.project.deleteTrack(tempTrack.uid);
+        });
         this.listElement.visibility.addEventListener("click", function(e){
             e.stopPropagation();
             if(this.classList.contains("hidden"))
@@ -169,14 +186,14 @@ class Track
         this.state.mode = "hidden";
         this.hidden = true;
         this.listElement.visibility.classList.add("hidden");
-        this.listElement.visibility.title = "Click to make visible";
+        this.listElement.visibility.title = "Make Visible";
     }
     show()
     {
         this.state.resetMode();
         this.hidden = false;
         this.listElement.visibility.classList.remove("hidden");
-        this.listElement.visibility.title = "Click to hide";
+        this.listElement.visibility.title = "Hide Track";
     }
     update(data)
     {

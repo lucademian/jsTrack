@@ -251,6 +251,8 @@ class Project
             this.backedUp = false;
             this.trigger("change");
         }
+
+        this.trigger("undo");
     }
     redo()
     {
@@ -265,6 +267,8 @@ class Project
             this.backedUp = false;
             this.trigger("change");
         }
+
+        this.trigger("redo");
     }
     backup()
     {
@@ -272,23 +276,34 @@ class Project
         this.backUpDate = new Date();
         this.backUpIndex = this.undoManager.getIndex();
     }
-    on(event, callback)
+    on(events, callback)
     {
-        if(this.callbacks[event] === undefined)
+        events = events.split(",");
+        for(var i=0; i < events.length; i++)
         {
-            this.callbacks[event] = [];
+            let event = events[i].trim();
+            if(this.callbacks[event] === undefined)
+            {
+                this.callbacks[event] = [];
+            }
+
+            this.callbacks[event].push(callback);
         }
 
-        this.callbacks[event].push(callback);
         return this;
     }
-    trigger(event, argArray=[])
+    trigger(events, argArray=[])
     {
-        if(this.callbacks[event] !== undefined)
+        events = events.split(",");
+        for(var i = 0; i < events.length; i++)
         {
-            for(var i=0; i < this.callbacks[event].length; i++)
+            let event = events[i].trim();
+            if(this.callbacks[event] !== undefined)
             {
-                this.callbacks[event][i].call(this, argArray);
+                for(var j=0; j < this.callbacks[event].length; j++)
+                {
+                    this.callbacks[event][j].call(this, argArray);
+                }
             }
         }
         return this;
@@ -304,12 +319,13 @@ class Project
     {
         this.saved = false;
         this.backedUp = false;
-        this.trigger("change");
 
         this.undoManager.add({
             undo: actions.undo,
             redo: actions.redo
         });
+
+        this.trigger("change");
 
         return this;
     }
@@ -555,9 +571,11 @@ class Project
                 let point = track.points[time];
                 point.unemphasize();
                 point.unselect();
-                track.stage.removeChild(point.shape);
+                point.show();
+                // track.stage.addChild(point.shape);
             }
-            
+            this.updateVisiblePoints();
+            this.switchTrack(uid);
             delete this.deletedTracks[uid];
         }
     }
@@ -582,6 +600,9 @@ class Project
             this.track.select();
         }
         track.table.makeActive();
+
+        this.trigger("newTrack", [track]);
+
         return track;
 	}
 	newAxes(x, y, color, makeDefault=true)
@@ -610,6 +631,8 @@ class Project
 		if(makeDefault)
             this.scale = scale;
             
+        this.trigger("newScale", [scale]);
+
         return scale;
     }
     switchTrack(uid)

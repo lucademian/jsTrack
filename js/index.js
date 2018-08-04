@@ -114,7 +114,8 @@ var newProject = new modal({
         "framerate": {
             "label": "Framerate",
             "type": "number",
-            "required": true
+            "required": true,
+            "initVal": "30"
         },
         "axesColor": {
             "label": "Axes Color",
@@ -181,7 +182,7 @@ var saveProject = new modal({
     }
 });
 
-saveProject.on("saveFile, saveDrive", function(modalData){
+saveProject.on("saveFile", function(modalData){
     showLoader();
     var fileUrl = URL.createObjectURL(master.videoFile);
     JSZipUtils.getBinaryContent(fileUrl, function (err, data) {
@@ -191,7 +192,12 @@ saveProject.on("saveFile, saveDrive", function(modalData){
         }
 
         var filename = modalData.filename;
-        if(filename.split(".").pop() !== CUSTOM_EXTENSION)
+
+        if(filename.length == 0)
+        {
+            filename = master.name.toLowerCase().replace(" ", "_") + "-" + new Date().getTime() + "." + CUSTOM_EXTENSION;
+        }
+        else if(filename.split(".").pop() !== CUSTOM_EXTENSION)
             filename += "." + CUSTOM_EXTENSION;
 
         var projectInfo = JSON.stringify(master.save());
@@ -206,10 +212,64 @@ saveProject.on("saveFile, saveDrive", function(modalData){
         }, function (err) {
             console.log(err);
         });
-
     });
 
     this.hide().clear();
+})
+.on("create", function(){
+    var button = document.getElementById(this.id + "_button-saveDrive");
+    button.disabled = true;
+    var modal = this;
+    var checkLoaded = setInterval(function(){
+        if(gapi.client !== undefined)
+        {
+            var upload = new DriveUpload({
+                apiKey: 'AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA',
+                clientId: '44440188363-5vnafandpsrppr9189u7sc8q755oar9d',
+                buttonEl: document.getElementById(modal.id + "_button-saveDrive"),
+                getFile: function(callback){
+                    showLoader();
+                    var fileUrl = URL.createObjectURL(master.videoFile);
+                    JSZipUtils.getBinaryContent(fileUrl, function (err, data) {
+                        if(err)
+                        {
+                            console.log(err);
+                        }
+                
+                        var filename = modal.export().filename || "";
+                        if(filename.length == 0)
+                        {
+                            filename = master.name.toLowerCase().replace(" ", "_") + "-" + new Date().getTime() + "." + CUSTOM_EXTENSION;
+                        }
+                        else if(filename.split(".").pop() !== CUSTOM_EXTENSION)
+                            filename += "." + CUSTOM_EXTENSION;
+                
+                        var projectInfo = JSON.stringify(master.save());
+                        var zip = new JSZip();
+                
+                        zip.file("video.mp4", data, {binary:true}).file("meta.json", projectInfo);
+                
+                        zip.generateAsync({type:"arraybuffer", mimeType: "application/octet-stream"}).then(function (zipFile) {
+                            callback(zipFile, filename, function(success){
+                                hideLoader();
+                                if(success)
+                                {
+                                    modal.hide();
+                                }
+                                else
+                                {
+                                    modal.hide();
+                                }
+                            });
+                        }, function (err) {
+                            console.log(err);
+                        });
+                    });
+                }
+            });
+            clearInterval(checkLoaded);
+        }
+    }, 400);
 })
 .on("cancel", function(){
     this.hide().clear();
@@ -372,7 +432,6 @@ editScale.on("cancel", function(){
 
 var counter = 3;
 newScale.on("submit", function(data){
-    document.getElementById("scale-button").title = "Edit Scale";
     master.state.mode = "newScale";
     counter = 1;
     var locations = {
@@ -404,6 +463,10 @@ newScale.on("submit", function(data){
 })
 .on("cancel", function(){
     this.hide().clear();
+});
+
+master.on("newScale", function(){
+    document.getElementById("scale-button").title = "Edit Scale";
 });
 
 var newTrack = new modal({
@@ -484,9 +547,12 @@ newTrack.on("create", function(){
 })
 .on("submit", function(data){
     this.hide().clear();
+    master.newTrack(data.name, data.color, true);
+});
+
+master.on("newTrack", function(){
     document.getElementById("tracks").classList.remove("hidden");
     document.getElementById("graphs").classList.remove("hidden");
-    master.newTrack(data.name, data.color, true);
 });
 
 stage.enableMouseOver();
@@ -759,9 +825,9 @@ frameArrows.forward.sprite.on("click", function(e){
         {
             if(master.timeline.setFrame(frame.frame.time) !== false)
             {
+                master.updateVisiblePoints();
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                master.updateVisiblePoints();
                 if(master.track.points[frame.frame.time] !== undefined)
                 {
                     master.track.points[frame.frame.time].emphasize();

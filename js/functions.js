@@ -54,6 +54,13 @@ if (!Array.prototype.last){
         return this[this.length - 1];
     };
 };
+if(!String.prototype.utf8Length)
+{
+    String.prototype.utf8Length = function() {
+        var m = encodeURIComponent(this).match(/%[89ABab]/g);
+        return this.length + (m ? m.length : 0);
+    }
+}
 
 function hideLoader()
 {

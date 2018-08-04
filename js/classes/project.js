@@ -564,6 +564,8 @@ class Project
             track.listElement.container.remove();
 
             delete this.trackList[uid];
+
+            this.trigger("deleteTrack", [track]);
         }
     }
     undeleteTrack(uid)
@@ -584,6 +586,8 @@ class Project
             this.updateVisiblePoints();
             this.switchTrack(uid);
             delete this.deletedTracks[uid];
+            
+            this.trigger("undeleteTrack", [track]);
         }
     }
 	newTrack(name, color, makeDefault=true, uid=false)

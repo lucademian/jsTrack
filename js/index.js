@@ -475,6 +475,15 @@ newScale.on("submit", function(data){
     this.hide().clear();
 });
 
+master.on("deleteTrack", function(){
+    if(Object.keys(master.trackList).length == 0)
+        document.getElementById("tracks").classList.add("hidden");
+});
+
+master.on("undeleteTrack", function(){
+    if(Object.keys(master.trackList).length > 0)
+        document.getElementById("tracks").classList.remove("hidden");
+});
 master.on("newScale", function(){
     document.getElementById("scale-button").title = "Edit Scale";
 });

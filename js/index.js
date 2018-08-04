@@ -91,10 +91,10 @@ var helpText = new modal({
     text: [
         "Welcome to JSTrack, an open source online version of <a href='https://physlets.org/tracker/'>Tracker</a>",
         "JSTrack makes it easy to create a new project. Simply drag your video file onto the box when the page opens. If you want to open an existing ." + CUSTOM_EXTENSION + " file, just drag that on instead of a video.",
-        "#Tracking Once you have opened or created your project, the steps to begin tracking are very short. In the top of the sidebar to the right, you will see some buttons. The first button, which is three dots connected by diagonal lines, is what you click to create a new data track.",
+        "<b>Tracking:</b> Once you have opened or created your project, the steps to begin tracking are very short. In the top of the sidebar to the right, you will see some buttons. The first button, which is three dots connected by diagonal lines, is what you click to create a new data track.",
         "After you click that and create your first track, you simply hold the <code>shift</code> button and click on the video using the new point tool.",
         "When you've finished your tracking, you can move the indicator arrows under the timeline to change the starting and ending frames of the movement",
-        "#Scales You can add a scale at any time, before or after tracking, by clicking the button directly after the track button, which is three dots in a straight line.",
+        "<b>Scales:</b> You can add a scale at any time, before or after tracking, by clicking the button directly after the track button, which is three dots in a straight line.",
         "After creating this scale, you will be directed to click for the starting and ending points of the scale, and then enter the value. The default is 1m. To convert units within the scale value, use the <code>></code> key, like this: <code>4.3 in > m</code>.",
         "You can create as many tracks as you need, but only one scale.",
         "Seeking around a video is done by using the frame arrows to the right of the timeline, dragging the black line along the timeline, or by clicking a point while holding the CTRL or CMD keys, which will also select said point.",
@@ -450,7 +450,7 @@ newScale.on("submit", function(data){
     };
     posText.text = "Click for 1st end of scale";
     stage.on("click", function(e){
-        let mouseCoords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+        let mouseCoords = master.toScaled(e.stageX, e.stageY);
         if(counter === 1)
         {
             locations.point1 = {"x": mouseCoords.x, "y": mouseCoords.y};

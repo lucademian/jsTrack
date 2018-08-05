@@ -737,31 +737,6 @@ panelMove.on("drag", function(el){
 });
 
 video.onplaying = (function(){
-    // let lastTime = 0;
-    // let frame = null;
-    // let frameTime = 1/60;
-    // let sirDifference = 0;
-    // let newCanv = document.createElement("canvas");
-    // let lilCanv = newCanv.getContext("2d");
-    // lilCanv.width = video.videoWidth;
-    // lilCanv.height = video.videoHeight;
-    // lilCanv.drawImage(video, 0, 0, canvas.width, canvas.height);
-    // let lastFrame = lilCanv.getImageData(0, 0, canvas.width, canvas.height).data;
-    // for(var tempTime = 0; tempTime <= video.duration; tempTime += frameTime)
-    // {
-    //     video.currentTime = tempTime;
-    //     lilCanv.drawImage(video, 0, 0, canvas.width, canvas.height);
-    //     frame = lilCanv.getImageData(0, 0, canvas.width, canvas.height).data;
-    //     ////console.log(lastFrame, frame);
-    //     if(lastFrame !== frame)
-    //     {
-    //         sirDifference = tempTime - lastTime;
-    //         lastTime = tempTime;
-    //         //console.log(sirDifference);
-    //         lastFrame = frame;
-    //     }
-    // }
-
     console.log("loaded");
     video.pause();
     video.currentTime = 0;

@@ -269,10 +269,19 @@ function handleFile(file, callback=null)
     switch(file.type)
     {
         case "video/mp4":
-            loadVideo(file, callback);
-            hideLaunchModal();
-            newProject.show();
-            hideLoader();
+            loadVideo(file, function(){
+                if(callback !== null)
+                    callback();
+                master.timeline.detectFrameRate(function(framerate){
+                    console.log(framerate);
+                    hideLaunchModal();
+                    newProject.push({
+                        "framerate": framerate
+                    });
+                    newProject.show();
+                    hideLoader();
+                });
+            });
             break;
         case "":
         case "application/x-zip":

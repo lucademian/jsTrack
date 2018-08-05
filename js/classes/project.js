@@ -53,21 +53,21 @@ class Project
                 return this._zoom;
             },
             set zoom(value){
-                this._zoom = value;
+                this._zoom = value.roundTo(5);
                 this.trigger("zoom");
             },
             get x(){
                 return this._x;
             },
             set x(value){
-                this._x = value;
+                this._x = value.roundTo(5);
                 this.trigger("translation");
             },
             get y(){
                 return this._y;
             },
             set y(value){
-                this._y = value;
+                this._y = value.roundTo(5);
                 this.trigger("translation");
             },
             trigger(event){

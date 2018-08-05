@@ -53,6 +53,54 @@ class Timeline
             this.callbacks[event].push(callback);
         }
     }
+    detectFrameRate(callback=null)
+    {
+        let lastTime = 0;
+        let frame = null;
+        let frameTime = 1/120;
+        let difference = 0;
+        let tempVideo = document.createElement("video");
+        let timeline = this;
+        var newFrames = 0;
+        tempVideo.onloadeddata = function(){
+            console.log("onloadeddata");
+            var newCanv = document.createElement("canvas");
+            newCanv.height = tempVideo.videoHeight;
+            newCanv.width = tempVideo.videoWidth;
+            var newCtx = newCanv.getContext("2d");
+            newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
+            let lastFrame = newCanv.toDataURL();
+            var timeStart = 0.1;
+            var timeEnd = timeStart + 0.4;
+            if(tempVideo.duration < timeEnd)
+                timeEnd = tempVideo.duration;
+            var tempTime = timeStart;
+            tempVideo.currentTime = tempTime;
+            console.log("Detecting...");
+            tempVideo.addEventListener("timeupdate", function(){
+                newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
+                frame = newCanv.toDataURL();
+                if(frame !== lastFrame)
+                {
+                    newFrames++;
+                    lastFrame = frame;
+                }
+                if(tempTime < timeEnd)
+                {
+                    tempTime += frameTime;
+                    tempVideo.currentTime = tempTime;
+                }
+                else
+                {
+                    var framerate = (newFrames - 1) / (timeEnd - timeStart);
+                    console.log(framerate);
+                    if(callback !== null)
+                        callback(framerate);
+                }
+            });
+        }
+        tempVideo.src = this.video.src;
+    }
     currentImage()
     {
         var canvas = document.createElement('canvas');

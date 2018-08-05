@@ -70,7 +70,7 @@ function hideLoader()
 function showLoader()
 {
     document.getElementById("fullscreen-loader").classList.add("active");
-    setTimeout(hideLoader, 10000);
+    // setTimeout(hideLoader, 10000);
 }
 
 function dataURLtoBlob(dataurl) {
@@ -106,9 +106,14 @@ function isQuotaExceeded(e) {
     return quotaExceeded;
 }
 
-
-
-
-
+function compareImages(img1,img2){
+    if(img1.data.length != img2.data.length)
+        return false;
+    for(var i = 0; i < img1.data.length; ++i){
+        if(img1.data[i] != img2.data[i])
+            return false;
+    }
+    return true;   
+ }
 
 

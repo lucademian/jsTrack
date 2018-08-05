@@ -129,28 +129,48 @@ class Axes
 		this.shape.addEventListener("pressup", function(e){
             if(moving)
             {
+                var lastCoords = {
+                    x: parent.x,
+                    y: parent.y
+                };
+                
+                var lastCoordsUnscaled = parent.project.toUnscaled(lastCoords);
+                
+                var newCoordsUnscaled = {
+                    x: parent.shape.x,
+                    y: parent.shape.y
+                };
                 let coords = parent.project.toScaled(parent.shape.x, parent.shape.y);
                 parent.x = coords.x;
                 parent.y = coords.y;
 
                 parent.project.change({
                     undo: function(){
-
+                        parent.x = lastCoords.x;
+                        parent.y = lastCoords.y;
+                        parent.shape.x = lastCoordsUnscaled.x - 1;
+                        parent.shape.y = lastCoordsUnscaled.y - 1;
                     },
                     redo: function(){
-
+                        parent.x = coords.x;
+                        parent.y = coords.y;
+                        parent.shape.x = newCoordsUnscaled.x - 1;
+                        parent.shape.y = newCoordsUnscaled.y - 1;
                     }
                 });
             }
             else if (rotating)
             {
-                parent.theta = -parent.shape.rotation.toRadians();
+                var lastRotation = parent.theta;
+                var newRotation = parent.theta = -parent.shape.rotation.toRadians();
                 parent.project.change({
                     undo: function(){
-
+                        parent.theta = lastRotation;
+                        parent.shape.rotation = -lastRotation.toDegrees();
                     },
                     redo: function(){
-
+                        parent.theta = newRotation;
+                        parent.shape.rotation = -newRotation.toDegrees();
                     }
                 });
             }

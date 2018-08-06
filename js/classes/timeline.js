@@ -10,20 +10,24 @@ class Timeline
         this.frameSkip = 1;
 		this.frameTime = (1/this.fps).roundTo(3);
 		this.frameCount =  Math.floor(this.duration / this.frameTime);
-		this.currentTime = 0;
+        this.currentTime = 0;
+        this.currentFrame = 0;
         this.savedTime = 0;
         this.seekSaved = false;
 		this.startFrame = 0;
         this.endFrame = this.frameCount;
         this.callbacks = {};
-		this.frames = {
-			0: new Frame(this, 0, this.video)
-        };
-
-        var timeline = this;
-        this.video.addEventListener("timeupdate", function(){
-            timeline.trigger("seek");
-        });
+		this.frames = [];
+    }
+    // function to fire "loaded" event
+    createFrames()
+    {
+        var counter = 0;
+        for(var time = 0; time < (this.video.duration) - (this.video.duration % this.frameTime); time = (time + this.frameTime).roundTo(3))
+        {
+            this.frames[counter] = new Frame(this, time, counter);
+            counter++;
+        }
     }
     trigger(events, argArray=[])
     {
@@ -62,47 +66,60 @@ class Timeline
         let tempVideo = document.createElement("video");
         let timeline = this;
         var newFrames = 0;
+        var firstLoad = true;
         tempVideo.onloadeddata = function(){
-            console.log("onloadeddata");
-            var newCanv = document.createElement("canvas");
-            newCanv.height = tempVideo.videoHeight;
-            newCanv.width = tempVideo.videoWidth;
-            var newCtx = newCanv.getContext("2d");
-            newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
-            let lastFrame = newCanv.toDataURL();
-            var timeStart = 0.1;
-            var timeEnd = timeStart + 0.4;
-            if(tempVideo.duration < timeEnd)
-                timeEnd = tempVideo.duration;
-            var tempTime = timeStart;
-            tempVideo.currentTime = tempTime;
-            console.log("Detecting...");
-            tempVideo.addEventListener("timeupdate", function(){
+            if(firstLoad)
+            {
+                firstLoad = false;
+                console.log("onloadeddata");
+                var newCanv = document.createElement("canvas");
+                newCanv.height = tempVideo.videoHeight;
+                newCanv.width = tempVideo.videoWidth;
+                var newCtx = newCanv.getContext("2d");
                 newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
-                frame = newCanv.toDataURL();
-                if(frame !== lastFrame)
-                {
-                    newFrames++;
-                    lastFrame = frame;
-                }
-                if(tempTime < timeEnd)
-                {
-                    tempTime += frameTime;
-                    tempVideo.currentTime = tempTime;
-                }
-                else
-                {
-                    var framerate = (newFrames - 1) / (timeEnd - timeStart);
-                    console.log(framerate);
-                    if(callback !== null)
-                        callback(framerate);
-                }
-            });
+                let lastFrame = newCanv.toDataURL();
+                var timeStart = 0.1;
+                var timeEnd = timeStart + 0.1;
+                if(tempVideo.duration < timeEnd)
+                    timeEnd = tempVideo.duration;
+                var tempTime = timeStart;
+                tempVideo.currentTime = tempTime;
+                console.log("Detecting...");
+                var firstDetection = true;
+                tempVideo.addEventListener("timeupdate", function(){
+                    newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
+                    frame = newCanv.toDataURL();
+                    if(frame !== lastFrame)
+                    {
+                        newFrames++;
+                        lastFrame = frame;
+                    }
+                    if(tempTime < timeEnd)
+                    {
+                        tempTime += frameTime;
+                        tempVideo.currentTime = tempTime;
+                    }
+                    else if(firstDetection)
+                    {
+                        firstDetection = false;
+                        var framerate = (newFrames - 1) / (timeEnd - timeStart);
+                        console.log(framerate);
+                        if(callback !== null)
+                            callback(framerate);
+                    }
+                });
+            }
         }
         tempVideo.src = this.video.src;
     }
     currentImage()
     {
+        return this.getImage();
+    }
+    getImage(time=this.currentTime)
+    {
+        var lastTime = this.currentTime;
+        this.video.currentTime = time;
         var canvas = document.createElement('canvas');
         canvas.height = this.video.videoHeight;
         canvas.width = this.video.videoWidth;
@@ -110,6 +127,7 @@ class Timeline
         ctx.drawImage(this.video, 0, 0, canvas.width, canvas.height);
         var img = new Image();
         img.src = canvas.toDataURL();
+        this.video.currentTime = lastTime;
         return img;
     }
     play(callback, options)
@@ -154,19 +172,13 @@ class Timeline
             var timeline = this;
 
             this.playInterval = setInterval(function(){
-                console.log(counter);
                 if(counter < endingFrame - frameSkip)
                 {
                     let next = timeline.next();
-                    if(next !== false && next.distance < (frameSkip * timeline.frameTime).roundTo(3))
+                    if(next !== false)
                     {
-                        timeline.currentTime = (next.time).roundTo(3);
-                        counter = timeline.getClosestFrame(next.time);
-                    }
-                    else
-                    {
-                        timeline.currentTime = (counter * timeline.frameTime).roundTo(3);
-                        counter += frameSkip;
+                        timeline.setFrame(next.frame);
+                        counter = next.number;
                     }
                 }
                 else
@@ -176,13 +188,12 @@ class Timeline
                 timeline.project.updateVisiblePoints();
                 if(timeline.project.track !== undefined && timeline.project.track !== null)
                 {
-                    if(timeline.project.track.points[timeline.currentTime] !== undefined)
+                    if(timeline.project.track.points[timeline.currentFrame] !== undefined)
                     {
                         timeline.project.track.unemphasizeAll();
-                        timeline.project.track.points[timeline.currentTime].emphasize();
+                        timeline.project.track.points[timeline.currentFrame].emphasize();
                     }
                 }
-                console.log(timeline.currentTime);
             }, timeline.frameTime / speed);
         }
     }
@@ -191,24 +202,28 @@ class Timeline
         clearInterval(this.playInterval);
         this.playInterval = undefined;
     }
-    seek(time)
+    seek(frame)
     {
-        this.savedTime = time;
+        this.savedFrame = frame;
         this.seekSaved = true;
 
         return this;
     }
     update()
     {
+        if(this.seekSaved && this.duration > 0)
+        {
+            this.currentFrame = this.savedFrame;
+            this.seekSaved = false;
+            
+            this.trigger("seek");
+        }
+
+        this.currentTime = (this.currentFrame * this.frameTime).roundTo(3);
+        
         if(this.video.currentTime != this.currentTime)
         {
             this.video.currentTime = this.currentTime;
-        }
-
-        if(this.seekSaved && this.duration > 0)
-        {
-            this.currentTime = this.savedTime;
-            this.seekSaved = false;
         }
     }
     updateFps(fps)
@@ -217,7 +232,7 @@ class Timeline
             start: (this.startFrame / this.frameCount) || 0,
             end: (this.endFrame / this.frameCount) || 1
         };
-        this.fps = fps;
+        this.fps = parseFloat(fps);
 		this.frameTime = (1/this.fps).roundTo(3);
         this.frameCount =  Math.floor(this.duration / this.frameTime);
 		this.duration = (this.frameCount * this.frameTime).roundTo(3);
@@ -238,36 +253,21 @@ class Timeline
 	}
 	current()
 	{
-		if(this.frames[this.currentTime.toString()] !== undefined)
+		if(this.frames[this.currentFrame] !== undefined)
 		{
-			return this.frames[this.currentTime.toString()];
+			return this.frames[this.currentFrame];
 		}
 		else
 		{
 			return false;
 		}
 	}
-	addFrame(time)
+	setFrame(frameNum)
 	{
-        time = time.roundTo(3);
-        var frame = null;
-        if(this.frames[time] === undefined)
-        {
-            frame = new Frame(this, time);
-            this.frames[time] = frame;
-        }
-        else
-        {
-            frame = this.frames[time];
-        }
-
-		return frame;
-	}
-	setFrame(time)
-	{
-		let frame = this.frames[time];
+		let frame = this.frames[frameNum];
 		if(frame !== undefined)
 		{
+            this.currentFrame = frame.number;
 			this.currentTime = frame.time.roundTo(3);
 			this.video.currentTime = frame.time;
 		}
@@ -286,61 +286,26 @@ class Timeline
     }
 	next()
 	{
-		//console.log(this.currentTime);
-		let timeDiff = Infinity;
-		let pickedFrame = this.frames[this.currentTime];
-		let newTime = 0;
-		for(var time in this.frames)
-		{
-			time = time.roundTo(3);
-			if(time > this.currentTime)
-			{
-				if(time - this.currentTime < timeDiff)
-				{
-					timeDiff = time - this.currentTime;
-					pickedFrame = this.frames[time.toString()];
-					newTime = time.roundTo(3);
-				}
-			}
-		}
-		if(pickedFrame == this.frames[this.currentTime])
+        var pickedFrame = this.frames[this.currentFrame + 1]
+		if(pickedFrame == undefined)
 		{
 			return false;
 		}
 		else
 		{
-			return {"frame": pickedFrame, "time": pickedFrame.time.roundTo(3), "distance": timeDiff.roundTo(3)};
+			return {"frame": pickedFrame, "time": pickedFrame.time.roundTo(3)};
 		}
-
 	}
 	prev()
 	{
-		//console.log(this.currentTime, this.frames);
-		let timeDiff = Infinity;
-		let pickedFrame = this.frames[this.currentTime];
-		let newTime = 0;
-		for(var time in this.frames)
-		{
-			time = time.roundTo(3);
-			if(time < this.currentTime)
-			{
-				if(Math.abs(time - this.currentTime) < timeDiff)
-				{
-					timeDiff = Math.abs(time - this.currentTime);
-					pickedFrame = this.frames[time.toString()];
-					newTime = time.roundTo(3);
-				}
-			}
-		}
-
-		if(pickedFrame === this.frames[this.currentTime])
+		var pickedFrame = this.frames[this.currentFrame - 1]
+		if(pickedFrame == undefined)
 		{
 			return false;
 		}
 		else
 		{
-			return {"frame": pickedFrame, "time": pickedFrame.time.roundTo(3), "distance": timeDiff.roundTo(3)};
+			return {"frame": pickedFrame, "time": pickedFrame.time.roundTo(3)};
 		}
-
 	}
 }

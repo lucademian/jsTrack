@@ -8,16 +8,6 @@ scrubberLine.rectShape.graphics.setStrokeStyle(1).beginStroke("#d8d8d8");
 scrubberLine.rect = scrubberLine.rectShape.graphics.drawRoundRect(0, (scrubberCanv.height - 10) / 2, scrubberCanv.width - 200, 10, 3, 3, 3, 3).command;
 scrubber.addChild(scrubberLine.rectShape);
 
-var frameMarkers = {
-    "master": {
-        "shape": new createjs.Shape(), 
-        "markers": {}
-    }
-};
-
-frameMarkers.master.shape.graphics.beginFill("#0000ff");
-scrubber.addChild(frameMarkers.master.shape);
-
 scrubberLine.thumb = new createjs.Shape;
 scrubberLine.thumb.graphics.beginFill("#000");
 scrubberLine.thumb.regX = 0;
@@ -69,7 +59,7 @@ scrubber.addChild(frameArrows.forward.sprite);
 scrubber.addChild(frameArrows.back.sprite);
 
 frameArrows.update = function(){
-    if(master.currentTime == (master.endFrame * master.frameTime).roundTo(3))
+    if(master.currentFrame == master.endFrame)
     {
         frameArrows.forward.sprite.gotoAndStop("frameForwardDisabled");
         frameArrows.forward.button.enabled = false;
@@ -82,7 +72,7 @@ frameArrows.update = function(){
         frameArrows.forward.enabled = true;
     }
 
-    if(master.currentTime == (master.startFrame * master.frameTime).roundTo(3))
+    if(master.currentFrame == master.startFrame)
     {
         frameArrows.back.sprite.gotoAndStop("frameBackDisabled");
         frameArrows.back.button.enabled = false;

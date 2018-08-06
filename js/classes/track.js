@@ -270,20 +270,20 @@ class Track
 	}
 	addPoint(frame, x, y, userAction=true)
 	{
-		if(this.points[frame.time] !== undefined)
+		if(this.points[frame.number] !== undefined)
 		{
             var track = this;
-            var point = this.points[frame.time];
+            var point = this.points[frame.number];
             var toGo = {x: point.x, y: point.y};
             this.project.change({
                 undo: function(){
                     point.move(toGo.x, toGo.y);
-                    track.project.timeline.currentTime = newPoint.frame.time;
+                    track.project.timeline.seek(newPoint.frame.number);
                     track.project.update();
                 },
                 redo: function(){
                     point.move(x, y);
-                    track.project.timeline.currentTime = newPoint.frame.time;
+                    track.project.timeline.seek(newPoint.frame.number);
                     track.project.update();
                 }
             });
@@ -291,24 +291,24 @@ class Track
             point.move(x, y).select();
             this.project.update();
             this.project.updateVisiblePoints();
-            return this.points[frame.time];
+            return this.points[frame.number];
 		}
 		else
 		{
             var newPoint = new Point(this, frame, x, y);
-            this.points[frame.time] = newPoint;
+            this.points[frame.number] = newPoint;
             frame.points.push(newPoint);
 
             var track = this;
             this.project.change({
                 undo: function(){
                     newPoint.remove();
-                    track.project.timeline.currentTime = newPoint.frame.time;
+                    track.project.timeline.seek(newPoint.frame.number);
                     track.project.update();
                 },
                 redo: function(){
                     newPoint.unRemove();
-                    track.project.timeline.currentTime = newPoint.frame.time;
+                    track.project.timeline.seek(newPoint.frame.number);
                     track.project.update();
                 }
             });

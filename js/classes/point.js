@@ -86,9 +86,9 @@ class Point
             
             tempShape.track.project.change({
                 undo: function(){
-                    let tempPoint = tempShape.track.deletedPoints[tempShape.frame.time];
+                    let tempPoint = tempShape.track.deletedPoints[tempShape.frame.number];
                     tempPoint.deleted = false;
-                    tempShape.track.points[point.frame.time] = tempPoint;
+                    tempShape.track.points[point.frame.number] = tempPoint;
                     tempShape.track.stage.addChild(tempPoint.shape);
                 },
                 redo: function(){
@@ -103,7 +103,7 @@ class Point
 
             if(tempShape.track.project.state.mode == "seek")
             {
-                tempShape.track.project.timeline.setFrame(tempShape.frame.time);
+                tempShape.track.project.timeline.setFrame(tempShape.frame.number);
                 tempShape.track.project.switchTrack(tempShape.track.uid);
                 tempShape.track.project.changed();
             }
@@ -143,7 +143,7 @@ class Point
 	{
         let point = this;
         
-        if(point.frame.time >= point.track.timeline.getFrameStart(point.track.timeline.startFrame) && point.frame.time <= point.track.timeline.getFrameStart(point.track.timeline.endFrame))
+        if(point.frame.number >= point.track.timeline.startFrame && point.frame.number <= point.track.timeline.endFrame)
         {
             let location = axes.convert(point.x, point.y);
 
@@ -235,8 +235,8 @@ class Point
         this.track.stage.removeChild(this.circle);
         this.unselect().unemphasize();
         this.deleted = true;
-        this.track.deletedPoints[this.frame.time] = this;
-		delete this.track.points[this.frame.time];
+        this.track.deletedPoints[this.frame.number] = this;
+		delete this.track.points[this.frame.number];
     }
     
     unRemove()
@@ -247,7 +247,7 @@ class Point
             this.track.stage.addChild(this.shape);
         }
         this.deleted = false;
-		this.track.points[this.frame.time] = this;
-        delete this.track.deletedPoints[this.frame.time];
+		this.track.points[this.frame.number] = this;
+        delete this.track.deletedPoints[this.frame.number];
     }
 }

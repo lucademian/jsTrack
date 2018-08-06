@@ -217,12 +217,12 @@ class Project
             this.axes.shape.x = moveTo.x;
             this.axes.shape.y = moveTo.y;
         }
-        for(var time in this.timeline.frames)
+        for(var i=0; i < this.timeline.frames.length; i++)
         {
-            let frame = this.timeline.frames[time];
-            for(var i = 0; i < frame.points.length; i++)
+            let frame = this.timeline.frames[i];
+            for(var j = 0; j < frame.points.length; j++)
             {
-                let point = frame.points[i];
+                let point = frame.points[j];
                 let scaled = this.toUnscaled(point.x, point.y);
                 point.shape.x = point.circle.x = scaled.x;
                 point.shape.y = point.circle.y = scaled.y;
@@ -333,26 +333,26 @@ class Project
     {
         if(this.state.mode !== "add")
         {
-            for(var time in this.timeline.frames)
+            for(var i = 0; i < this.timeline.frames.length; i++)
             {
-                let frame = this.timeline.frames[time];
-                if(frame.time < this.timeline.currentTime - this.timeline.frameTime * this.viewPoints.backward || frame.time > this.timeline.currentTime + this.timeline.frameTime * this.viewPoints.forward || frame.time < this.timeline.getFrameStart(this.timeline.startFrame) || frame.time > this.timeline.getFrameStart(this.timeline.endFrame))
+                let frame = this.timeline.frames[i];
+                if(frame.number < this.timeline.currentFrame - this.viewPoints.backward || frame.number > this.timeline.currentFrame + this.viewPoints.forward || frame.number < this.timeline.startFrame || frame.number > this.timeline.endFrame)
                 {
-                    for(var i = 0; i < frame.points.length; i++)
+                    for(var j = 0; j < frame.points.length; j++)
                     {
-                        if(!frame.points[i].hidden)
+                        if(!frame.points[j].hidden)
                         {
-                            frame.points[i].hide();
+                            frame.points[j].hide();
                         }
                     }
                 }
                 else
                 {
-                    for(var i = 0; i < frame.points.length; i++)
+                    for(var j = 0; j < frame.points.length; j++)
                     {
-                        if(frame.points[i].hidden)
+                        if(frame.points[j].hidden)
                         {
-                            frame.points[i].show();
+                            frame.points[j].show();
                         }
                     }
                 }
@@ -394,17 +394,11 @@ class Project
             duration: this.timeline.duration,
             video: this.timeline.video,
             fps: this.timeline.fps,
-            currentTime: this.timeline.currentTime,
+            currentFrame: this.timeline.currentFrame,
             uid: this.uid,
-            frames: [],
             startFrame: this.timeline.startFrame,
             endFrame: this.timeline.endFrame
         };
-
-        for(var time in this.timeline.frames)
-        {
-            saveData.frames.push(time);
-        }
 
         if(this.scale !== null && this.scale !== undefined)
         {
@@ -441,9 +435,9 @@ class Project
                 hidden: track.hidden
             };
 
-            for(var time in track.points)
+            for(var number in track.points)
             {
-                trackInfo.points[time] = {x: track.points[time].x, y: track.points[time].y};
+                trackInfo.points[number] = {x: track.points[number].x, y: track.points[number].y};
             }
 
             saveData.tracks[uid] = trackInfo;
@@ -473,6 +467,43 @@ class Project
         {
             var data = fileData;
         }
+
+        if(isNaN(this.timeline.duration))
+        {
+            console.log(this.timeline.video.duration);
+            this.timeline.duration = (this.timeline.video.duration);
+        }
+
+        if(data.fps !== undefined)
+        {
+            console.log(data.fps);
+            this.timeline.updateFps(data.fps);
+            if(this.timeline.frames.length == 0)
+            {
+                this.timeline.createFrames();
+                console.log(this.timeline.frames, this.timeline.fps, this.timeline.duration);
+            }
+            console.log(this.timeline.frames);
+            this._load(data, version);
+        }
+        else
+        {
+            var project = this;
+            this.timeline.detectFrameRate(function(fps){
+                project.timeline.updateFps(fps);
+                if(project.timeline.frames.length == 0)
+                {
+                    project.timeline.createFrames();
+                }
+
+                project._load(data, version);
+            });
+        }
+        
+        return this;
+    }
+    _load(data, version)
+    {
         for(var key in data)
         {
             let value = data[key];
@@ -487,7 +518,7 @@ class Project
                 case "fps":
                     this.timeline.updateFps(value);
                     break;
-                case "currentTime":
+                case "currentFrame":
                     this.timeline.seek(value);
                     break;
                 case "startFrame":
@@ -506,7 +537,6 @@ class Project
                     master.newScale(value.size, value.nodes[0].x, value.nodes[0].y, value.nodes[1].x, value.nodes[1].y, value.color, true);
                     break;
                 case "axes":
-                    console.log(value);
                     let axes = master.newAxes(value.position.x, value.position.y, value.color, true);
                     if(version > 0)
                     {
@@ -518,10 +548,11 @@ class Project
                     {
                         let trackInfo = value[uid];
                         let track = this.newTrack(trackInfo.name, trackInfo.color, false, uid);
-                        for(var time in trackInfo.points)
+                        for(var number in trackInfo.points)
                         {
-                            let frame = master.timeline.addFrame(time);
-                            track.addPoint(frame, trackInfo.points[time].x, trackInfo.points[time].y);
+                            let frame = master.timeline.frames[number];
+                            if(frame !== undefined)
+                                track.addPoint(frame, trackInfo.points[number].x, trackInfo.points[number].y);
                         }
                         track.unselectAll();
                         if(version > 0.2)
@@ -542,7 +573,6 @@ class Project
         this.created = true;
         this.trigger("created");
         this.undoManager.clear();
-        return this;
     }
     deleteTrack(uid)
     {
@@ -550,9 +580,9 @@ class Project
         {
             let track = this.trackList[uid];
             this.deletedTracks[uid] = track;
-            for(var time in track.points)
+            for(var number in track.points)
             {
-                let point = track.points[time];
+                let point = track.points[number];
                 point.unemphasize();
                 point.unselect();
                 track.stage.removeChild(point.shape);
@@ -575,9 +605,9 @@ class Project
             let track = this.deletedTracks[uid];
             this.trackList[uid] = track;
             document.getElementById("track-list").querySelector("ul").appendChild(track.listElement.container);
-            for(var time in track.points)
+            for(var number in track.points)
             {
-                let point = track.points[time];
+                let point = track.points[number];
                 point.unemphasize();
                 point.unselect();
                 point.show();
@@ -666,9 +696,9 @@ class Project
                 tableData = [""];
             this.track.table.newData(tableData, true, true);
 
-            if(this.track.points[master.timeline.currentTime] !== undefined)
+            if(this.track.points[master.timeline.currentFrame] !== undefined)
             {
-                this.track.points[master.timeline.currentTime].emphasize();
+                this.track.points[master.timeline.currentFrame].emphasize();
             }
         }
         return this;

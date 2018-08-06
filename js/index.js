@@ -21,7 +21,7 @@ stage.addChild(background2);
 stage.addChild(background);
 
 var tableContainer = document.getElementById('table');
-var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("video"), 29.21), new Handsontable(tableContainer), stage, background);
+var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("video"), 0), new Handsontable(tableContainer), stage, background);
 
 
 master.timeline.video.addEventListener("loadstart", function(){
@@ -155,6 +155,7 @@ var newProject = new modal({
 newProject.on("submit", function(data){
     master.name = data.name;
     master.timeline.updateFps(data.framerate);
+    master.timeline.createFrames();
     master.newAxes(300, 200, data.axesColor, true);
     this.hide().clear();
     master.viewPoints = {
@@ -578,8 +579,8 @@ stage.enableMouseOver();
 
 createjs.Ticker.addEventListener("tick", stage);
 stage.addEventListener("tick", function(){
-    master.timeline.update();
-    updateScrubber(master.timeline.currentTime, master.timeline.duration);
+    if(master.created)
+        master.timeline.update();
 });
 
 
@@ -644,12 +645,6 @@ function drawGraphics(initialDraw=false)
     scrubberLine.endMarker.x = (master.timeline.endFrame / master.timeline.frameCount * scrubberLine.rect.w) + scrubberLine.rect.x;
     scrubberLine.startMarker.y = scrubberLine.rect.y + scrubberLine.rect.h + 6;
     scrubberLine.endMarker.y = scrubberLine.rect.y + scrubberLine.rect.h + 6;
-
-    for(var time in frameMarkers.master.markers)
-    {
-        let marker = frameMarkers.master.markers[time];
-        marker.x = ((time / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x);
-    }
 
     master.handsOnTable.render();
 
@@ -742,8 +737,8 @@ video.onplaying = (function(){
     video.currentTime = 0;
     background.image = this;
     master.timeline.updateDuration(video.duration);
-    master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-    master.timeline.video.currentTime = master.timeline.currentTime;
+    master.timeline.seek(master.timeline.getFrameStart(master.timeline.startFrame));
+    master.updateVisiblePoints();
     drawGraphics(true);
     video.style.display = "none";
 });
@@ -763,7 +758,7 @@ stage.on("stagemousemove", function(e){
     }
     else
     {
-        posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: " + Math.round(coords.x) + ", Y: " + Math.round(coords.y);
+        posText.text = "Frame: " + master.timeline.currentFrame + ", X: " + Math.round(coords.x) + ", Y: " + Math.round(coords.y);
     }
     
     
@@ -776,35 +771,14 @@ stage.on("click", function(e){
         if(master.track.state.mode == "add")
         {
             var frame = master.timeline.current();
-            if(frame === false)
-            {
-                frame = master.timeline.addFrame(master.timeline.currentTime);
-                if(frameMarkers.master.markers[frame.time] == undefined)
-                    frameMarkers.master.markers[frame.time] = frameMarkers.master.shape.graphics.drawRect(((master.timeline.currentTime / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
-            }
             let scaled = master.toScaled(stage.mouseX, stage.mouseY);
             master.track.addPoint(frame, scaled.x, scaled.y);
 
             var nextFrame = master.timeline.next();
+            master.timeline.setFrame(nextFrame.frame.number);
 
-            if(nextFrame !== false && nextFrame.distance <= master.timeline.frameTime)
-            {
-                master.timeline.setFrame(nextFrame.frame.time);
-                // master.updateVisiblePoints();
-
-                if(master.track.points[nextFrame.frame.time] !== undefined)
-                    master.track.points[nextFrame.frame.time].show().emphasize();
-            }
-            else
-            {
-                var closestFrame = master.timeline.getClosestFrame();
-                
-                master.timeline.currentTime = ((closestFrame + 1) * master.timeline.frameTime).roundTo(3);
-                master.timeline.video.currentTime = master.timeline.currentTime;
-                master.track.unselectAll();
-                master.track.unemphasizeAll();
-                // master.updateVisiblePoints();
-            }
+            if(master.track.points[nextFrame.frame.number] !== undefined)
+                master.track.points[nextFrame.frame.number].show().emphasize();
         }
     }
     frameArrows.update();
@@ -813,52 +787,22 @@ stage.on("click", function(e){
 frameArrows.forward.sprite.on("click", function(e){
     if(frameArrows.forward.enabled === true)
     {
-        let time = master.timeline.currentTime;
         let frame = master.timeline.next();
-        let closestFrame = master.timeline.getClosestFrame();
-        if(closestFrame >= master.timeline.endFrame)
-            closestFrame = master.timeline.endFrame - 1;
-
-        if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip && frame.time <= master.timeline.getFrameStart(master.timeline.endFrame))
+        
+        if(frame !== false && frame.number <= master.timeline.endFrame)
         {
-            if(master.timeline.setFrame(frame.frame.time) !== false)
+            if(master.timeline.setFrame(frame.frame.number) !== false)
             {
-                // master.updateVisiblePoints();
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                if(master.track.points[frame.frame.time] !== undefined)
+                if(master.track.points[frame.frame.number] !== undefined)
                 {
-                    master.track.points[frame.frame.time].show().emphasize();
+                    master.track.points[frame.frame.number].show().emphasize();
                 }
-            }
-            else
-            {
-            }
-        }
-        else if(closestFrame <= master.timeline.endFrame - master.timeline.frameSkip && closestFrame >= master.timeline.startFrame)
-        {
-            master.timeline.currentTime = master.timeline.getFrameStart(closestFrame + master.timeline.frameSkip);
-            master.track.unselectAll();
-            master.track.unemphasizeAll();
-            // master.updateVisiblePoints();
-            if(master.track.points[master.timeline.currentTime] !== undefined)
-            {
-                master.track.points[master.timeline.currentTime].emphasize();
-            }
-        }
-        else
-        {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-            master.track.unselectAll();
-            master.track.unemphasizeAll();
-            // master.updateVisiblePoints();
-            if(master.track.points[master.timeline.currentTime] !== undefined)
-            {
-                master.track.points[master.timeline.currentTime].emphasize();
             }
         }
 
-        posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
+        posText.text = "Frame: " + master.timeline.currentFrame + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
         frameArrows.update();
     }
 });
@@ -866,49 +810,22 @@ frameArrows.forward.sprite.on("click", function(e){
 frameArrows.back.sprite.on("click", function(e){
     if(frameArrows.back.enabled === true)
     {
-        let time = master.timeline.currentTime;
         let frame = master.timeline.prev();
-        let closestFrame = master.timeline.getClosestFrame();
-        if(closestFrame <= master.startFrame)
-            closestFrame = master.startFrame + master.timeline.frameSkip;
         
-        if(frame !== false && frame.distance <= master.timeline.frameTime * master.timeline.frameSkip && frame.time >= master.timeline.getFrameStart(master.timeline.startFrame))
+        if(frame !== false && frame.number >= master.timeline.startFrame)
         {
-            if(master.timeline.setFrame(frame.frame.time) !== false)
+            if(master.timeline.setFrame(frame.frame.number) !== false)
             {
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                // master.updateVisiblePoints();
-                if(master.track.points[frame.frame.time] !== undefined)
+                if(master.track.points[frame.frame.number] !== undefined)
                 {
-                    master.track.points[frame.frame.time].emphasize();
+                    master.track.points[frame.frame.number].show().emphasize();
                 }
             }
         }
-        else if(closestFrame <= master.timeline.endFrame && closestFrame >= master.timeline.startFrame + master.timeline.frameSkip)
-        {
-            master.timeline.currentTime = master.timeline.getFrameStart(closestFrame - master.timeline.frameSkip);
-            master.timeline.video.currentTime = master.timeline.currentTime;
-            master.track.unselectAll();
-            master.track.unemphasizeAll();
-            // master.updateVisiblePoints();
-            if(master.track.points[master.timeline.currentTime] !== undefined)
-            {
-                master.track.points[master.timeline.currentTime].emphasize();
-            }
-        }
-        else
-        {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-            master.track.unselectAll();
-            master.track.unemphasizeAll();
-            // master.updateVisiblePoints();
-            if(master.track.points[master.timeline.currentTime] !== undefined)
-            {
-                master.track.points[master.timeline.currentTime].emphasize();
-            }
-        }
-        posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
+
+        posText.text = "Frame: " + master.timeline.currentFrame + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
         frameArrows.update();
     }
 });
@@ -918,58 +835,33 @@ scrubberLine.thumb.on("pressmove", function(e){
 
     if(coords.x >= scrubberLine.rect.x && coords.x <= scrubberLine.rect.w + scrubberLine.rect.x)
     {
-        let closestFrame = Math.round((((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration) / (master.timeline.frameTime / 4)) / 4;
+        let closestFrame = Math.round((((coords.x - scrubberLine.rect.x) / scrubberLine.rect.w) * master.timeline.duration) / (master.timeline.frameTime));
         if(closestFrame <= master.timeline.endFrame && closestFrame >= master.timeline.startFrame)
         {
-            
-            //console.log(closestFrame);
             scrubberLine.thumb.x = closestFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
             
-            time = (closestFrame * master.timeline.frameTime).roundTo(3);
-            master.timeline.video.currentTime = time;
-            master.timeline.currentTime = time;
-            // master.updateVisiblePoints();
+            master.timeline.seek(closestFrame);
         }
         else if(closestFrame < master.timeline.startFrame)
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-            // master.updateVisiblePoints();
+            master.timeline.seek(master.timeline.startFrame);
         }
         else if(closestFrame > master.timeline.endFrame)
         {
-            master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-            // master.updateVisiblePoints();
+            master.timeline.seek(master.timeline.endFrame);
         }
 
     }
     else if(coords.x < (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.startFrame + scrubberLine.rect.x)
     {
-        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-        // master.updateVisiblePoints();
+        master.timeline.seek(master.timeline.startFrame);
     }
     else if(coords.x > (scrubberLine.rect.w / master.timeline.frameCount) * master.timeline.endFrame + scrubberLine.rect.x)
     {
-        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-        // master.updateVisiblePoints();
-    }
-    
-    let current = master.timeline.current();
-    if(current !== false)
-    {
-        master.track.unselectAll();
-        master.track.unemphasizeAll();
-        if(master.track.points[current.time] !== undefined)
-        {
-            master.track.points[current.time].emphasize();
-        }
-    }
-    else
-    {
-        master.track.unselectAll();
-        master.track.unemphasizeAll();
+        master.timeline.seek(master.timeline.endFrame);
     }
 
-    posText.text = "Frame: " + (master.timeline.currentTime / master.timeline.frameTime).roundTo(2) + ", X: 0, Y: 0";
+    posText.text = "Frame: " + master.timeline.currentFrame + ", X: 0, Y: 0";
     frameArrows.update();
 });
 
@@ -989,33 +881,26 @@ scrubberLine.startMarker.on("pressmove", function(e){
     {
         scrubberLine.startMarker.x = closestFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
         master.timeline.startFrame = closestFrame;
-        if(master.timeline.currentTime < master.timeline.getFrameStart(master.timeline.startFrame))
+        if(master.timeline.currentFrame <= master.timeline.startFrame)
         {
             startMarkerStuck = true;
         }
         master.update();
-        // master.updateVisiblePoints();
     }
     else if(closestFrame < 0)
     {
         scrubberLine.startMarker.x = scrubberLine.rect.x;
         master.timeline.startFrame = 0;
-        if(master.timeline.currentTime < master.timeline.getFrameStart(master.timeline.startFrame))
+        if(master.timeline.currentFrame <= master.timeline.startFrame)
         {
             startMarkerStuck = true;
         }
         master.update();
-        // master.updateVisiblePoints();
     }
 
     if(startMarkerStuck)
     {
-        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-        master.track.unemphasizeAll();
-        if(master.track.points[master.timeline.currentTime] !== undefined)
-        {
-            master.track.points[master.timeline.currentTime].emphasize();
-        }
+        master.timeline.seek(master.timeline.startFrame);
     }
 
     frameArrows.update();
@@ -1036,15 +921,9 @@ scrubberLine.startMarker.on("pressup", function(){
                     master.timeline.startFrame = last;
                     if(stuck)
                     {
-                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-                        master.track.unemphasizeAll();
-                        if(master.track.points[master.timeline.currentTime] !== undefined)
-                        {
-                            master.track.points[master.timeline.currentTime].emphasize();
-                        }
+                        master.timeline.seek(master.timeline.startFrame);
                     }
                     master.update();
-                    // master.updateVisiblePoints();
                 },
                 redo: function(){
                     startFrames.push(current);
@@ -1052,15 +931,9 @@ scrubberLine.startMarker.on("pressup", function(){
                     master.timeline.startFrame = current;
                     if(stuck)
                     {
-                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.startFrame);
-                        master.track.unemphasizeAll();
-                        if(master.track.points[master.timeline.currentTime] !== undefined)
-                        {
-                            master.track.points[master.timeline.currentTime].emphasize();
-                        }
+                        master.timeline.seek(master.timeline.startFrame);
                     }
                     master.update();
-                    // master.updateVisiblePoints();
                 }
             });
         }
@@ -1086,33 +959,26 @@ scrubberLine.endMarker.on("pressmove", function(e){
     {
         scrubberLine.endMarker.x = closestFrame * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
         master.timeline.endFrame = closestFrame;
-        if(master.timeline.currentTime > master.timeline.getFrameStart(master.timeline.endFrame))
+        if(master.timeline.currentFrame > master.timeline.endFrame)
         {
             endMarkerStuck = true;
         }
         master.update();
-        // master.updateVisiblePoints();
     }
     else if(closestFrame > master.timeline.frameCount)
     {
         scrubberLine.endMarker.x = master.timeline.frameCount * (scrubberLine.rect.w / master.timeline.frameCount) + scrubberLine.rect.x;
         master.timeline.endFrame = master.timeline.frameCount;
-        if(master.timeline.currentTime > master.timeline.getFrameStart(master.timeline.endFrame))
+        if(master.timeline.currentFrame >= master.timeline.endFrame)
         {
             endMarkerStuck = true;
         }
         master.update();
-        // master.updateVisiblePoints();
     }
 
     if(endMarkerStuck)
     {
-        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-        master.track.unemphasizeAll();
-        if(master.track.points[master.timeline.currentTime] !== undefined)
-        {
-            master.track.points[master.timeline.currentTime].emphasize();
-        }
+        master.timeline.seek(master.timeline.endFrame);
     }
     frameArrows.update();
 });
@@ -1133,15 +999,9 @@ scrubberLine.endMarker.on("pressup", function(){
                     master.timeline.endFrame = last;
                     if(stuck)
                     {
-                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-                        master.track.unemphasizeAll();
-                        if(master.track.points[master.timeline.currentTime] !== undefined)
-                        {
-                            master.track.points[master.timeline.currentTime].emphasize();
-                        }
+                        master.timeline.seek(master.timeline.endFrame);
                     }
                     master.update();
-                    // master.updateVisiblePoints();
                 },
                 redo: function(){
                     endFrames.push(current);
@@ -1149,15 +1009,9 @@ scrubberLine.endMarker.on("pressup", function(){
                     master.timeline.endFrame = current;
                     if(stuck)
                     {
-                        master.timeline.currentTime = master.timeline.getFrameStart(master.timeline.endFrame);
-                        master.track.unemphasizeAll();
-                        if(master.track.points[master.timeline.currentTime] !== undefined)
-                        {
-                            master.track.points[master.timeline.currentTime].emphasize();
-                        }
+                        master.timeline.seek(master.timeline.endFrame);
                     }
                     master.update();
-                    // master.updateVisiblePoints();
                 }
             });
         }
@@ -1169,6 +1023,15 @@ scrubberLine.endMarker.on("pressup", function(){
 
 master.timeline.on("seek", function(){
     this.project.updateVisiblePoints();
+    if(this.project.track !== null && this.project.track !== undefined)
+    {
+        this.project.track.unemphasizeAll();
+        if(this.project.track.points[this.project.timeline.currentFrame] !== undefined)
+        {
+            this.project.track.points[this.project.timeline.currentFrame].emphasize();
+        }
+    }
+    updateScrubber(master.timeline.currentTime, master.timeline.duration);
     document.getElementById("video-clone").currentTime = master.timeline.currentTime;
 });
 
@@ -1342,12 +1205,6 @@ master.on("change", function(){
 master.on("created", function(){
     scrubberLine.startMarker.x = this.timeline.startFrame * (scrubberLine.rect.w / this.timeline.frameCount) + scrubberLine.rect.x;
     scrubberLine.endMarker.x = this.timeline.endFrame * (scrubberLine.rect.w / this.timeline.frameCount) + scrubberLine.rect.x;
-
-    for(var time in master.timeline.frames)
-    {
-        if(frameMarkers.master.markers[time] === undefined)
-            frameMarkers.master.markers[time] = frameMarkers.master.shape.graphics.drawRect(((parseFloat(time) / master.timeline.duration) * scrubberLine.rect.w + scrubberLine.rect.x), scrubberLine.rect.y, 1, scrubberLine.rect.h).command;
-    }
 
     this.updateVisiblePoints();
 });

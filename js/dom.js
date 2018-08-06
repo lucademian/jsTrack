@@ -131,7 +131,7 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
         if(confirm("You have a project backup from " + date + ". Would you like to recover this?"))
         {
             
-            if(backupInfo.video !== undefined || backupInfo.video !== null || backupInfo.video !== "")
+            if(backupInfo.video !== undefined && backupInfo.video !== null && backupInfo.video !== "")
             {
                 showLoader();
                 var file = dataURLtoBlob(backupInfo.video);
@@ -145,7 +145,7 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
                     JSZip.loadAsync(data).then(function (data) {
                         data.file("video.mp4").async("blob").then(function(videoBlob){
                             loadVideo(videoBlob, function(){
-                                if(backupInfo.data !== undefined || backupInfo.data !== null || backupInfo.data !== "")
+                                if(backupInfo.data !== undefined && backupInfo.data !== null && backupInfo.data !== "")
                                 {
                                     var file = dataURLtoBlob(backupInfo.data);
 
@@ -209,7 +209,7 @@ document.body.addEventListener('drop', function(e){
                     stage.removeAllChildren();
                     master.destroy();
 
-                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 29.21), new Handsontable(tableContainer), stage);
+                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 0), new Handsontable(tableContainer), stage);
                     stage.addChild(background);
                     stage.addChild(posText);
 
@@ -236,7 +236,7 @@ document.body.addEventListener('drop', function(e){
                     master.destroy();
                     stage.removeAllChildren();
 
-                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 29.21), new Handsontable(tableContainer), stage);
+                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 0), new Handsontable(tableContainer), stage);
                     stage.addChild(background);
                     stage.addChild(posText);
 

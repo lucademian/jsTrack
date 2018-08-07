@@ -278,12 +278,12 @@ class Track
             this.project.change({
                 undo: function(){
                     point.move(toGo.x, toGo.y);
-                    track.project.timeline.seek(newPoint.frame.number);
+                    track.project.timeline.seek(frame.number);
                     track.project.update();
                 },
                 redo: function(){
                     point.move(x, y);
-                    track.project.timeline.seek(newPoint.frame.number);
+                    track.project.timeline.seek(frame.number);
                     track.project.update();
                 }
             });
@@ -333,7 +333,6 @@ class Track
 	{
         if(this.emphasizedPoint !== null && this.emphasizedPoint !== undefined)
         {
-            //console.log(this.emphasizedPoint);
             this.emphasizedPoint.unemphasize();
         }
 		this.emphasizedPoint = null;

@@ -76,7 +76,6 @@
                     uploadFileRequest.setRequestHeader('Content-Type', 'application/x-zip');
                     uploadFileRequest.setRequestHeader('X-Upload-Content-Type', 'application/x-zip');
                     uploadFileRequest.onreadystatechange = function(){
-                        //console.log(uploadFileRequest.readyState, uploadFileRequest.status, XMLHttpRequest.DONE);
                         if(uploadFileRequest.readyState === XMLHttpRequest.DONE)
                             callback(true);
                         else

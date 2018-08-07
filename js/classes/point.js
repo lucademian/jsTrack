@@ -153,18 +153,18 @@ class Point
                 scaled: {}
             };
 
-            data.pixels.x = location.x;
-            data.pixels.y = location.y;
+            data.pixels.x = location.x.roundTo(5);
+            data.pixels.y = location.y.roundTo(5);
 
             if(scale == null || scale == undefined)
             {
-                data.scaled.x = location.x;
-                data.scaled.y = location.y;
+                data.scaled.x = location.x.roundTo(5);
+                data.scaled.y = location.y.roundTo(5);
             }
             else
             {
-                data.scaled.x = scale.convert(location.x).number;
-                data.scaled.y = scale.convert(location.y).number;
+                data.scaled.x = scale.convert(location.x).number.roundTo(5);
+                data.scaled.y = scale.convert(location.y).number.roundTo(5);
             }
 
             return data;

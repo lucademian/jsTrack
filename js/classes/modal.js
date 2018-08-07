@@ -141,7 +141,6 @@ class modal
             {
                 buttonItem.title = this.buttons[button].label;
                 buttonItem.style.backgroundImage = "url('" + this.buttons[button].image + "')";
-                console.log(this.buttons[button].image);
             }
             else
                 buttonItem.innerText = this.buttons[button].label;

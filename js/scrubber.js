@@ -59,7 +59,7 @@ scrubber.addChild(frameArrows.forward.sprite);
 scrubber.addChild(frameArrows.back.sprite);
 
 frameArrows.update = function(){
-    if(master.currentFrame == master.endFrame)
+    if(master.timeline.currentFrame == master.timeline.endFrame)
     {
         frameArrows.forward.sprite.gotoAndStop("frameForwardDisabled");
         frameArrows.forward.button.enabled = false;
@@ -72,7 +72,7 @@ frameArrows.update = function(){
         frameArrows.forward.enabled = true;
     }
 
-    if(master.currentFrame == master.startFrame)
+    if(master.timeline.currentFrame == master.timeline.startFrame)
     {
         frameArrows.back.sprite.gotoAndStop("frameBackDisabled");
         frameArrows.back.button.enabled = false;

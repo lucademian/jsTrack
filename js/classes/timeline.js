@@ -12,18 +12,22 @@ class Timeline
 		this.frameCount =  Math.floor(this.duration / this.frameTime);
         this.currentTime = 0;
         this.currentFrame = 0;
+        this.lastFrame = -1;
+        this.direction = "forward";
         this.savedTime = 0;
         this.seekSaved = false;
 		this.startFrame = 0;
-        this.endFrame = this.frameCount;
+        this.endFrame = 1;
         this.callbacks = {};
-		this.frames = [];
+		this.frames = [
+            new Frame(this, 0, 0)
+        ];
     }
     // function to fire "loaded" event
     createFrames()
     {
-        var counter = 0;
-        for(var time = 0; time < (this.video.duration) - (this.video.duration % this.frameTime); time = (time + this.frameTime).roundTo(3))
+        var counter = 1;
+        for(var time = this.frameTime; time < (this.video.duration) - (this.video.duration % this.frameTime); time = (time + this.frameTime).roundTo(3))
         {
             this.frames[counter] = new Frame(this, time, counter);
             counter++;
@@ -71,7 +75,6 @@ class Timeline
             if(firstLoad)
             {
                 firstLoad = false;
-                console.log("onloadeddata");
                 var newCanv = document.createElement("canvas");
                 newCanv.height = tempVideo.videoHeight;
                 newCanv.width = tempVideo.videoWidth;
@@ -79,12 +82,12 @@ class Timeline
                 newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
                 let lastFrame = newCanv.toDataURL();
                 var timeStart = 0.1;
-                var timeEnd = timeStart + 0.1;
+                var timeEnd = timeStart + 0.2;
                 if(tempVideo.duration < timeEnd)
                     timeEnd = tempVideo.duration;
                 var tempTime = timeStart;
                 tempVideo.currentTime = tempTime;
-                console.log("Detecting...");
+                console.log("Detecting Framerate...");
                 var firstDetection = true;
                 tempVideo.addEventListener("timeupdate", function(){
                     newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
@@ -102,8 +105,8 @@ class Timeline
                     else if(firstDetection)
                     {
                         firstDetection = false;
-                        var framerate = (newFrames - 1) / (timeEnd - timeStart);
-                        console.log(framerate);
+                        var framerate = Math.round((newFrames - 1) / (timeEnd - timeStart));
+                        console.log(framerate + " FPS");
                         if(callback !== null)
                             callback(framerate);
                     }
@@ -213,8 +216,14 @@ class Timeline
     {
         if(this.seekSaved && this.duration > 0)
         {
+            this.lastFrame = this.currentFrame;
             this.currentFrame = this.savedFrame;
             this.seekSaved = false;
+
+            if(this.lastFrame < this.currentFrame)
+                this.direction = "forward";
+            else
+                this.direction = "backward";
             
             this.trigger("seek");
         }
@@ -226,26 +235,16 @@ class Timeline
             this.video.currentTime = this.currentTime;
         }
     }
-    updateFps(fps)
+    updateTiming(duration, fps)
     {
         let ratios = {
             start: (this.startFrame / this.frameCount) || 0,
             end: (this.endFrame / this.frameCount) || 1
         };
+		this.duration = duration.roundTo(3);
         this.fps = parseFloat(fps);
 		this.frameTime = (1/this.fps).roundTo(3);
         this.frameCount =  Math.floor(this.duration / this.frameTime);
-		this.duration = (this.frameCount * this.frameTime).roundTo(3);
-        this.startFrame = Math.floor(ratios.start * this.frameCount);
-        this.endFrame = Math.floor(ratios.end * this.frameCount);
-    }
-	updateDuration(duration){
-        let ratios = {
-            start: (this.startFrame / this.frameCount) || 0,
-            end: (this.endFrame / this.frameCount) || 1
-        };
-		this.duration = duration.roundTo(3);
-		this.frameCount = Math.floor(this.duration / this.frameTime);
 		this.duration = (this.frameCount * this.frameTime).roundTo(3);
         this.startFrame = Math.floor(ratios.start * this.frameCount);
         this.endFrame = Math.floor(ratios.end * this.frameCount);
@@ -267,9 +266,17 @@ class Timeline
 		let frame = this.frames[frameNum];
 		if(frame !== undefined)
 		{
+            this.lastFrame = this.currentFrame;
             this.currentFrame = frame.number;
 			this.currentTime = frame.time.roundTo(3);
-			this.video.currentTime = frame.time;
+            this.video.currentTime = frame.time;
+
+            if(this.lastFrame < this.currentFrame)
+                this.direction = "forward";
+            else
+                this.direction = "backward";
+
+            this.trigger("seek");
 		}
 		else
 		{
@@ -293,7 +300,7 @@ class Timeline
 		}
 		else
 		{
-			return {"frame": pickedFrame, "time": pickedFrame.time.roundTo(3)};
+			return pickedFrame;
 		}
 	}
 	prev()
@@ -305,7 +312,7 @@ class Timeline
 		}
 		else
 		{
-			return {"frame": pickedFrame, "time": pickedFrame.time.roundTo(3)};
+			return pickedFrame;
 		}
 	}
 }

@@ -209,7 +209,7 @@ document.body.addEventListener('drop', function(e){
                     stage.removeAllChildren();
                     master.destroy();
 
-                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 0), new Handsontable(tableContainer), stage);
+                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 30), new Handsontable(tableContainer), stage);
                     stage.addChild(background);
                     stage.addChild(posText);
 
@@ -236,7 +236,7 @@ document.body.addEventListener('drop', function(e){
                     master.destroy();
                     stage.removeAllChildren();
 
-                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 0), new Handsontable(tableContainer), stage);
+                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 30), new Handsontable(tableContainer), stage);
                     stage.addChild(background);
                     stage.addChild(posText);
 
@@ -273,7 +273,6 @@ function handleFile(file, callback=null)
                 if(callback !== null)
                     callback();
                 master.timeline.detectFrameRate(function(framerate){
-                    console.log(framerate);
                     hideLaunchModal();
                     newProject.push({
                         "framerate": framerate

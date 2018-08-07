@@ -216,6 +216,7 @@ class Scale
                         _scale.textValue = math.format(math.unit(value), {notation: "auto", precision: 6}).toString();
                     }
                     _scale.project.changed();
+                    _scale.project.update();
 				}
 				catch(TypeError)
 				{

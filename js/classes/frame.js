@@ -7,6 +7,5 @@ class Frame
 		this.timeline = timeline;
         this.uid = (Math.round(Math.random() * 100000) + 1).toString();
         this.points = [];
-        this.image = this.timeline.getImage(time);
 	}
 }

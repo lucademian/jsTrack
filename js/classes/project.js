@@ -154,7 +154,6 @@ class Project
         });
         
         this.positioning.on("translation, zoom", function(position){
-            console.log(position);
             this.background.scale = this.backgroundScale * position.zoom;
             this.background.x = position.x ;
             this.background.y = position.y;
@@ -468,30 +467,21 @@ class Project
             var data = fileData;
         }
 
-        if(isNaN(this.timeline.duration))
-        {
-            console.log(this.timeline.video.duration);
-            this.timeline.duration = (this.timeline.video.duration);
-        }
-
         if(data.fps !== undefined)
         {
-            console.log(data.fps);
-            this.timeline.updateFps(data.fps);
-            if(this.timeline.frames.length == 0)
+            this.timeline.updateTiming(this.timeline.video.duration, data.fps);
+            if(this.timeline.frames.length == 1)
             {
                 this.timeline.createFrames();
-                console.log(this.timeline.frames, this.timeline.fps, this.timeline.duration);
             }
-            console.log(this.timeline.frames);
             this._load(data, version);
         }
         else
         {
             var project = this;
             this.timeline.detectFrameRate(function(fps){
-                project.timeline.updateFps(fps);
-                if(project.timeline.frames.length == 0)
+                project.timeline.updateTiming(project.timeline.video.duration, fps);
+                if(project.timeline.frames.length == 1)
                 {
                     project.timeline.createFrames();
                 }
@@ -514,9 +504,6 @@ class Project
                     break;
                 case "uid":
                     this.uid = value;
-                    break;
-                case "fps":
-                    this.timeline.updateFps(value);
                     break;
                 case "currentFrame":
                     this.timeline.seek(value);

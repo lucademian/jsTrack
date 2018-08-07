@@ -21,7 +21,7 @@ stage.addChild(background2);
 stage.addChild(background);
 
 var tableContainer = document.getElementById('table');
-var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("video"), 0), new Handsontable(tableContainer), stage, background);
+var master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("video"), 30), new Handsontable(tableContainer), stage, background);
 
 
 master.timeline.video.addEventListener("loadstart", function(){
@@ -63,7 +63,6 @@ function loadProject(file, callback=null)
         }
     
         JSZip.loadAsync(data).then(function (data) {
-            console.log(data);
             if(data.files["video.mp4"] !== undefined){
                 data.file("video.mp4").async("blob").then(function(videoBlob){
                     loadVideo(videoBlob, function(){
@@ -154,7 +153,7 @@ var newProject = new modal({
 
 newProject.on("submit", function(data){
     master.name = data.name;
-    master.timeline.updateFps(data.framerate);
+    master.timeline.updateTiming(master.timeline.video.duration, data.framerate);
     master.timeline.createFrames();
     master.newAxes(300, 200, data.axesColor, true);
     this.hide().clear();
@@ -295,11 +294,6 @@ var editProject = new modal({
             "type": "text",
             "required": true
         },
-        "framerate": {
-            "label": "Framerate",
-            "type": "text",
-            "required": true
-        },
         "axesColor": {
             "label": "Axes Color",
             "type": "color",
@@ -331,7 +325,6 @@ var editProject = new modal({
 
 editProject.on("submit", function(data){
     master.name = data.name;
-    master.timeline.updateFps(data.framerate);
     master.axes.updateColor(data.axesColor);
     this.hide().clear();
     master.viewPoints = {
@@ -434,7 +427,6 @@ editScale.on("cancel", function(){
     this.hide().clear();
 })
 .on("submit", function(data){
-    console.log(data);
     master.scale.updateInfo({
         "color": data.color
     });
@@ -559,10 +551,7 @@ editTrack.on("cancel", function(){
 });
 
 var unitAutocomplete;
-newTrack.on("create", function(){
-    console.log("created");
-})
-.on("cancel", function(){
+newTrack.on("cancel", function(){
     this.hide().clear();
 })
 .on("submit", function(data){
@@ -652,7 +641,6 @@ function drawGraphics(initialDraw=false)
     master.updateScale();
     scrubber.update();
     frameArrows.update();
-    console.log("drawn");
 }
 
 interact("#sidebar").resizable({
@@ -732,12 +720,9 @@ panelMove.on("drag", function(el){
 });
 
 video.onplaying = (function(){
-    console.log("loaded");
     video.pause();
     video.currentTime = 0;
     background.image = this;
-    master.timeline.updateDuration(video.duration);
-    master.timeline.seek(master.timeline.getFrameStart(master.timeline.startFrame));
     master.updateVisiblePoints();
     drawGraphics(true);
     video.style.display = "none";
@@ -775,13 +760,12 @@ stage.on("click", function(e){
             master.track.addPoint(frame, scaled.x, scaled.y);
 
             var nextFrame = master.timeline.next();
-            master.timeline.setFrame(nextFrame.frame.number);
+            master.timeline.setFrame(nextFrame.number);
 
-            if(master.track.points[nextFrame.frame.number] !== undefined)
-                master.track.points[nextFrame.frame.number].show().emphasize();
+            if(master.track.points[nextFrame.number] !== undefined)
+                master.track.points[nextFrame.number].show().emphasize();
         }
     }
-    frameArrows.update();
 });
 
 frameArrows.forward.sprite.on("click", function(e){
@@ -791,19 +775,16 @@ frameArrows.forward.sprite.on("click", function(e){
         
         if(frame !== false && frame.number <= master.timeline.endFrame)
         {
-            if(master.timeline.setFrame(frame.frame.number) !== false)
+            if(master.timeline.setFrame(frame.number) !== false)
             {
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                if(master.track.points[frame.frame.number] !== undefined)
+                if(master.track.points[frame.number] !== undefined)
                 {
-                    master.track.points[frame.frame.number].show().emphasize();
+                    master.track.points[frame.number].show().emphasize();
                 }
             }
         }
-
-        posText.text = "Frame: " + master.timeline.currentFrame + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
-        frameArrows.update();
     }
 });
 
@@ -814,19 +795,16 @@ frameArrows.back.sprite.on("click", function(e){
         
         if(frame !== false && frame.number >= master.timeline.startFrame)
         {
-            if(master.timeline.setFrame(frame.frame.number) !== false)
+            if(master.timeline.setFrame(frame.number) !== false)
             {
                 master.track.unselectAll();
                 master.track.unemphasizeAll();
-                if(master.track.points[frame.frame.number] !== undefined)
+                if(master.track.points[frame.number] !== undefined)
                 {
-                    master.track.points[frame.frame.number].show().emphasize();
+                    master.track.points[frame.number].show().emphasize();
                 }
             }
         }
-
-        posText.text = "Frame: " + master.timeline.currentFrame + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
-        frameArrows.update();
     }
 });
 
@@ -860,9 +838,6 @@ scrubberLine.thumb.on("pressmove", function(e){
     {
         master.timeline.seek(master.timeline.endFrame);
     }
-
-    posText.text = "Frame: " + master.timeline.currentFrame + ", X: 0, Y: 0";
-    frameArrows.update();
 });
 
 var startMarkerStuck = false;
@@ -1023,6 +998,8 @@ scrubberLine.endMarker.on("pressup", function(){
 
 master.timeline.on("seek", function(){
     this.project.updateVisiblePoints();
+    frameArrows.update();
+    posText.text = "Frame: " + master.timeline.currentFrame + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
     if(this.project.track !== null && this.project.track !== undefined)
     {
         this.project.track.unemphasizeAll();
@@ -1032,7 +1009,13 @@ master.timeline.on("seek", function(){
         }
     }
     updateScrubber(master.timeline.currentTime, master.timeline.duration);
-    document.getElementById("video-clone").currentTime = master.timeline.currentTime;
+    let video2 = document.getElementById("video-clone");
+    setTimeout(function(){
+        if(master.timeline.direction == "forward")
+            video2.currentTime = master.timeline.next().time;
+        else if(master.timeline.direction == "backward")
+            video2.currentTime = master.timeline.prev().time;
+    }, 100);
 });
 
 function updateBackup(state)
@@ -1206,7 +1189,9 @@ master.on("created", function(){
     scrubberLine.startMarker.x = this.timeline.startFrame * (scrubberLine.rect.w / this.timeline.frameCount) + scrubberLine.rect.x;
     scrubberLine.endMarker.x = this.timeline.endFrame * (scrubberLine.rect.w / this.timeline.frameCount) + scrubberLine.rect.x;
 
+    updateScrubber(master.timeline.currentTime, master.timeline.duration);
     this.updateVisiblePoints();
+    frameArrows.update();
 });
 
 keyboardJS.pause();

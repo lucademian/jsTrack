@@ -594,13 +594,52 @@ function drawGraphics(initialDraw=false)
     videoContainer.style.height = height + "px";
 
     let scale = Math.min((width / master.timeline.video.videoWidth), (height / master.timeline.video.videoHeight));
-    master.backgroundScale = scale;
     
     canvas.height = height;
     canvas.width = width;
-    background.scale = master.backgroundScale * master.positioning.zoom;
-    master.positioning.x = (canvas.width - (background.scale * master.timeline.video.videoWidth)) / 2;
-    master.positioning.y = (canvas.height - (background.scale * master.timeline.video.videoHeight)) / 2;
+    
+    if(master.positioning.autoZoom)
+    {
+        master.backgroundScale = scale;
+        background.scale = master.backgroundScale * master.positioning.zoom;
+    }
+
+    master.background.w = background.scale * master.timeline.video.videoWidth;
+    master.background.h = background.scale * master.timeline.video.videoHeight;
+
+    if(master.background.w <= canvas.width)
+    {
+        master.positioning.x = (canvas.width - (master.background.scale * master.timeline.video.videoWidth)) / 2;
+    }
+    else
+    {
+        if(master.positioning.x + master.background.w < canvas.width)
+        {
+            master.positioning.x = canvas.width - master.background.w;
+        }
+        
+        if(master.positioning.x > 0 && master.background.w > canvas.width)
+        {
+            master.positioning.x = 0;
+        }
+    }
+    if(master.background.h <= canvas.height)
+    {
+        master.positioning.y = (canvas.height - (master.background.scale * master.timeline.video.videoHeight)) / 2;
+    }
+    else
+    {
+        if(master.positioning.y + master.background.h < canvas.height)
+        {
+            master.positioning.y = canvas.height - master.background.h;
+        }
+        
+        if(master.positioning.y > 0 && master.background.h > canvas.height)
+        {
+            master.positioning.y = 0;
+        }
+    }
+
 
     background2.scale = background.scale;
     background2.x = background.x;
@@ -996,6 +1035,77 @@ scrubberLine.endMarker.on("pressup", function(){
     endMarkerStuck = false;
 });
 
+var originalCoords = {
+    x: 0,
+    y: 0
+};
+
+var originalPosition = {
+    x: master.positioning.x,
+    y: master.positioning.y
+};
+var backgroundDimensions = {
+    w: master.background.w,
+    h: master.background.h
+};
+
+background.on("mousedown", function(e){
+    originalCoords = {
+        x: e.stageX,
+        y: e.stageY
+    };
+    originalPosition = {
+        x: master.positioning.x,
+        y: master.positioning.y
+    };
+    backgroundDimensions = {
+        w: master.background.w,
+        h: master.background.h
+    };
+});
+background.on("pressmove", function(e){
+    let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
+    if(master.state.mode == "positioning")
+    {
+        let newPos = {
+            x: originalPosition.x + coords.x - originalCoords.x,
+            y: originalPosition.y + coords.y - originalCoords.y
+        };
+
+        if(newPos.x + backgroundDimensions.w < canvas.width)
+        {
+            newPos.x = canvas.width - backgroundDimensions.w;
+        }
+        
+        if(newPos.x > 0 && backgroundDimensions.w > canvas.width)
+        {
+            newPos.x = 0;
+        }
+
+        if(newPos.y + backgroundDimensions.h < canvas.height)
+        {
+            newPos.y = canvas.height - backgroundDimensions.h;
+        }
+        
+        if(newPos.y > 0 && backgroundDimensions.h > canvas.height)
+        {
+            newPos.y = 0;
+        }
+
+        if(backgroundDimensions.w > canvas.width)
+        {
+            master.positioning.x = newPos.x;
+            master.positioning.stuck = false;
+        }
+
+        if(backgroundDimensions.h > canvas.height)
+        {
+            master.positioning.y = newPos.y;
+            master.positioning.stuck = false;
+        }
+    }
+});
+
 master.timeline.on("seek", function(){
     this.project.updateVisiblePoints();
     frameArrows.update();
@@ -1217,9 +1327,137 @@ function(){
     }
 });
 
-keyboardJS.on("ctrl", function(e){
+keyboardJS.on("s", function(e){
     e.preventRepeat();
     master.state.mode = "seek";
+},
+function(){
+    master.state.reset();
+});
+
+keyboardJS.on(["up", "down", "right", "left"], function(e){
+    let newPos = {
+        x: master.positioning.x,
+        y: master.positioning.y
+    };
+
+    switch(e.key)
+    {
+        case "ArrowLeft":
+            newPos.x += 20;
+            break;
+        case "ArrowRight":
+            newPos.x -= 20;
+            break;
+        case "ArrowUp":
+            newPos.y += 20;
+            break;
+        case "ArrowDown":
+            newPos.y -= 20;
+            break;
+    }
+
+    if(newPos.x + master.background.w < canvas.width)
+    {
+        newPos.x = canvas.width - master.background.w;
+    }
+    
+    if(newPos.x > 0 && master.background.w > canvas.width)
+    {
+        newPos.x = 0;
+    }
+
+    if(newPos.y + master.background.h < canvas.height)
+    {
+        newPos.y = canvas.height - master.background.h;
+    }
+    
+    if(newPos.y > 0 && master.background.h > canvas.height)
+    {
+        newPos.y = 0;
+    }
+
+    if(master.background.w > canvas.width)
+    {
+        master.positioning.x = newPos.x;
+        master.positioning.stuck = false;
+    }
+
+    if(master.background.h > canvas.height)
+    {
+        master.positioning.y = newPos.y;
+        master.positioning.stuck = false;
+    }
+});
+
+keyboardJS.on(["=", "+"], function(e){
+    master.positioning.zoom += 0.05;
+});
+
+keyboardJS.on("-", function(e){
+    if(master.positioning.zoom > 0.1)
+        master.positioning.zoom -= 0.05;
+    else
+        master.positioning.zoom = 0.05;
+});
+
+
+master.positioning.on("zoomin, zoomout", function(e){
+
+    let newPos = {
+        x: master.positioning.x,
+        y: master.positioning.y
+    };
+
+    switch(e)
+    {
+        case "zoomin":
+            newPos.x -= (this.timeline.video.videoWidth * 0.05) / 2;
+            newPos.y -= (this.timeline.video.videoHeight * 0.05) / 2;
+            break;
+        case "zoomout":
+            newPos.x += (this.timeline.video.videoWidth * 0.05) / 2;
+            newPos.y += (this.timeline.video.videoHeight * 0.05) / 2;
+            break;
+    }
+
+
+    if(this.background.w > this.stage.canvas.width)
+    {
+        if(newPos.x + this.background.w < this.stage.canvas.width)
+            this.positioning.x = canvas.width - this.background.w;
+        else if(newPos.x > 0)
+            this.positioning.x = 0;
+        else
+            this.positioning.x = newPos.x;
+    }
+    else
+        this.positioning.x = (this.stage.canvas.width - this.background.w) / 2;
+
+    if(this.background.h > this.stage.canvas.height)
+    {
+        if(newPos.y + this.background.h < this.stage.canvas.height)
+            this.positioning.y = canvas.height - this.background.h;
+        else if(newPos.y > 0)
+            this.positioning.y = 0;
+        else
+            this.positioning.y = newPos.y;
+    }
+    else
+        this.positioning.y = (this.stage.canvas.height - this.background.h) / 2;
+})
+.on("zoom, translation", function(){
+    background2.scale = this.background.scale;
+    background2.x = this.background.x;
+    background2.y = this.background.y;
+})
+.on("zoom", function(){
+    document.getElementById("screen-fit-button").classList.remove("disabled");
+});
+
+keyboardJS.on("ctrl", function(e){
+    e.preventRepeat();
+    master.state.mode = "positioning";
 },
 function(){
     master.state.reset();

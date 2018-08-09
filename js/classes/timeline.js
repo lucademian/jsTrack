@@ -225,10 +225,12 @@ class Timeline
             else
                 this.direction = "backward";
             
+            this.currentTime = (this.currentFrame * this.frameTime).roundTo(3);
+
             this.trigger("seek");
         }
-
-        this.currentTime = (this.currentFrame * this.frameTime).roundTo(3);
+        else
+            this.currentTime = (this.currentFrame * this.frameTime).roundTo(3);
         
         if(this.video.currentTime != this.currentTime)
         {

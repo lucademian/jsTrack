@@ -48,12 +48,27 @@ class Project
             _zoom: 1,
             _x: 0,
             _y: 0,
+            stuck: true,
+            autoZoom: true,
             _callbacks: {},
             get zoom(){
                 return this._zoom;
             },
             set zoom(value){
+                let oldZoom = this._zoom;
                 this._zoom = value.roundTo(5);
+                this.autoZoom = false;
+
+                project.background.scale = project.backgroundScale * this._zoom;
+                project.background.w = project.background.scale * project.timeline.video.videoWidth;
+                project.background.h = project.background.scale * project.timeline.video.videoHeight;
+                project.updateScale();
+
+                if(oldZoom > this._zoom)
+                    this.trigger("zoomout");
+                else
+                    this.trigger("zoomin");
+                
                 this.trigger("zoom");
             },
             get x(){
@@ -61,6 +76,10 @@ class Project
             },
             set x(value){
                 this._x = value.roundTo(5);
+
+                project.background.x = this._x;
+                project.updateScale();
+
                 this.trigger("translation");
             },
             get y(){
@@ -68,6 +87,10 @@ class Project
             },
             set y(value){
                 this._y = value.roundTo(5);
+
+                project.background.y = this._y;
+                project.updateScale();
+
                 this.trigger("translation");
             },
             trigger(event){
@@ -76,7 +99,7 @@ class Project
                     let callbacks = this._callbacks[event];
                     for(var i = 0; i < callbacks.length; i++)
                     {
-                        callbacks[i].call(project, {zoom: this._zoom, x: this._x, y: this._y});
+                        callbacks[i].call(project, event);
                     }
                 }
             },
@@ -94,6 +117,7 @@ class Project
 
                     this._callbacks[tempEvent].push(callback);
                 }
+                return this;
             }
         }
         this.state = {
@@ -139,25 +163,19 @@ class Project
             {
                 case "cell":
                     this.stage.cursor = "cell";
-                    this.stage._testMouseOver(true);
                     break;
                 case "add":
                 case "newScale":
                     this.stage.cursor = "url('add_point.png') 16 16, auto";
-                    this.stage._testMouseOver(true);
+                    break;
+                case "positioning":
+                    this.stage.cursor = "move";
                     break;
                 default:
                     this.stage.cursor = "default";
-                    this.stage._testMouseOver(true);
                     break;
             }
-        });
-        
-        this.positioning.on("translation, zoom", function(position){
-            this.background.scale = this.backgroundScale * position.zoom;
-            this.background.x = position.x ;
-            this.background.y = position.y;
-            this.updateScale();
+            this.stage._testMouseOver(true);
         });
 
         this.timeline.project = this;

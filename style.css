@@ -187,6 +187,9 @@ input.scale-text {
 #toolbox #save-button {
     background-image: url("icons/save.svg");
 }
+#toolbox #screen-fit-button {
+    background-image: url("icons/screenfit.svg");
+}
 #toolbox #undo-button {
     background-image: url("icons/undo.svg");
 }

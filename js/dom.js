@@ -7,6 +7,13 @@ document.querySelector("#new-track-button:not(.disabled)").addEventListener("cli
 document.querySelector("#undo-button:not(.disabled)").addEventListener("click", function(){
     master.undo();
 });
+document.querySelector("#screen-fit-button:not(.disabled)").addEventListener("click", function(){
+    master.positioning.zoom = 1;
+    master.positioning.autoZoom = true;
+    master.positioning.stuck = true;
+    drawGraphics();
+    this.classList.add("disabled");
+});
 document.querySelector("#redo-button:not(.disabled)").addEventListener("click", function(){
     master.redo();
 });

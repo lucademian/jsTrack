@@ -532,12 +532,6 @@ class Project
                 case "endFrame":
                     this.timeline.endFrame = value;
                     break;
-                case "frames":
-                    for(var i=0; i < value.length; i++)
-                    {
-                        this.timeline.addFrame(value[i]);
-                    }
-                    break;
                 case "scale":
                     master.newScale(value.size, value.nodes[0].x, value.nodes[0].y, value.nodes[1].x, value.nodes[1].y, value.color, true);
                     break;

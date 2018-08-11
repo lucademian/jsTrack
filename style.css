@@ -2,13 +2,13 @@
 body, html {
     margin: 0;
     padding: 0;
-    background: #f00;
+    background: #FFF;
     height: 100vh;
     width: calc(100vw - 300px);
     overflow: hidden;
 }
 #container {
-    background: #000;
+    background: #FFF;
     position: fixed;
     width: 100vw;
     height: 100vh;

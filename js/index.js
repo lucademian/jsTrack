@@ -26,6 +26,7 @@ var master = new Project("My Project", new Timeline(canvas.width, canvas.height,
 
 master.timeline.video.addEventListener("loadstart", function(){
     document.getElementById("video-clone").src = this.src;
+    document.getElementById("video-clone").pause();
     document.getElementById("video-clone").style.display = "none";
 });
 
@@ -155,7 +156,8 @@ newProject.on("submit", function(data){
     master.name = data.name;
     master.timeline.updateTiming(master.timeline.video.duration, data.framerate);
     master.timeline.createFrames();
-    master.newAxes(300, 200, data.axesColor, true);
+    let axesPos = master.toScaled(canvas.width/2, canvas.height/2);
+    master.newAxes(axesPos.x, axesPos.y, data.axesColor, true);
     this.hide().clear();
     master.viewPoints = {
         forward: data.pointsForward,
@@ -795,7 +797,7 @@ stage.on("click", function(e){
         if(master.track.state.mode == "add")
         {
             var frame = master.timeline.current();
-            let scaled = master.toScaled(stage.mouseX, stage.mouseY);
+            let scaled = master.toScaled(e.stageX, e.stageY);
             master.track.addPoint(frame, scaled.x, scaled.y);
 
             var nextFrame = master.timeline.next();
@@ -1106,6 +1108,19 @@ background.on("pressmove", function(e){
     }
 });
 
+canvas.addEventListener("wheel", function(e){
+    e.preventDefault();
+    if(master.state.mode == "positioning")
+    {
+        if(master.positioning.zoom > 0.01 || Math.sign(e.deltaY) == -1)
+            master.positioning.zoom -= e.deltaY/25;
+
+        if(master.positioning.zoom <= 0.01)
+            master.positioning.zoom = 0.01;
+    }
+});
+
+var secondVidTimeout = null;
 master.timeline.on("seek", function(){
     this.project.updateVisiblePoints();
     frameArrows.update();
@@ -1120,12 +1135,10 @@ master.timeline.on("seek", function(){
     }
     updateScrubber(master.timeline.currentTime, master.timeline.duration);
     let video2 = document.getElementById("video-clone");
-    setTimeout(function(){
-        if(master.timeline.direction == "forward")
-            video2.currentTime = master.timeline.next().time;
-        else if(master.timeline.direction == "backward")
-            video2.currentTime = master.timeline.prev().time;
-    }, 100);
+    clearTimeout(secondVidTimeout);
+    secondVidTimeout = setTimeout(function(){
+        video2.currentTime = master.timeline.currentTime;
+    }, 300);
 });
 
 function updateBackup(state)
@@ -1185,6 +1198,7 @@ function projectBackup()
         var toBackup = {};
         toBackup.uid = master.uid;
         toBackup.date = new Date().toString();
+        toBackup.videoName = master.videoName;
 
         var sameProject = (lastBackup.uid === master.uid);
 
@@ -1390,6 +1404,19 @@ keyboardJS.on(["up", "down", "right", "left"], function(e){
     }
 });
 
+keyboardJS.on(["ctrl + =", "ctrl + +", "cmd + =", "cmd + +"], function(e){
+    e.preventDefault();
+    master.positioning.zoom += 0.01;
+});
+
+keyboardJS.on(["ctrl + -", "cmd + -"], function(e){
+    e.preventDefault();
+    if(master.positioning.zoom > 0.02)
+        master.positioning.zoom -= 0.01;
+    else
+        master.positioning.zoom = 0.01;
+});
+
 keyboardJS.on(["=", "+"], function(e){
     master.positioning.zoom += 0.05;
 });
@@ -1409,18 +1436,8 @@ master.positioning.on("zoomin, zoomout", function(e){
         y: master.positioning.y
     };
 
-    switch(e)
-    {
-        case "zoomin":
-            newPos.x -= (this.timeline.video.videoWidth * 0.05) / 2;
-            newPos.y -= (this.timeline.video.videoHeight * 0.05) / 2;
-            break;
-        case "zoomout":
-            newPos.x += (this.timeline.video.videoWidth * 0.05) / 2;
-            newPos.y += (this.timeline.video.videoHeight * 0.05) / 2;
-            break;
-    }
-
+    newPos.x -= (this.timeline.video.videoWidth * e.delta) / 2;
+    newPos.y -= (this.timeline.video.videoHeight * e.delta) / 2;
 
     if(this.background.w > this.stage.canvas.width)
     {

@@ -27,7 +27,7 @@
                     </div>
                     <div class="option button" title="Create New Track" id="new-track-button"></div>
                     <div class="option button" title="Create Scale" id="scale-button"></div>
-                    <div class="option button" title="Fit to Screen" id="screen-fit-button"></div>
+                    <div class="option button disabled" title="Fit to Screen" id="screen-fit-button"></div>
                     <div class="option button" title="Undo" id="undo-button"></div>
                     <div class="option button" title="Redo" id="redo-button"></div>
                     <div class="option button" title="Edit Project" id="edit-project-button"></div>
@@ -71,8 +71,8 @@
             </div>
         </div>
         <button id="help-fab" class="help-button"></button>
-        <video id="video" autoplay></video>
-        <video id="video-clone" autoplay></video>
+        <video id="video" autoplay muted></video>
+        <video id="video-clone" autoplay muted></video>
 
         <div id="fullscreen-loader"></div>
         <script type="text/javascript" src='src/createjs.min.js'></script>

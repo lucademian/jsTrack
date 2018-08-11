@@ -7,6 +7,7 @@ class Project
         this.uid = Math.random() * 100000000000000;
         this.timeline = timeline;
         this.stage = stage;
+        this.videoName = "";
         this.background = background;
         this.backgroundScale = 0;
         this.saved = true;
@@ -58,6 +59,7 @@ class Project
                 let oldZoom = this._zoom;
                 this._zoom = value.roundTo(5);
                 this.autoZoom = false;
+                let zoomChange = this._zoom - oldZoom;
 
                 project.background.scale = project.backgroundScale * this._zoom;
                 project.background.w = project.background.scale * project.timeline.video.videoWidth;
@@ -65,11 +67,11 @@ class Project
                 project.updateScale();
 
                 if(oldZoom > this._zoom)
-                    this.trigger("zoomout");
+                    this.trigger("zoomout", {"delta": zoomChange});
                 else
-                    this.trigger("zoomin");
+                    this.trigger("zoomin", {"delta": zoomChange});
                 
-                this.trigger("zoom");
+                this.trigger("zoom", {"delta": zoomChange});
             },
             get x(){
                 return this._x;
@@ -93,13 +95,14 @@ class Project
 
                 this.trigger("translation");
             },
-            trigger(event){
+            trigger(event, argArray={}){
+                argArray.event = event;
                 if(this._callbacks[event] !== undefined)
                 {
                     let callbacks = this._callbacks[event];
                     for(var i = 0; i < callbacks.length; i++)
                     {
-                        callbacks[i].call(project, event);
+                        callbacks[i].call(project, argArray);
                     }
                 }
             },
@@ -414,7 +417,8 @@ class Project
             currentFrame: this.timeline.currentFrame,
             uid: this.uid,
             startFrame: this.timeline.startFrame,
-            endFrame: this.timeline.endFrame
+            endFrame: this.timeline.endFrame,
+            videoName: this.videoName
         };
 
         if(this.scale !== null && this.scale !== undefined)
@@ -522,6 +526,9 @@ class Project
                     break;
                 case "uid":
                     this.uid = value;
+                    break;
+                case "videoName":
+                    this.videoName = value;
                     break;
                 case "currentFrame":
                     this.timeline.seek(value);

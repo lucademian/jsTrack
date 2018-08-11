@@ -7,12 +7,15 @@ document.querySelector("#new-track-button:not(.disabled)").addEventListener("cli
 document.querySelector("#undo-button:not(.disabled)").addEventListener("click", function(){
     master.undo();
 });
-document.querySelector("#screen-fit-button:not(.disabled)").addEventListener("click", function(){
-    master.positioning.zoom = 1;
-    master.positioning.autoZoom = true;
-    master.positioning.stuck = true;
-    drawGraphics();
-    this.classList.add("disabled");
+document.querySelector("#screen-fit-button").addEventListener("click", function(){
+    if(!this.classList.contains("disabled"))
+    {
+        master.positioning.zoom = 1;
+        master.positioning.autoZoom = true;
+        master.positioning.stuck = true;
+        drawGraphics();
+        this.classList.add("disabled");
+    }
 });
 document.querySelector("#redo-button:not(.disabled)").addEventListener("click", function(){
     master.redo();
@@ -127,7 +130,7 @@ dropArea.addEventListener('drop', function(e){
     handleFiles(files);
 }, false);
 
-
+var dataLoaded = false;
 if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup") !== null && localStorage.getItem("backup") !== "")
 {
     if(document.getElementById("launch").classList.contains("active"))
@@ -179,6 +182,44 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
                     });
                 });
             }
+            else if(backupInfo.data !== undefined && backupInfo.data !== null && backupInfo.data !== "")
+            {
+                var file = dataURLtoBlob(backupInfo.data);
+
+                let fileUrl = URL.createObjectURL(file);
+                JSZipUtils.getBinaryContent(fileUrl, function(err, data) {
+                    if(err) {
+                        throw err; // or handle err
+                    }
+                
+                    JSZip.loadAsync(data).then(function (data) {
+                        data.file("meta.json").async("text").then(function(projectJson){
+                            let videoName = "";
+                            let rawVideoName = "";
+                            if(backupInfo.videoName !== undefined && backupInfo.videoName !== null && backupInfo.videoName !== "")
+                            {
+                                videoName = "(" + backupInfo.videoName + ") ";
+                                rawVideoName = backupInfo.videoName;
+                            }
+                            if(confirm("There is no video saved in this backup, you will need to be able to access the original video " + videoName + "to load it yourself. Would you like to continue?"))
+                            {
+                                document.getElementById("file-drop-area").querySelector(".text").innerText = "Drag the video here to recover your project, or"
+                                dataLoaded = {
+                                    name: rawVideoName,
+                                    data: JSON.parse(projectJson)
+                                };
+                            }
+                            else
+                            {
+                                if(confirm("Would you like to remove this backup from storage?"))
+                                {
+                                    localStorage.removeItem("backup");
+                                }
+                            }
+                        });
+                    });
+                });
+            }
             else
             {
                 if(confirm("Error opening project. Would you like to remove it from storage?"))
@@ -224,10 +265,6 @@ document.body.addEventListener('drop', function(e){
                     while (tracklist.firstChild) {
                         tracklist.removeChild(tracklist.firstChild);
                     }
-
-                    frameMarkers.master.markers = {};
-                    frameMarkers.master.shape.graphics.clear();
-                    frameMarkers.master.shape.graphics.beginFill("#0000ff");
                     
                     handleFile(file, function(){
                         master.saved = true;
@@ -252,9 +289,6 @@ document.body.addEventListener('drop', function(e){
                         tracklist.removeChild(tracklist.firstChild);
                     }
 
-                    frameMarkers.master.shape.graphics.clear();
-                    frameMarkers.master.markers = {};
-
                     handleFile(file);
                 }
             }
@@ -276,18 +310,50 @@ function handleFile(file, callback=null)
     switch(file.type)
     {
         case "video/mp4":
-            loadVideo(file, function(){
-                if(callback !== null)
-                    callback();
-                master.timeline.detectFrameRate(function(framerate){
-                    hideLaunchModal();
-                    newProject.push({
-                        "framerate": framerate
+            if(dataLoaded !== false)
+            {
+                let canLoad = false;
+
+                if(file.name !== dataLoaded.name)
+                {
+                    if(confirm("This file doesn't match what the original video was named. Continue?"))
+                        canLoad = true;
+                    else
+                        canLoad = false;
+                }
+                else
+                    canLoad = true;
+                
+                if(canLoad)
+                {
+                    loadVideo(file, function(){
+                        if(callback !== null)
+                            callback();
+                        
+                        master.load(dataLoaded.data);
+                        hideLoader();
+                        hideLaunchModal();
+                        master.saved = true;
+                        master.trigger("created");
                     });
-                    newProject.show();
-                    hideLoader();
+                }
+            }
+            else
+            {
+                master.videoName = file.name;
+                loadVideo(file, function(){
+                    if(callback !== null)
+                        callback();
+                    master.timeline.detectFrameRate(function(framerate){
+                        hideLaunchModal();
+                        newProject.push({
+                            "framerate": framerate
+                        });
+                        newProject.show();
+                        hideLoader();
+                    });
                 });
-            });
+            }
             break;
         case "":
         case "application/x-zip":

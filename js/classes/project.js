@@ -169,14 +169,26 @@ class Project
         this.state.modeChange(function(mode){
             switch(mode)
             {
-                case "cell":
-                    this.stage.cursor = "cell";
+                case "seek":
+                    this.stage.removeChild(this.addBackground);
+                    this.stage.cursor = "crosshair";
                     break;
                 case "add":
                 case "newScale":
                     this.stage.addChild(this.addBackground);
                     // in chrome, (16,16) is bottom right, in firefox it is center. image is 16x16 so ???
-                    this.stage.cursor = "url('add_point.png') 16 16, copy";
+                    switch(platform.name)
+                    {
+                        case "Firefox":
+                            this.stage.cursor = "url('add_point.png') 16 16, copy";
+                            break;
+                        case "Chrome":
+                            this.stage.cursor = "url('add_point.png') 8 8, copy";
+                            break;
+                        default:
+                            this.stage.cursor = "copy";
+                            break;
+                    }
                     break;
                 case "positioning":
                     this.stage.addChild(this.addBackground);

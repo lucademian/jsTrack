@@ -103,7 +103,7 @@ class Point
 
             if(tempShape.track.project.state.mode == "seek")
             {
-                tempShape.track.project.timeline.setFrame(tempShape.frame.number);
+                tempShape.track.project.timeline.seek(tempShape.frame.number);
                 tempShape.track.project.switchTrack(tempShape.track.uid);
                 tempShape.track.project.changed();
             }
@@ -111,7 +111,7 @@ class Point
         this.track.project.state.modeChange(function(mode){
             if(mode == "seek")
             {
-                tempShape.shape.cursor = "cell";
+                tempShape.shape.cursor = "crosshair";
             }
             else
             {

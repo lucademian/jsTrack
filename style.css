@@ -8,7 +8,7 @@ body, html {
     overflow: hidden;
 }
 #container {
-    background: #FFF;
+    background: #f2f2f2;
     position: fixed;
     width: 100vw;
     height: 100vh;

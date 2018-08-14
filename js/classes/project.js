@@ -8,6 +8,11 @@ class Project
         this.timeline = timeline;
         this.stage = stage;
         this.videoName = "";
+        this.addBackground = new createjs.Shape();
+        let hitArea = new createjs.Shape();
+        hitArea.graphics.beginFill("#000000");
+        hitArea.graphics.drawRect(-10000, -10000, 30000, 30000);
+        this.addBackground.hitArea = hitArea;
         this.background = background;
         this.backgroundScale = 0;
         this.saved = true;
@@ -169,13 +174,18 @@ class Project
                     break;
                 case "add":
                 case "newScale":
-                    this.stage.cursor = "url('add_point.png') 16 16, auto";
+                    this.stage.addChild(this.addBackground);
+                    // in chrome, (16,16) is bottom right, in firefox it is center. image is 16x16 so ???
+                    this.stage.cursor = "url('add_point.png') 16 16, copy";
                     break;
                 case "positioning":
+                    this.stage.addChild(this.addBackground);
                     this.stage.cursor = "move";
                     break;
                 default:
+                    this.stage.removeChild(this.addBackground);
                     this.stage.cursor = "default";
+                    this.updateVisiblePoints();
                     break;
             }
             this.stage._testMouseOver(true);

@@ -17,8 +17,17 @@ class Scale
         }
         else
         {
-            this.textValue = math.unit(size).toString();
-            this.size = math.unit(size);
+            let valueProcessed = this.processValue(size);
+            if(valueProcessed !== false)
+            {
+                this.textValue = valueProcessed.textValue;
+                this.size = valueProcessed.size;
+            }
+            else
+            {
+                this.textValue = math.unit("1m").toString();
+                this.size = math.unit("1m");
+            }
         }
 
 		this.hitArea = new createjs.Shape();
@@ -192,39 +201,56 @@ class Scale
     {
         return this.size.units[0].unit.name;
     }
+    processValue(value)
+    {
+        var returnData = {};
+        if(value.length > 0)
+        {
+            try
+            {
+                if(value.split(">").length > 1)
+                {
+                    let split = value.split(">");
+                    math.unit(split[0].trim());
+                    returnData.size = math.unit(split[0].trim()).to(split.pop().trim());
+                    returnData.textValue = math.format(_scale.size, {notation: "auto", precision: 6}).toString();
+                }
+                else
+                {
+                    math.unit(value);
+                    returnData.size = math.unit(value);
+                    returnData.textValue = math.format(math.unit(value), {notation: "auto", precision: 6}).toString();
+                }
+            }
+            catch(TypeError)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        return returnData;
+    }
 	update(value=this.textValue)
 	{
 		let _scale = this;
 
 		if(value !== _scale.textValue)
 		{
-			if(value.length > 0)
-			{
-				try
-				{
-                    if(value.split(">").length > 1)
-                    {
-                        let split = value.split(">");
-                        math.unit(split[0].trim());
-                        _scale.size = math.unit(split[0].trim()).to(split.pop().trim());
-                        _scale.textValue = math.format(_scale.size, {notation: "auto", precision: 6}).toString();
-                    }
-                    else
-                    {
-                        math.unit(value);
-                        _scale.size = math.unit(value);
-                        _scale.textValue = math.format(math.unit(value), {notation: "auto", precision: 6}).toString();
-                    }
-                    _scale.project.changed();
-                    _scale.project.update();
-				}
-				catch(TypeError)
-				{
+            let valueProcessed = this.processValue(value);
+            
+            if(valueProcessed !== false)
+            {
+                _scale.size = valueProcessed.size;
+                _scale.textValue = valueProcessed.textValue;
 
-				}
-			}
+                _scale.project.changed();
+                _scale.project.update();
 
-			_scale.textElement.value = _scale.textValue;
+                _scale.textElement.value = _scale.textValue;
+            }
 		}
 		
 		_scale.lineStart.x = _scale.nodes[1].x;

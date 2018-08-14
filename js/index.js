@@ -1051,7 +1051,7 @@ var backgroundDimensions = {
     h: master.background.h
 };
 
-background.on("mousedown", function(e){
+master.addBackground.on("mousedown", function(e){
     originalCoords = {
         x: e.stageX,
         y: e.stageY
@@ -1065,7 +1065,7 @@ background.on("mousedown", function(e){
         h: master.background.h
     };
 });
-background.on("pressmove", function(e){
+master.addBackground.on("pressmove", function(e){
     let coords = e.target.stage.globalToLocal(e.stageX, e.stageY);
     if(master.state.mode == "positioning")
     {
@@ -1428,6 +1428,15 @@ keyboardJS.on("-", function(e){
         master.positioning.zoom = 0.05;
 });
 
+keyboardJS.on(["ctrl + 0", "cmd + 0"], function(e){
+    e.preventDefault();
+
+    master.positioning.zoom = 1;
+    master.positioning.autoZoom = true;
+    master.positioning.stuck = true;
+    drawGraphics();
+    document.getElementById("screen-fit-button").classList.add("disabled");
+})
 
 master.positioning.on("zoomin, zoomout", function(e){
 

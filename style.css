@@ -184,6 +184,9 @@ input.scale-text {
 #toolbox #export-button {
     background-image: url("icons/export.svg");
 }
+#toolbox #logout-button {
+    background-image: url("icons/logout.svg");
+}
 #toolbox #save-button {
     background-image: url("icons/save.svg");
 }

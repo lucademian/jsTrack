@@ -13,10 +13,18 @@
 		
 		// Elements
 		this.buttonEl = options.buttonEl;
+        this.logoutEl = options.logoutEl;
 		
         // Events
         this._getFile = options.getFile;
-		this.buttonEl.addEventListener('click', this.open.bind(this));		
+		this.buttonEl.addEventListener('click', this.open.bind(this));
+        this.logoutEl.addEventListener('click', function(){
+            if(!this.classList.contains('disabled'))
+            {
+                gapi.auth.signOut();
+                this.classList.add('disabled');
+            }
+        }.bind(this.logoutEl));
 	
 		// Disable the button until the API loads, as it won't work properly until then.
 		this.buttonEl.disabled = true;
@@ -33,12 +41,16 @@
 		open: function() {		
 			// Check if the user has already authenticated
 			var token = gapi.auth.getToken();
-			if (token) {
+			if (token && !this.logoutEl.classList.contains("disabled")) {
 				this._upload();
+                this.logoutEl.classList.remove("disabled");
 			} else {
 				// The user has not yet authenticated with Google
 				// We need to do the authentication before displaying the Drive picker.
-				this._doAuth(false, function() { this._upload(); }.bind(this));
+				this._doAuth(false, function() {
+                    this._upload();
+                    this.logoutEl.classList.remove("disabled");
+                }.bind(this));
 			}
 		},
 		
@@ -99,12 +111,24 @@
 		 * Authenticate with Google Drive via the Google JavaScript API.
 		 * @private
 		 */
-		_doAuth: function(immediate, callback) {	
-			gapi.auth.authorize({
-				client_id: this.clientId + '.apps.googleusercontent.com',
-				scope: 'https://www.googleapis.com/auth/drive.readonly',
-				immediate: immediate
-			}, callback);
+		_doAuth: function(immediate, callback) {
+            if(this.logoutEl.classList.contains("disabled"))
+            {
+                gapi.auth.authorize({
+                    client_id: this.clientId + '.apps.googleusercontent.com',
+                    scope: 'https://www.googleapis.com/auth/drive',
+                    immediate: immediate,
+                    authuser: -1
+                }, callback);
+            }
+            else
+            {
+                gapi.auth.authorize({
+                    client_id: this.clientId + '.apps.googleusercontent.com',
+                    scope: 'https://www.googleapis.com/auth/drive',
+                    immediate: immediate,
+                }, callback);
+            }
 		}
 	};
 }());

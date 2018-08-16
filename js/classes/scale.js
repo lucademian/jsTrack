@@ -213,7 +213,7 @@ class Scale
                     let split = value.split(">");
                     math.unit(split[0].trim());
                     returnData.size = math.unit(split[0].trim()).to(split.pop().trim());
-                    returnData.textValue = math.format(_scale.size, {notation: "auto", precision: 6}).toString();
+                    returnData.textValue = math.format(returnData.size, {notation: "auto", precision: 6}).toString();
                 }
                 else
                 {
@@ -243,10 +243,32 @@ class Scale
             
             if(valueProcessed !== false)
             {
+                let oldInfo = {
+                    size: _scale.size,
+                    textValue: _scale.textValue
+                };
+
                 _scale.size = valueProcessed.size;
                 _scale.textValue = valueProcessed.textValue;
 
-                _scale.project.changed();
+                let newInfo = {
+                    size: _scale.size,
+                    textValue: _scale.textValue
+                };
+
+                if(oldInfo.size.toString() !== newInfo.size.toString())
+                {
+                    _scale.project.change({
+                        undo: function()
+                        {
+                            _scale.update(oldInfo.size.toString());
+                        },
+                        redo: function()
+                        {
+                            _scale.update(newInfo.size.toString());
+                        }
+                    });
+                }
                 _scale.project.update();
 
                 _scale.textElement.value = _scale.textValue;

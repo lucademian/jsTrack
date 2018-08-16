@@ -250,6 +250,7 @@ class Timeline
 		this.duration = (this.frameCount * this.frameTime).roundTo(3);
         this.startFrame = Math.floor(ratios.start * this.frameCount);
         this.endFrame = Math.floor(ratios.end * this.frameCount);
+        this.trigger("timingUpdate");
 		return this.duration;
 	}
 	current()

@@ -12,11 +12,19 @@
 		this.clientId = options.clientId;
 		
 		// Elements
-		this.buttonEl = options.buttonEl;
+        this.buttonEl = options.buttonEl;
+        this.logoutEl = options.logoutEl;
 		
 		// Events
 		this.onSelect = options.onSelect;
-		this.buttonEl.addEventListener('click', this.open.bind(this));		
+        this.buttonEl.addEventListener('click', this.open.bind(this));
+        this.logoutEl.addEventListener('click', function(){
+            if(!this.classList.contains('disabled'))
+            {
+                gapi.auth.signOut();
+                this.classList.add('disabled');
+            }
+        }.bind(this.logoutEl));
 	
 		// Disable the button until the API loads, as it won't work properly until then.
 		this.buttonEl.disabled = true;
@@ -34,12 +42,16 @@
 		open: function() {		
 			// Check if the user has already authenticated
 			var token = gapi.auth.getToken();
-			if (token) {
-				this._showPicker();
+			if (token && !this.logoutEl.classList.contains("disabled")) {
+                this._showPicker();
+                this.logoutEl.classList.remove("disabled");
 			} else {
 				// The user has not yet authenticated with Google
 				// We need to do the authentication before displaying the Drive picker.
-				this._doAuth(false, function() { this._showPicker(); }.bind(this));
+				this._doAuth(false, function() {
+                    this._showPicker();
+                    this.logoutEl.classList.remove("disabled");
+                }.bind(this));
 			}
 		},
 		
@@ -108,11 +120,23 @@
 		 * @private
 		 */
 		_doAuth: function(immediate, callback) {	
-			gapi.auth.authorize({
-				client_id: this.clientId + '.apps.googleusercontent.com',
-				scope: 'https://www.googleapis.com/auth/drive',
-				immediate: immediate
-			}, callback);
+            if(this.logoutEl.classList.contains("disabled"))
+            {
+                gapi.auth.authorize({
+                    client_id: this.clientId + '.apps.googleusercontent.com',
+                    scope: 'https://www.googleapis.com/auth/drive',
+                    authuser: -1,
+                    immediate: immediate
+                }, callback);
+            }
+            else
+            {
+                gapi.auth.authorize({
+                    client_id: this.clientId + '.apps.googleusercontent.com',
+                    scope: 'https://www.googleapis.com/auth/drive',
+                    immediate: immediate
+                }, callback);
+            }
 		}
 	};
 }());
@@ -150,6 +174,7 @@ function initPicker() {
         apiKey: 'AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA',
         clientId: '44440188363-5vnafandpsrppr9189u7sc8q755oar9d',
         buttonEl: document.getElementById('pick'),
+        logoutEl: document.getElementById('logout-button'),
         onSelect: importDrive
     });	
 }

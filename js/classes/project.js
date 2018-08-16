@@ -378,6 +378,7 @@ class Project
             for(var i = 0; i < this.timeline.frames.length; i++)
             {
                 let frame = this.timeline.frames[i];
+                // console.log(frame);
                 if(frame.number < this.timeline.currentFrame - this.viewPoints.backward || frame.number > this.timeline.currentFrame + this.viewPoints.forward || frame.number < this.timeline.startFrame || frame.number > this.timeline.endFrame)
                 {
                     for(var j = 0; j < frame.points.length; j++)

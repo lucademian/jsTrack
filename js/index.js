@@ -239,6 +239,7 @@ saveProject.on("saveFile", function(modalData){
                 apiKey: 'AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA',
                 clientId: '44440188363-5vnafandpsrppr9189u7sc8q755oar9d',
                 buttonEl: document.getElementById(modal.id + "_button-saveDrive"),
+                logoutEl: document.getElementById('logout-button'),
                 getFile: function(callback){
                     showLoader();
                     var fileUrl = URL.createObjectURL(master.videoFile);
@@ -818,11 +819,14 @@ frameArrows.forward.sprite.on("click", function(e){
         {
             if(master.timeline.setFrame(frame.number) !== false)
             {
-                master.track.unselectAll();
-                master.track.unemphasizeAll();
-                if(master.track.points[frame.number] !== undefined)
+                if(master.track !== null)
                 {
-                    master.track.points[frame.number].show().emphasize();
+                    master.track.unselectAll();
+                    master.track.unemphasizeAll();
+                    if(master.track.points[frame.number] !== undefined)
+                    {
+                        master.track.points[frame.number].show().emphasize();
+                    }
                 }
             }
         }
@@ -1121,7 +1125,7 @@ canvas.addEventListener("wheel", function(e){
 });
 
 var secondVidTimeout = null;
-master.timeline.on("seek", function(){
+master.timeline.on("seek, timingUpdate", function(){
     this.project.updateVisiblePoints();
     frameArrows.update();
     posText.text = "Frame: " + master.timeline.currentFrame + ", X: "+stage.mouseX+", Y: "+stage.mouseY;
@@ -1138,7 +1142,7 @@ master.timeline.on("seek", function(){
     clearTimeout(secondVidTimeout);
     secondVidTimeout = setTimeout(function(){
         video2.currentTime = master.timeline.currentTime;
-    }, 300);
+    }, 100);
 });
 
 function updateBackup(state)

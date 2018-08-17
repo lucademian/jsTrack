@@ -52,19 +52,21 @@ class Point
                     tempShape.track.stage.addChild(tempShape.shape);
                 }
 			}
-		});
+        });
+        var moving = false;
 		this.shape.on("pressmove", function(e){
             if(tempShape.track.project.state.mode !== "seek")
             {
                 let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
-                
+                moving = true;
                 tempShape.move(coords.x, coords.y, true);
                 tempShape.select();
             }
         });
         this.shape.on("pressup", function(e){
-            if(tempShape.track.project.state.mode !== "seek")
+            if(tempShape.track.project.state.mode !== "seek" && moving)
             {
+                moving = false;
                 let coords = tempShape.track.project.toScaled(e.stageX, e.stageY);
                 
                 var goTo = {x: tempShape.x, y: tempShape.y};

@@ -124,6 +124,7 @@ var dropArea = document.getElementById("file-drop-area");
 
 dropArea.addEventListener('drop', function(e){
     showLoader();
+    console.log(e);
     let dt = e.dataTransfer
     let files = dt.files
 
@@ -365,10 +366,45 @@ function handleFile(file, callback=null)
             else
             {
                 alert("This filetype is not supported. It must be .mp4 or ." + CUSTOM_EXTENSION);
+                hideLoader();
             }
             break;
         default:
-            alert("This filetype is not supported. It must be .mp4 or ." + CUSTOM_EXTENSION);
+            if(file.type.split("/")[0] == "video")
+            {
+                if(confirm("The only supported video type is mp4. Would you like to open a free video converter?"))
+                {
+                    window.open(VIDEO_CONVERTOR, "_blank");
+                    // var urlPrompt = prompt("Paste output link here to load video.");
+                    // if(urlPrompt !== null && urlPrompt !== "")
+                    // {
+                    //     fetch(urlPrompt)
+                    //     .then(res => res.blob()) // Gets the response and returns it as a blob
+                    //     .then(blob => {
+                    //         console.log(blob);
+                    //         master.videoName = file.name;
+                    //         loadVideo(file, function(){
+                    //             if(callback !== null)
+                    //                 callback();
+                    //             master.timeline.detectFrameRate(function(framerate){
+                    //                 hideLaunchModal();
+                    //                 newProject.push({
+                    //                     "framerate": framerate
+                    //                 });
+                    //                 newProject.show();
+                    //                 hideLoader();
+                    //             });
+                    //         });
+                    //     });
+                    // }
+                }
+            }
+            else
+            {
+                alert("This filetype is not supported. It must be .mp4 or ." + CUSTOM_EXTENSION);
+            }
+            hideLoader();
+            break;
     }
 }
 function handleFiles(files)

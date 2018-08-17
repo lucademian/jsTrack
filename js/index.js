@@ -13,7 +13,7 @@ var distanceUnits = {
 };
 const EXPORT_FORMATS = ["xlsx", "xlsm", "xlsb", "xls", "ods", "fods", "csv", "txt", "sylk", "html", "dif", "dbf", "rtf", "prn", "eth"];
 const CUSTOM_EXTENSION = "jstrack";
-
+const VIDEO_CONVERTOR = "https://video.online-convert.com/convert-to-mp4";
 
 var background = new createjs.Bitmap(document.getElementById("video"));
 var background2 = new createjs.Bitmap(document.getElementById("video-clone"));

@@ -65,7 +65,7 @@ class Timeline
     {
         let lastTime = 0;
         let frame = null;
-        let frameTime = 1/120;
+        let frameTime = 1/240;
         let difference = 0;
         let tempVideo = document.createElement("video");
         let timeline = this;
@@ -75,40 +75,47 @@ class Timeline
             if(firstLoad)
             {
                 firstLoad = false;
+                tempVideo.currentTime = tempVideo.duration;
                 var newCanv = document.createElement("canvas");
                 newCanv.height = tempVideo.videoHeight;
                 newCanv.width = tempVideo.videoWidth;
                 var newCtx = newCanv.getContext("2d");
                 newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
-                let lastFrame = newCanv.toDataURL();
-                var timeStart = 0.1;
-                var timeEnd = timeStart + 0.2;
-                if(tempVideo.duration < timeEnd)
-                    timeEnd = tempVideo.duration;
-                var tempTime = timeStart;
+                
+                var tempTime = 0;
                 tempVideo.currentTime = tempTime;
+                let startFrame = newCanv.toDataURL();
                 console.log("Detecting Framerate...");
-                var firstDetection = true;
+                var matchCount = 0;
+                var startFrameTime = 0;
                 tempVideo.addEventListener("timeupdate", function(){
                     newCtx.drawImage(tempVideo, 0, 0, newCanv.width, newCanv.height);
+                    if(tempTime == 0)
+                        startFrame = newCanv.toDataURL();
+                    
                     frame = newCanv.toDataURL();
-                    if(frame !== lastFrame)
+
+                    if(frame !== startFrame && matchCount == 0)
                     {
-                        newFrames++;
-                        lastFrame = frame;
-                    }
-                    if(tempTime < timeEnd)
-                    {
+                        startFrameTime = tempTime;
+                        startFrame = frame;
                         tempTime += frameTime;
+                        matchCount++;
                         tempVideo.currentTime = tempTime;
                     }
-                    else if(firstDetection)
-                    {
-                        firstDetection = false;
-                        var framerate = Math.round((newFrames - 1) / (timeEnd - timeStart));
+                    else if(frame !== startFrame && matchCount == 1)
+                    {                        
+                        matchCount++;
+                        //(1/2510)
+                        var framerate = ((tempVideo.duration / (tempTime - startFrameTime))/tempVideo.duration).roundTo(2);
                         console.log(framerate + " FPS");
                         if(callback !== null)
                             callback(framerate);
+                    }
+                    else
+                    {
+                        tempTime += frameTime;
+                        tempVideo.currentTime = tempTime;
                     }
                 });
             }

@@ -125,6 +125,12 @@ var newProject = new modal({
             "required": true,
             "initVal": "30"
         },
+        "frameskip": {
+            "label": "# of frames to move",
+            "type": "number",
+            "required": true,
+            "initVal": 1
+        },
         "axesColor": {
             "label": "Axes Color",
             "type": "color",
@@ -154,6 +160,7 @@ var newProject = new modal({
 
 newProject.on("submit", function(data){
     master.name = data.name;
+    master.timeline.frameSkip = parseInt(data.frameskip);
     master.timeline.updateTiming(master.timeline.video.duration, data.framerate);
     master.timeline.createFrames();
     let axesPos = master.toScaled(canvas.width/2, canvas.height/2);
@@ -297,6 +304,12 @@ var editProject = new modal({
             "type": "text",
             "required": true
         },
+        "frameskip": {
+            "label": "# of frames to move",
+            "type": "number",
+            "required": true,
+            "initVal": 1
+        },
         "axesColor": {
             "label": "Axes Color",
             "type": "color",
@@ -328,6 +341,7 @@ var editProject = new modal({
 
 editProject.on("submit", function(data){
     master.name = data.name;
+    master.timeline.frameSkip = parseInt(data.frameskip);
     master.axes.updateColor(data.axesColor);
     this.hide().clear();
     master.viewPoints = {

@@ -303,7 +303,17 @@ class Timeline
     }
 	next()
 	{
-        var pickedFrame = this.frames[this.currentFrame + 1]
+        var nextFrameNum = this.currentFrame + this.frameSkip;
+        if(this.currentFrame % this.frameSkip !== 0)
+        {
+            nextFrameNum -= (this.currentFrame % this.frameSkip);
+        }
+
+        if(nextFrameNum > this.endFrame)
+        {
+            nextFrameNum = this.currentFrame + (this.frameCount % this.frameSkip);
+        }
+        var pickedFrame = this.frames[nextFrameNum];
 		if(pickedFrame == undefined)
 		{
 			return false;
@@ -315,7 +325,18 @@ class Timeline
 	}
 	prev()
 	{
-		var pickedFrame = this.frames[this.currentFrame - 1]
+        var prevFrameNum = this.currentFrame - this.frameSkip;
+        if(this.currentFrame % this.frameSkip !== 0)
+        {
+            prevFrameNum += this.frameSkip - (this.currentFrame % this.frameSkip);
+        }
+
+        if(prevFrameNum < this.startFrame)
+        {
+            prevFrameNum = this.currentFrame - (this.frameCount % this.frameSkip);
+        }
+
+        var pickedFrame = this.frames[prevFrameNum];
 		if(pickedFrame == undefined)
 		{
 			return false;

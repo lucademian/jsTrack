@@ -48,6 +48,7 @@ document.querySelector("#edit-project-button:not(.disabled)").addEventListener("
     editProject.push({
         "name": master.name,
         "framerate": master.timeline.fps,
+        "frameskip": master.timeline.frameSkip,
         "axesColor": master.axes.color,
         "pointsForward": master.viewPoints.forward,
         "pointsBackward": master.viewPoints.backward

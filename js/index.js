@@ -842,11 +842,14 @@ frameArrows.back.sprite.on("click", function(e){
         {
             if(master.timeline.setFrame(frame.number) !== false)
             {
-                master.track.unselectAll();
-                master.track.unemphasizeAll();
-                if(master.track.points[frame.number] !== undefined)
+                if(master.track !== null)
                 {
-                    master.track.points[frame.number].show().emphasize();
+                    master.track.unselectAll();
+                    master.track.unemphasizeAll();
+                    if(master.track.points[frame.number] !== undefined)
+                    {
+                        master.track.points[frame.number].show().emphasize();
+                    }
                 }
             }
         }

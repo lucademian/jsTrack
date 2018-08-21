@@ -108,6 +108,10 @@ class Timeline
                         matchCount++;
                         //(1/2510)
                         var framerate = ((tempVideo.duration / (tempTime - startFrameTime))/tempVideo.duration).roundTo(2);
+
+                        // For some reason firefox, not chrome, reads 30fps videos as 34.29 fps
+                        if(platform.name == "Firefox" && framerate == 34.29)
+                            framerate = 30;
                         console.log(framerate + " FPS");
                         if(callback !== null)
                             callback(framerate);

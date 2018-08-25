@@ -20,8 +20,9 @@ document.querySelector("#screen-fit-button").addEventListener("click", function(
 document.querySelector("#redo-button:not(.disabled)").addEventListener("click", function(){
     master.redo();
 });
-document.querySelector("#export-button:not(.disabled)").addEventListener("click", function(){
-    exportData.show();
+document.getElementById("export-button").addEventListener("click", function(){
+    if(!this.classList.contains("disabled"))
+        exportData.show();
 });
 document.querySelector("#save-button:not(.disabled)").addEventListener("click", function(){
     saveProject.show();

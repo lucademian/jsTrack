@@ -289,6 +289,7 @@ class Track
             });
             
             point.move(x, y).select();
+            this.project.trigger("newpoint");
             this.project.update();
             this.project.updateVisiblePoints();
             return this.points[frame.number];
@@ -298,6 +299,7 @@ class Track
             var newPoint = new Point(this, frame, x, y);
             this.points[frame.number] = newPoint;
             frame.points.push(newPoint);
+            this.project.timeline.activeFrames.push(frame);
 
             var track = this;
             this.project.change({
@@ -317,6 +319,8 @@ class Track
             if(pointData != undefined)
                 this.table.addRow({t: pointData.t, x: pointData.scaled.x, y: pointData.scaled.y}, true);
             
+            this.project.trigger("newpoint");
+            this.project.updateVisiblePoints();
             return newPoint;
         }
         

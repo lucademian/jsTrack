@@ -167,6 +167,29 @@ class Project
         };
 
         this.state.modeChange(function(mode){
+            if(mode == "add")
+            {
+                if(this.axes !== null && this.axes !== undefined)
+                {
+                    this.axes.hide();
+                }
+                if(this.scale !== null && this.scale !== undefined)
+                {
+                    this.scale.hide();
+                }
+            }
+            else
+            {
+                if(this.axes !== null && this.axes !== undefined)
+                {
+                    this.axes.show();
+                }
+                if(this.scale !== null && this.scale !== undefined)
+                {
+                    this.scale.show();
+                }
+            }
+
             switch(mode)
             {
                 case "seek":
@@ -375,9 +398,9 @@ class Project
     {
         if(this.state.mode !== "add")
         {
-            for(var i = 0; i < this.timeline.frames.length; i++)
+            for(var i = 0; i < this.timeline.activeFrames.length; i++)
             {
-                let frame = this.timeline.frames[i];
+                let frame = this.timeline.activeFrames[i];
                 // console.log(frame);
                 if(frame.number < this.timeline.currentFrame - this.viewPoints.backward || frame.number > this.timeline.currentFrame + this.viewPoints.forward || frame.number < this.timeline.startFrame || frame.number > this.timeline.endFrame)
                 {

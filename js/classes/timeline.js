@@ -22,6 +22,7 @@ class Timeline
 		this.frames = [
             new Frame(this, 0, 0)
         ];
+        this.activeFrames = [];
     }
     // function to fire "loaded" event
     createFrames()

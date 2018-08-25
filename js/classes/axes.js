@@ -150,12 +150,14 @@ class Axes
                         parent.y = lastCoords.y;
                         parent.shape.x = lastCoordsUnscaled.x - 1;
                         parent.shape.y = lastCoordsUnscaled.y - 1;
+                        parent.project.update();
                     },
                     redo: function(){
                         parent.x = coords.x;
                         parent.y = coords.y;
                         parent.shape.x = newCoordsUnscaled.x - 1;
                         parent.shape.y = newCoordsUnscaled.y - 1;
+                        parent.project.update();
                     }
                 });
             }
@@ -167,10 +169,12 @@ class Axes
                     undo: function(){
                         parent.theta = lastRotation;
                         parent.shape.rotation = -lastRotation.toDegrees();
+                        parent.project.update();
                     },
                     redo: function(){
                         parent.theta = newRotation;
                         parent.shape.rotation = -newRotation.toDegrees();
+                        parent.project.update();
                     }
                 });
             }
@@ -179,6 +183,14 @@ class Axes
 			moving = false;
 			rotating = false;
 		});
+    }
+    hide()
+    {
+		this.stage.removeChild(this.shape);
+    }
+    show()
+    {
+		this.stage.addChild(this.shape);
     }
     rotate(radians)
     {

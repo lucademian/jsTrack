@@ -167,8 +167,8 @@ newProject.on("submit", function(data){
     master.newAxes(axesPos.x, axesPos.y, data.axesColor, true);
     this.hide().clear();
     master.viewPoints = {
-        forward: data.pointsForward,
-        backward: data.pointsBackward
+        forward: parseInt(data.pointsForward),
+        backward: parseInt(data.pointsBackward)
     };
     master.updateVisiblePoints();
     master.created = true;
@@ -345,8 +345,8 @@ editProject.on("submit", function(data){
     master.axes.updateColor(data.axesColor);
     this.hide().clear();
     master.viewPoints = {
-        forward: data.pointsForward,
-        backward: data.pointsBackward
+        forward: parseInt(data.pointsForward),
+        backward: parseInt(data.pointsBackward)
     };
     master.updateVisiblePoints();
 })
@@ -578,6 +578,10 @@ newTrack.on("cancel", function(){
 
 master.on("newTrack", function(){
     document.getElementById("tracks").classList.remove("hidden");
+    document.getElementById("export-button").classList.remove("disabled");
+});
+
+master.on("newpoint", function(){
     document.getElementById("graphs").classList.remove("hidden");
 });
 
@@ -693,6 +697,7 @@ function drawGraphics(initialDraw=false)
 
     master.handsOnTable.render();
 
+    updateScrubber(master.timeline.currentTime, master.timeline.duration);
     stage.update();
     master.updateScale();
     scrubber.update();

@@ -178,6 +178,25 @@ class Scale
             _scale.project.changed();
         });
     }
+    show()
+    {
+		document.getElementById("main-container").appendChild(this.textElement);
+        this.stage.addChild(this.textHitShape);
+        this.stage.addChild(this.text);
+		this.stage.addChild(this.line);
+		this.stage.addChild(this.nodes[0]);
+        this.stage.addChild(this.nodes[1]);
+        this.update();
+    }
+    hide()
+    {
+        this.stage.removeChild(this.textHitShape);
+        this.stage.removeChild(this.text);
+		this.stage.removeChild(this.line);
+		this.stage.removeChild(this.nodes[0]);
+        this.stage.removeChild(this.nodes[1]);
+		document.getElementById("main-container").removeChild(this.textElement);
+    }
     updateInfo(data)
     {
         for(var key in data)

@@ -567,7 +567,6 @@ editTrack.on("cancel", function(){
     this.hide();
 });
 
-var unitAutocomplete;
 newTrack.on("cancel", function(){
     this.hide().clear();
 })

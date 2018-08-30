@@ -16,7 +16,7 @@ scrubberLine.thumb.rect = scrubberLine.thumb.graphics.drawRoundRect(-2, -5, 4, s
 scrubber.addChild(scrubberLine.thumb);
 
 var marker = new createjs.SpriteSheet({
-	images: ["marker.png"],
+	images: ["icons/marker.png"],
 	frames: {width:10, height:9},
 	animations: {
         "default": 0
@@ -31,7 +31,7 @@ scrubber.addChild(scrubberLine.startMarker);
 scrubber.addChild(scrubberLine.endMarker);
 
 var buttons = new createjs.SpriteSheet({
-	images: ["buttons.png"],
+	images: ["icons/buttons.png"],
 	frames: {width:20, height:20},
 	animations: {
 		"frameBack": 0,

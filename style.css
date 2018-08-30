@@ -4,7 +4,7 @@ body, html {
     padding: 0;
     background: #FFF;
     height: 100vh;
-    width: calc(100vw - 300px);
+    width: 100vw;
     overflow: hidden;
 }
 #container {
@@ -290,7 +290,7 @@ input.scale-text {
     float: right;
     width: 20px;
     height: 20px;
-    background: url("visible.svg");
+    background: url("icons/visible.svg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -307,7 +307,7 @@ input.scale-text {
     margin-left: 10px;
 }
 .sidebar-list ul li .visibility.hidden {
-    background: url("hidden.svg");
+    background: url("icons/hidden.svg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -510,12 +510,6 @@ body > .scale-draggable {
     text-align: center;
 }
 
-/* #launch .area.highlight * {
-    display: none;
-} */
-.autoComplete {
-    font-family: sans-serif;
-}
 #fullscreen-loader {
     position: fixed;
     width: 100%;
@@ -523,10 +517,6 @@ body > .scale-draggable {
     top: 0;
     left: 0;
     background: rgba(255,255,255,0.9);
-    /* background-image: url("loader.svg");
-    background-size: 150px;
-    background-position: center center;
-    background-repeat: no-repeat; */
     display: none;
     cursor: wait;
 }

@@ -114,6 +114,7 @@ function hideLaunchModal()
     document.getElementById("modal-container").classList.remove("active");
     document.getElementById("modal-container").classList.remove("launch");
     document.getElementById("launch").classList.remove("active");
+    document.getElementById("help-fab").remove();
     
     keyboardJS.resume();
 }

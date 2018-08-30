@@ -203,10 +203,10 @@ class Project
                     switch(platform.name)
                     {
                         case "Firefox":
-                            this.stage.cursor = "url('add_point.png') 16 16, copy";
+                            this.stage.cursor = "url('icons/add_point.png') 16 16, copy";
                             break;
                         case "Chrome":
-                            this.stage.cursor = "url('add_point.png') 8 8, copy";
+                            this.stage.cursor = "url('icons/add_point.png') 8 8, copy";
                             break;
                         default:
                             this.stage.cursor = "copy";

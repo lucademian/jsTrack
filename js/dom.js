@@ -1,3 +1,23 @@
+document.getElementById("sidebar-visibility").addEventListener("click", function(){
+    if(this.classList.contains("show"))
+    {
+        document.getElementById("sidebar").classList.add("normal");
+        document.getElementById("sidebar").classList.remove("hidden");
+        document.getElementById("sidebar-visibility").classList.add("hide");
+        document.getElementById("sidebar-visibility").classList.remove("show");
+    }
+    else
+    {
+        document.getElementById("sidebar").classList.remove("normal");
+        document.getElementById("sidebar").classList.add("hidden");
+        document.getElementById("sidebar-visibility").classList.add("show");
+        document.getElementById("sidebar-visibility").classList.remove("hide");
+    }
+    
+    document.getElementById("sidebar").classList.add("changed");
+    document.getElementById("sidebar-visibility").style.right = document.getElementById("sidebar").offsetWidth + 'px';
+    drawGraphics();
+});
 document.querySelector("#new-track-button:not(.disabled)").addEventListener("click", function(){
     newTrack.push({
         "color": newTrack.defaultColors[Math.floor(Math.random()*newTrack.defaultColors.length)]
@@ -240,68 +260,6 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
         }
     }
 }
-
-
-document.body.addEventListener('drop', function(e){
-    if(!document.getElementById("launch").classList.contains("active"))
-    {
-        let dt = e.dataTransfer
-        let files = dt.files
-
-        var fileArray = [...files];
-        if(fileArray.length > 0)
-        {
-            var file = fileArray[0];
-            if(file.type === "" && file.name.split(".").pop() == CUSTOM_EXTENSION)
-            {
-                if(confirm("This will replace the current project and open this file. Would you like to continue?"))
-                {
-                    showLoader();
-                    stage.removeAllChildren();
-                    master.destroy();
-
-                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 30), new Handsontable(tableContainer), stage);
-                    stage.addChild(background);
-                    stage.addChild(posText);
-
-                    let tracklist = document.getElementById("track-list").querySelector("ul");
-                    while (tracklist.firstChild) {
-                        tracklist.removeChild(tracklist.firstChild);
-                    }
-                    
-                    handleFile(file, function(){
-                        master.saved = true;
-                        hideLoader();
-                    });
-                }
-            }
-            else if(file.type == "video/mp4")
-            {
-                if(confirm("This will create a new project with this video. Would you like to continue?"))
-                {
-                    showLoader();
-                    master.destroy();
-                    stage.removeAllChildren();
-
-                    master = new Project("My Project", new Timeline(canvas.width, canvas.height, document.getElementById("my-video"), 30), new Handsontable(tableContainer), stage);
-                    stage.addChild(background);
-                    stage.addChild(posText);
-
-                    let tracklist = document.getElementById("track-list").querySelector("ul");
-                    while (tracklist.firstChild) {
-                        tracklist.removeChild(tracklist.firstChild);
-                    }
-
-                    handleFile(file);
-                }
-            }
-            else
-            {
-                alert("This filetype is not supported. It must be .mp4 or ." + CUSTOM_EXTENSION);
-            }
-        }
-    }
-}, false);
 
 document.getElementById("file-input").addEventListener("change", function(e){
     handleFiles(this.files);

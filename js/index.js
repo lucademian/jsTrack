@@ -596,20 +596,31 @@ stage.addEventListener("tick", function(){
 
 function drawGraphics(initialDraw=false)
 {
-    let width = window.innerWidth - sidebar.offsetWidth;
-    let height = window.innerHeight - 50;
-
     if(window.innerWidth < 1000)
     {
-        width = window.innerWidth;
-        sidebar.classList.remove("normal");
-        sidebar.classList.add("hidden");
+        if(!sidebar.classList.contains("changed"))
+        {
+            sidebar.classList.remove("normal");
+            sidebar.classList.add("hidden");
+            document.getElementById("sidebar-visibility").classList.add("show");
+            document.getElementById("sidebar-visibility").classList.remove("hide");
+        }
     }
     else
     {
-        sidebar.classList.add("normal");
-        sidebar.classList.remove("hidden");
+        if(!sidebar.classList.contains("changed"))
+        {
+            sidebar.classList.add("normal");
+            sidebar.classList.remove("hidden");
+            document.getElementById("sidebar-visibility").classList.add("hide");
+            document.getElementById("sidebar-visibility").classList.remove("show");
+        }
     }
+    
+    let width = window.innerWidth - sidebar.offsetWidth;
+    let height = window.innerHeight - 50;
+
+    document.getElementById("sidebar-visibility").style.right = sidebar.offsetWidth + 'px';
 
     videoContainer.style.width = width + "px";
     videoContainer.style.height = height + "px";
@@ -724,6 +735,7 @@ interact("#sidebar").resizable({
 
     // update the element's style
     target.style.width  = event.rect.width + 'px';
+    document.getElementById("sidebar-visibility").style.right = event.rect.width + 'px';
 })
 .on('resizeend', drawGraphics);
 
@@ -793,6 +805,7 @@ var resizeTimer;
 window.addEventListener("resize", function(){
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(drawGraphics, 250);
+    document.getElementById("sidebar-visibility").style.right = sidebar.offsetWidth + 'px';
 });
 
 stage.on("stagemousemove", function(e){

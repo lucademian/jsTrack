@@ -48,16 +48,45 @@ body, html {
     position: fixed;
     overflow-y: auto;
     box-sizing: border-box;
+    max-width: calc(100vw - 36px);
+    border-left: 1px #c9c9c9 solid;
 }
 #sidebar.normal {
     top: 0;
     right: 0;
+    max-width: calc(100vw - 36px);
+    padding: 5px;
 }
 #sidebar.hidden {
     top: 0;
     right: -100vw;
     z-index: 4;
     box-shadow: 0px 0px 20px -5px rgba(0,0,0,0.5);
+    max-width: 0;
+    padding: 0px;
+}
+#sidebar-visibility {
+    position: fixed;
+    top: 30px;
+    margin-right: -2px;
+    width: 30px;
+    height: 30px;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    background: #FFF;
+    background-size: 40%;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 2;
+    cursor: pointer;
+    border: 1px #c9c9c9 solid;
+    border-right: none;
+}
+#sidebar-visibility.show {
+    background-image: url("icons/show_sidebar.svg");
+}
+#sidebar-visibility.hide {
+    background-image: url("icons/hide_sidebar.svg");
 }
 #graph {
     background: blue;
@@ -189,6 +218,9 @@ input.scale-text {
 }
 #toolbox #save-button {
     background-image: url("icons/save.svg");
+}
+#toolbox #new-project {
+    background-image: url("icons/new_project.svg");
 }
 #toolbox #screen-fit-button {
     background-image: url("icons/screenfit.svg");

@@ -11,7 +11,7 @@ class Axes
         this.styles = {
             color: []
         };
-		this.size = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2))*2;
+		this.size = Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2))*4;
 		this.shape = new createjs.Shape();
 		// this.shape.regX = 2000;
         // this.shape.regY = 2000;

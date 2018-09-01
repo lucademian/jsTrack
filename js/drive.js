@@ -119,24 +119,13 @@
 		 * Authenticate with Google Drive via the Google JavaScript API.
 		 * @private
 		 */
-		_doAuth: function(immediate, callback) {	
-            if(this.logoutEl.classList.contains("disabled"))
-            {
-                gapi.auth.authorize({
-                    client_id: this.clientId + '.apps.googleusercontent.com',
-                    scope: 'https://www.googleapis.com/auth/drive',
-                    authuser: -1,
-                    immediate: immediate
-                }, callback);
-            }
-            else
-            {
-                gapi.auth.authorize({
-                    client_id: this.clientId + '.apps.googleusercontent.com',
-                    scope: 'https://www.googleapis.com/auth/drive',
-                    immediate: immediate
-                }, callback);
-            }
+		_doAuth: function(immediate, callback) {
+            gapi.auth.authorize({
+                client_id: this.clientId + '.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/drive',
+                authuser: -1,
+                immediate: immediate
+            }, callback);
 		}
 	};
 }());

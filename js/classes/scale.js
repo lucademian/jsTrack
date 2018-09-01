@@ -266,35 +266,42 @@ class Scale
 
             if(valueProcessed !== false)
             {
-                let oldInfo = {
-                    size: _scale.size,
-                    textValue: _scale.textValue
-                };
-
-                _scale.size = valueProcessed.size;
-                _scale.textValue = valueProcessed.textValue;
-
-                let newInfo = {
-                    size: _scale.size,
-                    textValue: _scale.textValue
-                };
-
-                if(oldInfo.size.toString() !== newInfo.size.toString())
+                if(valueProcessed.size.value !== null)
                 {
-                    _scale.project.change({
-                        undo: function()
-                        {
-                            _scale.update(oldInfo.size.toString());
-                        },
-                        redo: function()
-                        {
-                            _scale.update(newInfo.size.toString());
-                        }
-                    });
-                }
-                _scale.project.update();
+                    let oldInfo = {
+                        size: _scale.size,
+                        textValue: _scale.textValue
+                    };
 
-                _scale.textElement.value = _scale.textValue;
+                    _scale.size = valueProcessed.size;
+                    _scale.textValue = valueProcessed.textValue;
+
+                    let newInfo = {
+                        size: _scale.size,
+                        textValue: _scale.textValue
+                    };
+
+                    if(oldInfo.size.toString() !== newInfo.size.toString())
+                    {
+                        _scale.project.change({
+                            undo: function()
+                            {
+                                _scale.update(oldInfo.size.toString());
+                            },
+                            redo: function()
+                            {
+                                _scale.update(newInfo.size.toString());
+                            }
+                        });
+                    }
+                    _scale.project.update();
+
+                    _scale.textElement.value = _scale.textValue;
+                }
+                else
+                {
+                    _scale.textElement.value = _scale.textValue;
+                }
             }
             else
             {

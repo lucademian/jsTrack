@@ -236,7 +236,6 @@ class Scale
                 }
                 else
                 {
-                    math.unit(value);
                     returnData.size = math.unit(value);
                     returnData.textValue = math.format(math.unit(value), {notation: "auto", precision: 6}).toString();
                 }
@@ -260,6 +259,11 @@ class Scale
 		{
             let valueProcessed = this.processValue(value);
             
+            if(!valueProcessed)
+            {
+                valueProcessed = this.processValue(value.trim() + " m");
+            }
+
             if(valueProcessed !== false)
             {
                 let oldInfo = {

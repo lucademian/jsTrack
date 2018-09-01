@@ -39,7 +39,7 @@ function projectBackup()
         }
 
         var projectInfo = JSON.stringify(master.save());
-        var lastBackupRaw = localStorage.getItem("backup");
+        var lastBackupRaw = getStorage("backup");
         var lastBackup = JSON.parse(lastBackupRaw);
 
         if(lastBackup === null)
@@ -59,7 +59,7 @@ function projectBackup()
 
         var sameProject = (lastBackup.uid === master.uid);
 
-        localStorage.removeItem("backup");
+        deleteStorage("backup");
 
         
         var dataZip = new JSZip();
@@ -70,7 +70,7 @@ function projectBackup()
             reader.onload = function() {
                 try {
                     toBackup.data = reader.result;
-                    localStorage.setItem("backup", JSON.stringify(toBackup));
+                    setStorage("backup", JSON.stringify(toBackup));
 
                     if(lastBackup.video === null || lastBackup.video === "" || lastBackup.video === undefined || !sameProject)
                     {
@@ -81,10 +81,10 @@ function projectBackup()
                             reader.readAsDataURL(blob); 
                             reader.onload = function() {
                                 try {
-                                    localStorage.setItem("video", reader.result);
-                                    localStorage.removeItem("video");
+                                    setStorage("video", reader.result);
+                                    deleteStorage("video");
                                     toBackup.video = reader.result;
-                                    localStorage.setItem("backup", JSON.stringify(toBackup));
+                                    setStorage("backup", JSON.stringify(toBackup));
                                     master.backup();
                                     success = 2;
                                     updateBackup(success);
@@ -92,7 +92,7 @@ function projectBackup()
                                 catch(e)
                                 {
                                     toBackup.video = undefined;
-                                    localStorage.setItem("backup", JSON.stringify(toBackup));
+                                    setStorage("backup", JSON.stringify(toBackup));
                                     master.backup();
                                     success = 1;
                                     updateBackup(success);
@@ -109,10 +109,10 @@ function projectBackup()
                         if(lastBackup.video !== null && lastBackup.video !== "" && lastBackup.video !== undefined)
                         {
                             try {
-                                localStorage.setItem("video", lastBackup.video);
-                                localStorage.removeItem("video");
+                                setStorage("video", lastBackup.video);
+                                deleteStorage("video");
                                 toBackup.video = lastBackup.video;
-                                localStorage.setItem("backup", JSON.stringify(toBackup));
+                                setStorage("backup", JSON.stringify(toBackup));
                                 master.backup();
                                 success = 2;
                                 updateBackup(success);
@@ -120,7 +120,7 @@ function projectBackup()
                             catch(e)
                             {
                                 toBackup.video = undefined;
-                                localStorage.setItem("backup", JSON.stringify(toBackup));
+                                setStorage("backup", JSON.stringify(toBackup));
                                 master.backup();
                                 success = 1;
                                 updateBackup(success);
@@ -140,7 +140,7 @@ function projectBackup()
                 }
                 catch(e)
                 {
-                    localStorage.setItem("backup", JSON.stringify(lastBackupRaw));
+                    setStorage("backup", JSON.stringify(lastBackupRaw));
                     master.backup();
                     success = false;
                     updateBackup(success);
@@ -161,17 +161,17 @@ master.on("change", function(){
     }
     else if(this.saved)
     {
-        localStorage.removeItem("backup");
+        deleteStorage("backup");
     }
 });
 
 
 var dataLoaded = false;
-if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup") !== null && localStorage.getItem("backup") !== "")
+if(getStorage("backup") !== undefined && getStorage("backup") !== null && getStorage("backup") !== "")
 {
     if(document.getElementById("launch").classList.contains("active"))
     {
-        var backupInfo = JSON.parse(localStorage.getItem("backup"));
+        var backupInfo = JSON.parse(getStorage("backup"));
         var date = backupInfo.date || (new Date().toString());
         date = new Date(date).toLocaleString();
         if(confirm("You have a project backup from " + date + ". Would you like to recover this?"))
@@ -249,7 +249,7 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
                             {
                                 if(confirm("Would you like to remove this backup from storage?"))
                                 {
-                                    localStorage.removeItem("backup");
+                                    deleteStorage("backup");
                                 }
                             }
                         });
@@ -260,7 +260,7 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
             {
                 if(confirm("Error opening project. Would you like to remove it from storage?"))
                 {
-                    localStorage.removeItem("backup");
+                    deleteStorage("backup");
                 }
             }
         }
@@ -268,7 +268,7 @@ if(localStorage.getItem("backup") !== undefined && localStorage.getItem("backup"
         {
             if(confirm("Would you like to delete this from storage?"))
             {
-                localStorage.removeItem("backup");
+                deleteStorage("backup");
             }
         }
     }

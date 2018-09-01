@@ -1,3 +1,6 @@
+document.getElementById("new-project").addEventListener("click", function(){
+    window.location.reload();
+});
 document.getElementById("sidebar-visibility").addEventListener("click", function(){
     if(this.classList.contains("show"))
     {

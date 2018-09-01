@@ -10,7 +10,7 @@ class Scale
             {x: x1, y: y1},
             {x: x2, y: y2}
         ];
-        if(size === null || size == undefined)
+        if(size == null || size == undefined)
         {
             this.textValue = math.unit("1m").toString();
             this.size = math.unit("1m");
@@ -290,6 +290,10 @@ class Scale
                 }
                 _scale.project.update();
 
+                _scale.textElement.value = _scale.textValue;
+            }
+            else
+            {
                 _scale.textElement.value = _scale.textValue;
             }
 		}

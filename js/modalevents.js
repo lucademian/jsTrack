@@ -199,9 +199,11 @@ newScale.on("submit", function(data){
         {
             locations.point2 = {"x": mouseCoords.x, "y": mouseCoords.y};
             let scale = master.newScale(null, locations.point1.x, locations.point1.y, locations.point2.x, locations.point2.y, data.color);
-            scale.textElement.dispatchEvent(new Event("startEditing"));
-            scale.textElement.value = "";
-            scale.textElement.focus();
+            window.setTimeout(function(){
+                scale.textElement.dispatchEvent(new Event("startEditing"));
+                scale.textElement.value = "";
+                scale.textElement.focus();
+            }, 200);
             stage.cursor = "default";
             master.state.default();
             counter++;

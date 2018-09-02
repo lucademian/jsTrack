@@ -92,6 +92,7 @@ class Point
                     tempPoint.deleted = false;
                     tempShape.track.points[point.frame.number] = tempPoint;
                     tempShape.track.stage.addChild(tempPoint.shape);
+                    tempShape.track.project.update();
                 },
                 redo: function(){
                     tempShape.remove();
@@ -238,7 +239,8 @@ class Point
         this.unselect().unemphasize();
         this.deleted = true;
         this.track.deletedPoints[this.frame.number] = this;
-		delete this.track.points[this.frame.number];
+        delete this.track.points[this.frame.number];
+        this.track.project.update();
     }
     
     unRemove()
@@ -251,5 +253,6 @@ class Point
         this.deleted = false;
 		this.track.points[this.frame.number] = this;
         delete this.track.deletedPoints[this.frame.number];
+        this.track.project.update();
     }
 }

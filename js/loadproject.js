@@ -4,6 +4,7 @@ function hideLaunchModal()
     document.getElementById("modal-container").classList.remove("launch");
     document.getElementById("launch").classList.remove("active");
     document.getElementById("help-fab").remove();
+    document.getElementById("github-fab").remove();
     
     keyboardJS.resume();
 }

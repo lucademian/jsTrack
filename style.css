@@ -184,7 +184,7 @@ input.scale-text {
 #toolbox .button:not(.disabled):active {
     background-color: rgba(0, 0, 0, 0.1);
 }
-#help-fab {
+#help-fab, #github-fab {
     position: absolute;
     background: url("icons/help.svg");
     background-size: 100%;
@@ -197,6 +197,10 @@ input.scale-text {
     border: none;
     padding: 0;
     cursor: pointer;
+}
+#github-fab {
+    background-image: url("icons/github.svg");
+    right: 44px;
 }
 
 

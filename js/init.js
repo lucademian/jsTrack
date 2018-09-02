@@ -1,3 +1,27 @@
+/**
+ * jsTrack: web-based Tracker (https://physlets.org/tracker/). Get position data from objects in a video.
+ * Copyright (C) 2018 Luca Demian
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Contact:
+ * 
+ * Luca Demian
+ * lucademian1@gmail.com
+ * 
+ */
+
 var sidebar = document.getElementById("sidebar");
 var videoContainer = document.getElementById("video-container");
 var canvas = document.getElementById("main");
@@ -14,6 +38,8 @@ var distanceUnits = {
 const EXPORT_FORMATS = ["xlsx", "xlsm", "xlsb", "xls", "ods", "fods", "csv", "txt", "sylk", "html", "dif", "dbf", "rtf", "prn", "eth"];
 const CUSTOM_EXTENSION = "jstrack";
 const VIDEO_CONVERTOR = "https://video.online-convert.com/convert-to-mp4";
+
+// Replace with your keys
 const GOOGLE_API_KEY = 'AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA';
 const GOOGLE_CLIENT_ID = '44440188363-5vnafandpsrppr9189u7sc8q755oar9d';
 

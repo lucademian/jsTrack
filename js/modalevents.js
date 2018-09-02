@@ -1,10 +1,3 @@
-helpText.on("close", function(){
-    this.hide();
-});
-
-
-
-
 newProject.on("submit", function(data){
     master.name = data.name;
     master.timeline.frameSkip = parseInt(data.frameskip);

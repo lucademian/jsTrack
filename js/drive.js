@@ -160,8 +160,8 @@ function importDrive(file)
 
 function initPicker() {
     var picker = new FilePicker({
-        apiKey: 'AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA',
-        clientId: '44440188363-5vnafandpsrppr9189u7sc8q755oar9d',
+        apiKey: GOOGLE_API_KEY,
+        clientId: GOOGLE_CLIENT_ID,
         buttonEl: document.getElementById('pick'),
         logoutEl: document.getElementById('logout-button'),
         onSelect: importDrive

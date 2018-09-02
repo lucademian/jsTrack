@@ -42,7 +42,7 @@
 		open: function() {		
 			// Check if the user has already authenticated
 			var token = gapi.auth.getToken();
-			if (token && !this.logoutEl.classList.contains("disabled")) {
+			if (token) {
                 this._showPicker();
                 this.logoutEl.classList.remove("disabled");
 			} else {

@@ -426,7 +426,7 @@ class Project
             {
                 let frame = this.timeline.activeFrames[i];
                 // console.log(frame);
-                if(frame.number < this.timeline.currentFrame - this.viewPoints.backward || frame.number > this.timeline.currentFrame + this.viewPoints.forward || frame.number < this.timeline.startFrame || frame.number > this.timeline.endFrame)
+                if(frame.number < this.timeline.currentFrame - (this.viewPoints.backward * this.timeline.frameSkip) || frame.number > this.timeline.currentFrame + (this.viewPoints.forward * this.timeline.frameSkip) || frame.number < this.timeline.startFrame || frame.number > this.timeline.endFrame)
                 {
                     for(var j = 0; j < frame.points.length; j++)
                     {

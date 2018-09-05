@@ -52,7 +52,7 @@ class Timeline
     createFrames()
     {
         var counter = 1;
-        for(var time = this.frameTime; time < (this.video.duration) - (this.video.duration % this.frameTime); time = (time + this.frameTime).roundTo(3))
+        for(var time = this.frameTime; time <= (this.video.duration); time = (time + this.frameTime).roundTo(3))
         {
             this.frames[counter] = new Frame(this, time, counter);
             counter++;
@@ -169,16 +169,17 @@ class Timeline
         this.video.currentTime = lastTime;
         return img;
     }
-    play(callback, options)
+    play(callback=null, options={})
     {
         if(this.playInterval == undefined)
         {
+            this.trigger("play");
             var loop = true;
             var startingTime = this.currentTime;
             var startingFrame = this.startFrame;
             var endingFrame = this.endFrame;
             var frameSkip = this.frameSkip;
-            var speed = 0.25;
+            var speed = 1;
 
             for(var key in options)
             {
@@ -211,17 +212,20 @@ class Timeline
             var timeline = this;
 
             this.playInterval = setInterval(function(){
-                if(counter < endingFrame - frameSkip)
+                if(counter <= endingFrame)
                 {
                     let next = timeline.next();
                     if(next !== false)
                     {
-                        timeline.setFrame(next.frame);
+                        timeline.setFrame(next.number);
                         counter = next.number;
+                        if(counter == endingFrame)
+                            counter = endingFrame + 100;
                     }
                 }
                 else
                 {
+                    timeline.setFrame(startingFrame);
                     counter = startingFrame;
                 }
                 timeline.project.updateVisiblePoints();
@@ -233,13 +237,14 @@ class Timeline
                         timeline.project.track.points[timeline.currentFrame].emphasize();
                     }
                 }
-            }, timeline.frameTime / speed);
+            }, 200 / speed);
         }
     }
     pause()
     {
         clearInterval(this.playInterval);
         this.playInterval = undefined;
+        this.trigger("pause");
     }
     seek(frame)
     {
@@ -340,8 +345,9 @@ class Timeline
 
         if(nextFrameNum > this.endFrame)
         {
-            nextFrameNum = this.currentFrame + (this.frameCount % this.frameSkip);
+            nextFrameNum = this.endFrame;
         }
+
         var pickedFrame = this.frames[nextFrameNum];
 		if(pickedFrame == undefined)
 		{

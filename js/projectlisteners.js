@@ -74,3 +74,11 @@ master.timeline.on("seek, timingUpdate", function(){
         video2.currentTime = master.timeline.currentTime;
     }, 100);
 });
+
+master.timeline.on("play", function(){
+    document.getElementById("video-clone").style.opacity = "0";
+});
+
+master.timeline.on("pause", function(){
+    document.getElementById("video-clone").style.opacity = "1";
+});

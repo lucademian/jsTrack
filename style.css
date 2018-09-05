@@ -235,6 +235,12 @@ input.scale-text {
 #toolbox #redo-button {
     background-image: url("icons/redo.svg");
 }
+#toolbox #play-pause-button.pause {
+    background-image: url("icons/pause.svg");
+}
+#toolbox #play-pause-button.play {
+    background-image: url("icons/play.svg");
+}
 #toolbox #help-button {
     background-image: url("icons/help.svg");
 }

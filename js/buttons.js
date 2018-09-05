@@ -51,6 +51,20 @@ document.querySelector("#new-track-button:not(.disabled)").addEventListener("cli
     });
     newTrack.show();
 });
+document.getElementById("play-pause-button").addEventListener("click", function(){
+    if(this.classList.contains("play"))
+    {
+        master.timeline.play();
+        this.classList.remove("play");
+        this.classList.add("pause");
+    }
+    else
+    {
+        master.timeline.pause();
+        this.classList.remove("pause");
+        this.classList.add("play");
+    }
+});
 document.querySelector("#undo-button:not(.disabled)").addEventListener("click", function(){
     master.undo();
 });

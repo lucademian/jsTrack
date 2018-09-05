@@ -90,6 +90,7 @@ function handleFile(file, callback=null)
             {
                 if(confirm("The only supported video type is mp4. Would you like to open a free video converter?"))
                 {
+                    hideLoader();
                     window.open(VIDEO_CONVERTOR, "_blank");
                     // var urlPrompt = prompt("Paste output link here to load video.");
                     // if(urlPrompt !== null && urlPrompt !== "")

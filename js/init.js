@@ -40,7 +40,7 @@ const CUSTOM_EXTENSION = "jstrack";
 const VIDEO_CONVERTOR = "https://video.online-convert.com/convert-to-mp4";
 
 // Replace with your keys
-const GOOGLE_API_KEY = 'AIzaSyBNvbE95WObsTDKxj8Eo7x2jfCmP99oxNA';
+const GOOGLE_API_KEY = 'AIzaSyDIijziwMBTuCoKGMXhaVzBzUZibDVwiBM';
 const GOOGLE_CLIENT_ID = '44440188363-5vnafandpsrppr9189u7sc8q755oar9d';
 
 var background = new createjs.Bitmap(document.getElementById("video"));

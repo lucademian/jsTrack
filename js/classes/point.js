@@ -114,7 +114,7 @@ class Point
                 undo: function(){
                     let tempPoint = tempShape.track.deletedPoints[tempShape.frame.number];
                     tempPoint.deleted = false;
-                    tempShape.track.points[point.frame.number] = tempPoint;
+                    tempShape.track.points[tempPoint.frame.number] = tempPoint;
                     tempShape.track.stage.addChild(tempPoint.shape);
                     tempShape.track.project.update();
                 },

@@ -53,6 +53,16 @@ function(){
     master.state.reset();
 });
 
+keyboardJS.on(["delete", "backspace"], function(e){
+    if(master.track !== undefined && master.track !== null)
+    {
+        if(master.track.selectedPoint !== null && master.track.selectedPoint !== undefined)
+        {
+            master.track.selectedPoint.shape.dispatchEvent(new Event("dblclick"));
+        }
+    }
+});
+
 keyboardJS.on(["up", "down", "right", "left"], function(e){
     let newPos = {
         x: master.positioning.x,

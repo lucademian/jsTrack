@@ -471,7 +471,7 @@ body > .scale-draggable {
 #launch .area {
     width: 50vw;
     height: 50vh;
-    border: 5px rgb(226, 226, 226) dashed;
+    border: 3px rgb(226, 226, 226) solid;
     border-radius: 20px;
     background-position: center bottom;
     background-repeat: no-repeat;

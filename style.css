@@ -483,6 +483,7 @@ body > .scale-draggable {
     animation-fill-mode: backwards;
     animation-iteration-count: infinite;
     transition: all 0.4s;
+    position: relative;
 }
 #launch .area.highlight {
     animation-name: highlightPulse;
@@ -518,6 +519,19 @@ body > .scale-draggable {
 #launch .launch-buttons {
     display: block;
     text-align: center;
+}
+#launch { 
+    text-align: center;
+}
+#launch #info-link {
+    display: inline-block;
+    text-align: center;
+    font: 17px "Source Sans Pro", sans-serif;
+    color: #707070;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    margin-left: -50px;
 }
 
 #fullscreen-loader {

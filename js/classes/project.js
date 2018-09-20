@@ -662,6 +662,13 @@ class Project
                 point.unemphasize();
                 point.unselect();
                 track.stage.removeChild(point.shape);
+                for(var i=0; i < point.frame.points.length; i++)
+                {
+                    if(point.frame.points[i] == point)
+                    {
+                        delete point.frame.points[i];
+                    }
+                }
             }
             if(this.track == track)
             {
@@ -687,7 +694,8 @@ class Project
                 point.unemphasize();
                 point.unselect();
                 point.show();
-                // track.stage.addChild(point.shape);
+                
+                point.frame.points.push(point);
             }
             this.updateVisiblePoints();
             this.switchTrack(uid);

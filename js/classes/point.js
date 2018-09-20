@@ -175,7 +175,7 @@ class Point
             let location = axes.convert(point.x, point.y);
 
             let data = {
-                t: (point.frame.time - point.track.timeline.getFrameStart(point.track.timeline.startFrame)).roundTo(3),
+                t: (point.track.project.videoSpeed * (point.frame.time - point.track.timeline.getFrameStart(point.track.timeline.startFrame))).roundSig(6),
                 pixels: {},
                 scaled: {}
             };

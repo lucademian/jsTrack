@@ -43,6 +43,12 @@ var newProject = new modal({
             "required": true,
             "initVal": 1
         },
+        "videospeed": {
+            "label": "Speed of video",
+            "type": "number",
+            "required": true,
+            "initVal": 1
+        },
         "axesColor": {
             "label": "Axes Color",
             "type": "color",

@@ -32,6 +32,11 @@ if (!Number.prototype.roundTo){
 		return parseFloat(parseFloat(this).toFixed(x));
 	}
 }
+if (!Number.prototype.roundSig){
+	Number.prototype.roundSig = function(x){
+		return parseFloat(parseFloat(this).toPrecision(x));
+	}
+}
 if (!String.prototype.roundTo){
 	String.prototype.roundTo = function(x){
 		return parseFloat(parseFloat(this).toFixed(x));

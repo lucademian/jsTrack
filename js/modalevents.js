@@ -24,6 +24,7 @@
 
 newProject.on("submit", function(data){
     master.name = data.name;
+    master.videoSpeed = parseFloat(data.videospeed);
     master.timeline.frameSkip = parseInt(data.frameskip);
     master.timeline.updateTiming(master.timeline.video.duration, data.framerate);
     master.timeline.createFrames();

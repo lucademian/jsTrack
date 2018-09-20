@@ -56,6 +56,7 @@ class Project
             forward: 0,
             backward: 7
         };
+        this.videoSpeed = 1;
         this.handsOnTable = handsOnTable;
         this.handsOnTable.updateSettings({
             readOnly: true,
@@ -488,7 +489,8 @@ class Project
             uid: this.uid,
             startFrame: this.timeline.startFrame,
             endFrame: this.timeline.endFrame,
-            videoName: this.videoName
+            videoName: this.videoName,
+            videoSpeed: this.videoSpeed
         };
 
         if(this.scale !== null && this.scale !== undefined)
@@ -599,6 +601,9 @@ class Project
                     break;
                 case "videoName":
                     this.videoName = value;
+                    break;
+                case "videoSpeed":
+                    this.videoSpeed = value;
                     break;
                 case "currentFrame":
                     this.timeline.seek(value);

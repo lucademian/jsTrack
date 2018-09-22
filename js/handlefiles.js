@@ -88,39 +88,76 @@ function handleFile(file, callback=null)
         default:
             if(file.type.split("/")[0] == "video")
             {
-                if(confirm("The only supported video type is mp4. Would you like to open a free video converter?"))
+                if(confirm("The only supported video type is mp4. Would you like to try the experimental video converter? (sometimes doesn't work, especially for longer videos)"))
+                {
+                    showLoader();
+                    var filereader = new FileReader();
+                    filereader.onload = function(result){
+                        var fileData = result.target.result;
+
+                        var stdout = "";
+                        var stderr = "";
+                        var worker = new Worker("src/ffmpeg-worker-mp4.js");
+                        worker.onmessage = function(e) {
+                            var msg = e.data;
+                            switch (msg.type) {
+                                case "ready":
+                                    worker.postMessage({
+                                        MEMFS: [{name: file.name, data: fileData}],
+                                        type: "run", arguments: ["-i", file.name, "-vcodec", "copy", "-acodec", "copy", "out.mp4"]
+                                    });
+                                    break;
+                                case "stdout":
+                                    stdout += msg.data + "\n";
+                                    break;
+                                case "stderr":
+                                    stderr += msg.data + "\n";
+                                    break;
+                                case "done":
+                                    //console.log(msg);
+                                    var result = msg.data.MEMFS[0];
+                                    //console.log(JSON.stringify(result));
+                                    let name = file.name.substring(0, file.name.indexOf('.') != -1 ? file.name.indexOf('.') : file.name.length)
+                                    //console.log(result.data);
+                                    var blob = new File([result.data], name + ".mp4", {
+                                        type: 'video/mp4'
+                                    });
+                                    //console.log(blob);
+                                    master.videoName = blob.name;
+                                    loadVideo(blob, function(){
+                                        if(callback !== null)
+                                            callback();
+                                        master.timeline.detectFrameRate(function(framerate){
+                                            hideLaunchModal();
+                                            newProject.push({
+                                                "framerate": framerate
+                                            });
+                                            newProject.show();
+                                            hideLoader();
+                                        });
+                                    });
+                                    break;
+                                // case "exit":
+                                //     console.log("Process exited with code " + msg.data);
+                                //     console.log(stdout);
+                                //     worker.terminate();
+                                //     break;
+                            }
+                        };
+                    };
+                    filereader.readAsArrayBuffer(file);
+                }
+                else if(confirm("Would you like to open a free online video converter in another tab?"))
                 {
                     hideLoader();
                     window.open(VIDEO_CONVERTOR, "_blank");
-                    // var urlPrompt = prompt("Paste output link here to load video.");
-                    // if(urlPrompt !== null && urlPrompt !== "")
-                    // {
-                    //     fetch(urlPrompt)
-                    //     .then(res => res.blob()) // Gets the response and returns it as a blob
-                    //     .then(blob => {
-                    //         console.log(blob);
-                    //         master.videoName = file.name;
-                    //         loadVideo(file, function(){
-                    //             if(callback !== null)
-                    //                 callback();
-                    //             master.timeline.detectFrameRate(function(framerate){
-                    //                 hideLaunchModal();
-                    //                 newProject.push({
-                    //                     "framerate": framerate
-                    //                 });
-                    //                 newProject.show();
-                    //                 hideLoader();
-                    //             });
-                    //         });
-                    //     });
-                    // }
                 }
             }
             else
             {
+                hideLoader();
                 alert("This filetype is not supported. It must be .mp4 or ." + CUSTOM_EXTENSION);
             }
-            hideLoader();
             break;
     }
 }

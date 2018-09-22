@@ -152,6 +152,10 @@ function handleFile(file, callback=null)
                     hideLoader();
                     window.open(VIDEO_CONVERTOR, "_blank");
                 }
+                else
+                {
+                    hideLoader();
+                }
             }
             else
             {

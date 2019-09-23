@@ -29,6 +29,7 @@ function hideLaunchModal()
     document.getElementById("launch").classList.remove("active");
     document.getElementById("help-fab").remove();
     document.getElementById("github-fab").remove();
+    document.getElementById("paypal-fab").remove();
     
     keyboardJS.resume();
 }

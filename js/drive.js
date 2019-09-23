@@ -63,7 +63,7 @@
             var accessToken = gapi.auth.getToken().access_token;
             var view = new google.picker.DocsView(google.picker.ViewId.DOCS);
             view.setMimeTypes("video/mp4,application/x-zip");
-            view.setQuery("-title:*.zip");
+//             view.setQuery("-title:*.zip");
             view.setMode(google.picker.DocsViewMode.LIST);
 			this.picker = new google.picker.PickerBuilder().
 				addView(view).
@@ -71,7 +71,8 @@
 				setOAuthToken(accessToken).
                 setCallback(this._pickerCallback.bind(this)).
 				build().
-                setVisible(true);
+                setVisible(true).
+				setTitle("jsTrack Import");
 		},
 		
 		/**

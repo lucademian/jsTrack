@@ -13,6 +13,13 @@ body, html {
     width: 100vw;
     height: 100vh;
 }
+#modal-logo {
+	position: fixed;
+    z-index: 2;
+    width: 60px;
+    top: 30px;
+    left: 30px;
+}
 #video-container {
     position: fixed;
     display: block;
@@ -184,7 +191,7 @@ input.scale-text {
 #toolbox .button:not(.disabled):active {
     background-color: rgba(0, 0, 0, 0.1);
 }
-#help-fab, #github-fab {
+#help-fab, #github-fab, #paypal-fab {
     position: absolute;
     background: url("icons/help.svg");
     background-size: 100%;
@@ -201,6 +208,10 @@ input.scale-text {
 #github-fab {
     background-image: url("icons/github.svg");
     right: 44px;
+}
+#paypal-fab {
+    background-image: url("icons/money.png");
+    right: 78px;
 }
 
 

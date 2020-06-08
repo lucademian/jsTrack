@@ -90,7 +90,7 @@ document.querySelector("#save-button:not(.disabled)").addEventListener("click", 
 });
 document.querySelectorAll(".help-button:not(.disabled)").forEach(function(el){
     el.addEventListener("click", function(){
-        window.open("https://docs.google.com/document/d/1O1SreDzyFuCWGf4FgaYWwVGx91DtyCNsM3eOawcJG7E/edit", "_blank");
+        window.open("using_jstrack.pdf", "_blank");
     });
 });
 document.querySelector("#scale-button:not(.disabled)").addEventListener("click", function(){

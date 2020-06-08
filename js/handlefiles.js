@@ -52,6 +52,11 @@ function handleFile(file, callback=null)
                         hideLaunchModal();
                         master.saved = true;
                         master.trigger("created");
+						
+						gtag('event', 'Import Video Existing Project', {
+							'event_category' : 'Start',
+							'event_label' : master.name
+						});
                     });
                 }
             }
@@ -78,6 +83,10 @@ function handleFile(file, callback=null)
             {
                 loadProject(file, callback);
                 hideLaunchModal();
+				gtag('event', 'Load Project File', {
+					'event_category' : 'Start',
+					'event_label' : file.name
+				});
             }
             else
             {
@@ -90,6 +99,10 @@ function handleFile(file, callback=null)
             {
                 if(confirm("The only supported video type is mp4. Would you like to try the experimental video converter? (sometimes doesn't work, especially for longer videos)"))
                 {
+					gtag('event', 'Agreed to Try Convertor', {
+						'event_category' : 'Start',
+						'event_label' : file.type
+					});
                     showLoader();
                     var filereader = new FileReader();
                     filereader.onload = function(result){
@@ -136,6 +149,11 @@ function handleFile(file, callback=null)
                                             hideLoader();
                                         });
                                     });
+									
+									gtag('event', 'Convertor Done', {
+										'event_category' : 'Start',
+										'event_label' : file.type
+									});
                                     break;
                                 // case "exit":
                                 //     console.log("Process exited with code " + msg.data);

@@ -38,6 +38,11 @@ newProject.on("submit", function(data){
     master.updateVisiblePoints();
     master.created = true;
     master.trigger("created");
+	
+	gtag('event', 'New Project', {
+		'event_category' : 'Start',
+		'event_label' : master.name
+	});
 });
 
 saveProject.on("saveFile", function(modalData){
